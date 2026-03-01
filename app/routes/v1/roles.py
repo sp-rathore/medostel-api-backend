@@ -122,7 +122,7 @@ async def update_role(
 
 
 # API 2: CRUD - Delete role
-@router.delete("/{roleId}", response_model=APIResponse, status_code=HTTPStatus.NO_CONTENT)
+@router.delete("/{roleId}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_role(
     roleId: str,
     db=Depends(get_db)
@@ -148,13 +148,6 @@ async def delete_role(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                 detail="Failed to delete role"
             )
-
-        return APIResponse(
-            status="success",
-            code=HTTPStatus.NO_CONTENT,
-            message="Role deleted successfully",
-            timestamp=datetime.now()
-        )
     except HTTPException:
         raise
     except Exception as e:

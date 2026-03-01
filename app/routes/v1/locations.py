@@ -118,7 +118,7 @@ async def update_location(
 
 
 # API 4: CRUD - Delete location
-@router.delete("/{location_id}", response_model=APIResponse, status_code=HTTPStatus.NO_CONTENT)
+@router.delete("/{location_id}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_location(
     location_id: int,
     db=Depends(get_db)
@@ -144,13 +144,6 @@ async def delete_location(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                 detail="Failed to delete location"
             )
-
-        return APIResponse(
-            status="success",
-            code=HTTPStatus.NO_CONTENT,
-            message="Location deleted successfully",
-            timestamp=datetime.now()
-        )
     except HTTPException:
         raise
     except Exception as e:

@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # Database Configuration
-    DATABASE_URL: str = "postgresql://medostel_api_user:Iag2bMi@0@6aD@35.244.27.232:5432/medostel"
+    DATABASE_URL: str = "postgresql://medostel_api_user:Iag2bMi%400%406aD%40@35.244.27.232:5432/medostel"
     DB_POOL_SIZE: int = 5
     DB_POOL_MAX_OVERFLOW: int = 10
     DB_POOL_TIMEOUT: int = 30

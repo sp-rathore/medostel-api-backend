@@ -123,7 +123,7 @@ async def update_user(
 
 
 # API 6: CRUD - Delete user
-@router.delete("/{userId}", response_model=APIResponse, status_code=HTTPStatus.NO_CONTENT)
+@router.delete("/{userId}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_user(
     userId: str,
     db=Depends(get_db)
@@ -149,13 +149,6 @@ async def delete_user(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                 detail="Failed to delete user"
             )
-
-        return APIResponse(
-            status="success",
-            code=HTTPStatus.NO_CONTENT,
-            message="User deleted successfully",
-            timestamp=datetime.now()
-        )
     except HTTPException:
         raise
     except Exception as e:

@@ -127,7 +127,7 @@ async def update_registration_request(
 
 
 # API 10: CRUD - Delete registration request
-@router.delete("/{requestId}", response_model=APIResponse, status_code=HTTPStatus.NO_CONTENT)
+@router.delete("/{requestId}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_registration_request(
     requestId: str,
     db=Depends(get_db)
@@ -153,13 +153,6 @@ async def delete_registration_request(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                 detail="Failed to delete registration request"
             )
-
-        return APIResponse(
-            status="success",
-            code=HTTPStatus.NO_CONTENT,
-            message="Registration request deleted successfully",
-            timestamp=datetime.now()
-        )
     except HTTPException:
         raise
     except Exception as e:

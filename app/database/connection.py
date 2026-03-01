@@ -20,7 +20,7 @@ def init_db_pool():
             settings.DB_POOL_SIZE,
             settings.DB_POOL_SIZE + settings.DB_POOL_MAX_OVERFLOW,
             settings.DATABASE_URL,
-            timeout=settings.DB_POOL_TIMEOUT
+            connect_timeout=settings.DB_POOL_TIMEOUT
         )
         logger.info("Database connection pool initialized successfully")
     except Exception as e:

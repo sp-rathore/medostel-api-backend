@@ -123,7 +123,7 @@ async def update_login_credentials(
 
 
 # API 8: CRUD - Delete login credentials
-@router.delete("/credentials/{userId}", response_model=APIResponse, status_code=HTTPStatus.NO_CONTENT)
+@router.delete("/credentials/{userId}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_login_credentials(
     userId: str,
     db=Depends(get_db)
@@ -149,13 +149,6 @@ async def delete_login_credentials(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                 detail="Failed to delete login credentials"
             )
-
-        return APIResponse(
-            status="success",
-            code=HTTPStatus.NO_CONTENT,
-            message="Login credentials deleted successfully",
-            timestamp=datetime.now()
-        )
     except HTTPException:
         raise
     except Exception as e:
