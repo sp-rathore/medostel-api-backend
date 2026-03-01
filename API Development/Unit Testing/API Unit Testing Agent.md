@@ -827,15 +827,15 @@ async def test_get_roles_empty_result(client):
 async def test_create_role_success(client):
     """Should create a new role with 201 status"""
     role_data = {
-        "roleId": "ROLE_TEST_001",
-        "roleName": "Test Role",
+        "roleId": "TESTADMIN",
+        "roleName": "Test Administrator",
         "status": "Active",
         "comments": "Test role for unit testing"
     }
     response = await client.post("/api/v1/roles", json=role_data)
     assert response.status_code == 201
     assert response.json()["status"] == "success"
-    assert response.json()["data"]["role"]["roleId"] == "ROLE_TEST_001"
+    assert response.json()["data"]["role"]["roleId"] == "TESTADMIN"
 ```
 
 **Test Case 2.2: Create duplicate role fails**
@@ -1208,11 +1208,11 @@ async def test_get_login_users_filter_active(client):
 ```python
 async def test_get_login_users_filter_by_role(client):
     """Should filter login records by role_id"""
-    response = await client.get("/api/v1/auth/users?role_id=ROLE_DOCTOR")
+    response = await client.get("/api/v1/auth/users?role_id=DOCTOR")
     assert response.status_code == 200
     records = response.json()["data"]["loginRecords"]
     for record in records:
-        assert record["roleId"] == "ROLE_DOCTOR"
+        assert record["roleId"] == "DOCTOR"
 ```
 
 #### API 8: CRUD Operations on Login Credentials
@@ -1225,7 +1225,7 @@ async def test_create_login_success(client):
         "userId": "newuser@example.com",
         "username": "newuser",
         "password": "SecurePassword123!",
-        "roleId": "ROLE_DOCTOR",
+        "roleId": "DOCTOR",
         "isActive": True
     }
     response = await client.post("/api/v1/auth/credentials", json=login_data)
@@ -1251,7 +1251,7 @@ async def test_create_login_weak_password(client):
         "userId": "user@example.com",
         "username": "user",
         "password": "123",  # Weak password
-        "roleId": "ROLE_DOCTOR",
+        "roleId": "DOCTOR",
         "isActive": True
     }
     response = await client.post("/api/v1/auth/credentials", json=login_data)
@@ -1658,7 +1658,7 @@ async def test_password_not_in_response(client):
         "userId": "user@example.com",
         "username": "user",
         "password": "SecurePassword123!",
-        "roleId": "ROLE_DOCTOR",
+        "roleId": "DOCTOR",
         "isActive": True
     }
     response = await client.post("/api/v1/auth/credentials", json=login_data)
@@ -1900,7 +1900,7 @@ async def sample_login(client, sample_user):
         "userId": sample_user["userId"],
         "username": fake.user_name(),
         "password": "TestPassword123!",
-        "roleId": "ROLE_DOCTOR",
+        "roleId": "DOCTOR",
         "isActive": True
     }
     response = await client.post("/api/v1/auth/credentials", json=login_data)
