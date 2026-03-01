@@ -419,7 +419,7 @@ python -m uvicorn app.main:app --reload
 
 ### Project Documentation
 - `Development/API Development/API Development agent.md` - API specifications
-- `Development/API Development/Kubernetes Cluster Configuration.md` - GKE setup
+- `Development/API Development/Kubernetes_Cluster/Kubernetes Cluster Configuration.md` - GKE setup
 - `Development/DevOps Development/DBA/DBA.md` - Database documentation
 
 ### Infrastructure

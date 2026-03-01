@@ -1672,7 +1672,7 @@ logger.warning(f"Rate limit approaching for user {userId}")
 ### Related Documentation
 
 **Infrastructure & Database:**
-- Kubernetes Cluster: `Development/API Development/Kubernetes Cluster Configuration.md`
+- Kubernetes Cluster: `Development/API Development/Kubernetes_Cluster/Kubernetes Cluster Configuration.md`
 - Database Details: `Development/DevOps Development/DBA/DBA.md`
 - DevOps Configuration: `Development/DevOps Development/`
 
@@ -1830,7 +1830,7 @@ Key Files:
 
 ### Database & Infrastructure
 → For PostgreSQL details: See `Development/DevOps Development/DBA/DBA.md`
-→ For GKE cluster info: See `Development/API Development/Kubernetes Cluster Configuration.md`
+→ For GKE cluster info: See `Development/API Development/Kubernetes_Cluster/Kubernetes Cluster Configuration.md`
 
 ---
 
