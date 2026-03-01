@@ -2006,7 +2006,7 @@ Documentation Updated:
 git push origin main
 ```
 
-### Example: API Change Case Study
+### Example 1: API Change Case Study (Roles APIs)
 **When**: User_Role_Master GET/POST/PUT APIs were enhanced on March 1, 2026
 **Changed**:
 - API 1 now supports 3 request scenarios
@@ -2024,6 +2024,46 @@ git push origin main
 7. ⏳ Updated README.md with new feature descriptions
 8. ✅ Created comprehensive commit with all changes
 
+---
+
+### Example 2: Database Schema Enhancement (User_Master) - March 1, 2026
+**When**: User_Master table schema was enhanced on March 1, 2026
+**Database Changes**:
+- `userId`: Changed from VARCHAR(255) to BIGINT (supports up to 1 billion users)
+- `emailId`: Added RFC 5322 regex validation via CHECK constraint
+- `mobileNumber`: Changed from VARCHAR(15) to NUMERIC(10) with 10-digit validation (1000000000-9999999999)
+- Dependent tables updated: User_Login, New_User_Request, Report_History
+
+**Related Files Updated**:
+1. ✅ **Medostel Tables Agent.md** - Master schema documentation with validation rules
+2. ✅ **create_Tables.sql** - Complete SQL schema with all constraints and indexes
+3. ✅ **DevOps Development/DBA/Databasespecs.md** - Updated table definitions
+4. ✅ **DevOps Development/DBA/DBA.md** - Updated instance documentation
+5. ✅ **DevOps Development/DBA/DEPLOYMENT_GUIDE.md** - Updated deployment instructions
+6. ⏳ **API Development Agent.md** - Needs User_Master API specification updates (APIs 5-6)
+7. ⏳ **PROJECT_STRUCTURE.md** - Needs User_Master detailed specifications (APIs 5-6)
+8. ⏳ **APISETUP.md** - Needs User_Master implementation code (Section 6.3)
+9. ⏳ **API Unit Testing Agent.md** - Needs test cases for email/mobile validation
+
+**Pydantic Schema Changes Required**:
+```python
+# User_Master schema updates needed
+userId: int  # Changed from str to int (BIGINT in PostgreSQL)
+emailId: EmailStr  # Add pydantic EmailStr validator
+mobileNumber: int  # Changed from str to int (NUMERIC(10))
+status: Literal['Active', 'Inactive', 'Suspended']  # Updated status values
+```
+
+**API Impact**:
+- API 5 (GET /users/all): userId in responses will be numeric
+- API 6 (POST/PUT /users): userId input validation, email format validation, 10-digit mobile validation
+- Test cases: Add email format validation tests, mobile number range tests
+
+**See Also**:
+- For database details: `/Data Engineering/Medostel Tables Agent.md`
+- For DBA documentation: `/DevOps Development/DBA/DBA.md`
+- For schema creation: `/DevOps Development/create_Tables.sql`
+
 ### Documentation Interdependencies
 
 **API Development Agent.md** → Drives all other documentation
@@ -2038,13 +2078,15 @@ git push origin main
 
 ---
 
-**Last Updated**: 2026-03-01 (Added Document Synchronization Workflow)
+**Last Updated**: 2026-03-01 (Document Synchronization Workflow + User_Master Schema Enhancement)
 **Created By**: Claude Code
-**Status**: Design Complete & Documented - Ready for Implementation
-**Database**: PostgreSQL 18.2 (medostel instance)
+**Status**: Design Complete & Documented - Schema Enhanced for Production
+**Database**: PostgreSQL 18.2 (medostel instance) - Schema v2.0
 **Instance**: medostel-ai-assistant-pgdev-instance
 **Total APIs Designed**: 12 (6 tables × 2 APIs each)
 **Platform**: GKE (Google Kubernetes Engine)
 **Framework**: FastAPI with Python 3.11+
-**Documentation Files**: 8 comprehensive guide files (7 in API Development + 1 in Data Engineering)
+**Documentation Files**: 11 comprehensive guide files (8 in API Development + 3 in Data Engineering/DBA)
 **API Enhancement Status**: API 1 & 2 (User_Role_Master) ✅ Enhanced | APIs 3-12 ⏳ Standard
+**Schema Enhancement Status**: User_Master ✅ Enhanced (BIGINT userId, email validation, 10-digit mobile validation)
+**Dependent Table Updates**: User_Login ✅ Updated | New_User_Request ✅ Updated | Report_History ✅ Updated

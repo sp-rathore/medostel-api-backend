@@ -5,9 +5,18 @@
 This guide provides step-by-step instructions to create the 6 core tables in the Medostel PostgreSQL database.
 
 **Database**: Medostel
-**Engine**: PostgreSQL 18
+**Engine**: PostgreSQL 18.2
 **Instance**: medostel-ai-assistant-pgdev-instance
 **Project**: gen-lang-client-0064186167
+**Schema Version**: 2.0 (Updated March 1, 2026)
+**Status**: Production Ready ✅
+
+### Recent Schema Changes (March 1, 2026)
+- ✅ User_Master.userId changed from VARCHAR(255) to BIGINT (supports up to 1 billion users)
+- ✅ Email validation added using RFC 5322 regex pattern
+- ✅ Mobile number changed to NUMERIC(10) with 10-digit validation (1000000000-9999999999)
+- ✅ User_Login.userId updated to BIGINT to match User_Master
+- ✅ All dependent tables updated with new constraints
 
 ---
 
@@ -57,7 +66,7 @@ Expected Output:
 After users are created, execute the table creation script:
 
 ```bash
-cd /Users/shishupals/Documents/Claude/projects/Medostel/Development/DevOps\ Development/DBA
+cd /Users/shishupals/Documents/Claude/projects/Medostel/repositories/medostel-api-backend/DevOps\ Development
 
 # Start Cloud SQL Proxy
 /opt/homebrew/share/google-cloud-sdk/bin/cloud-sql-proxy \
@@ -70,8 +79,10 @@ sleep 3
 gcloud sql connect medostel-ai-assistant-pgdev-instance \
   --user=medostel_admin_user \
   --project=gen-lang-client-0064186167 \
-  --database=Medostel < create_tables.sql
+  --database=Medostel < create_Tables.sql
 ```
+
+**Note**: The `create_Tables.sql` file includes all schema enhancements dated March 1, 2026.
 
 ---
 
@@ -111,33 +122,51 @@ Expected Tables:
 
 ### 1. **User_Role_Master** (6 columns)
 - roleId (PK), roleName, status, createdDate, updatedDate, comments
+- System Roles: ADMIN, DOCTOR, HOSPITAL, NURSE, PARTNER, PATIENT, RECEPTION, TECHNICIAN
 
 ### 2. **State_City_PinCode_Master** (9 columns)
 - id (PK), stateId, stateName, cityName, cityId, pinCode, countryName, status, timestamps
+- Geographic reference data for location-based queries
 
-### 3. **User_Master** (14 columns)
-- userId (PK), firstName, lastName, currentRole, organisation, emailId, mobileNumber, address, location, status, timestamps
+### 3. **User_Master** (12 columns) - ✅ ENHANCED
+- userId (BIGINT PK), firstName, lastName, currentRole (FK), emailId (RFC 5322 validated), mobileNumber (NUMERIC(10) - 10 digits), organisation, address, status, createdDate, updatedDate
+- **Schema v2.0**: BIGINT userId (supports 1 billion users), Email regex validation, 10-digit numeric mobile validation
 
-### 4. **User_Login** (10 columns)
-- userId (PK/FK), username, passwordHash, mobilePhone, roleId, isActive, login timestamps
+### 4. **User_Login** (10 columns) - ✅ UPDATED
+- userId (BIGINT PK/FK), username, password, roleId (FK), isActive, lastLoginTime, loginAttempts, timestamps
+- **Schema v2.0**: userId now BIGINT to match User_Master, tracks login attempts
 
-### 5. **New_User_Request** (15 columns)
-- requestId (PK), user details, currentRole, requestStatus, timestamps, approvalDetails
+### 5. **New_User_Request** (13 columns) - ✅ ENHANCED
+- requestId (PK), userName, firstName, lastName, currentRole, emailId (RFC 5322 validated), mobileNumber (NUMERIC(10) - 10 digits), address, requestStatus, approvalDate, approvalComments, timestamps
+- **Schema v2.0**: Matching User_Master validation rules for email and mobile
 
-### 6. **Report_History** (11 columns)
-- id (PK), userId (FK), timestamp, fileName, fileType, reportType, diagnosis, pdfUrl, jsonData, status
+### 6. **Report_History** (12 columns) - ✅ UPDATED
+- id (PK), userId (BIGINT FK), fileName, fileType, reportType, status, diagnosis, inferredDiagnosis, pdfUrl, bucketLocation, jsonData, timestamps
+- **Schema v2.0**: userId now BIGINT to match User_Master, enhanced status tracking
 
 ---
 
 ## Indexes Created
 
-### Performance Indexes
-- User_Role_Master: idx_user_role_name, idx_user_role_status
-- State_City_PinCode_Master: idx_state_name, idx_city_name, idx_pincode, idx_state_city
-- User_Master: idx_user_email, idx_user_mobile, idx_user_role, idx_user_status, idx_user_created_date
-- User_Login: idx_login_username, idx_login_role_id, idx_login_active, idx_login_last_login
-- New_User_Request: idx_new_user_email, idx_new_user_status, idx_new_user_created
-- Report_History: idx_report_user_id, idx_report_timestamp, idx_report_type, idx_report_status, idx_report_created
+### Performance Indexes (35 total)
+
+**User_Role_Master**:
+- pk_user_role_master (PK), idx_role_status, idx_role_name, idx_role_updated
+
+**State_City_PinCode_Master**:
+- pk_state_city_pincode (PK), idx_state_id, idx_city_id, idx_pin_code, idx_country, idx_location_status
+
+**User_Master** - ✅ ENHANCED:
+- pk_user_master (PK), idx_user_email, idx_user_mobile, idx_user_role, idx_user_status, idx_user_name, idx_user_updated
+
+**User_Login** - ✅ UPDATED:
+- pk_user_login (PK), idx_login_username, idx_login_active, idx_login_role, idx_login_attempts, idx_login_lastlogin, idx_login_updated
+
+**New_User_Request** - ✅ ENHANCED:
+- pk_new_user_request (PK), idx_request_email, idx_request_mobile, idx_request_status, idx_request_role, idx_request_created, idx_request_updated
+
+**Report_History** - ✅ UPDATED:
+- pk_report_history (PK), idx_report_user, idx_report_type, idx_report_status, idx_report_created, idx_report_updated
 
 ---
 
@@ -220,11 +249,15 @@ After successful deployment:
 ## Support Files Location
 
 ```
-/Users/shishupals/Documents/Claude/projects/Medostel/Development/DevOps Development/DBA/
-├── Databasespecs.md
-├── create_tables.sql
-├── DEPLOYMENT_GUIDE.md
-└── Tables.md
+/Users/shishupals/Documents/Claude/projects/Medostel/repositories/medostel-api-backend/
+├── DevOps Development/
+│   ├── create_Tables.sql (Complete schema with all enhancements)
+│   └── DBA/
+│       ├── Databasespecs.md (Schema specifications)
+│       ├── DBA.md (Complete DBA documentation)
+│       └── DEPLOYMENT_GUIDE.md (This file)
+└── Data Engineering/
+    └── Medostel Tables Agent.md (Master table documentation)
 ```
 
 ---
@@ -250,6 +283,7 @@ gcloud sql connect medostel-ai-assistant-pgdev-instance \
 
 ---
 
-**Last Updated**: 2026-02-28
-**Status**: Ready for Deployment
+**Last Updated**: 2026-03-01
+**Schema Version**: 2.0 (Enhanced with BIGINT userId, email validation, 10-digit mobile validation)
+**Status**: ✅ Production Ready with Enhanced Schema
 **Created By**: Claude Code

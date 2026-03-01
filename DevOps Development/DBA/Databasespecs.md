@@ -69,150 +69,166 @@ CREATE TABLE State_City_PinCode_Master (
 ```
 
 #### 2.3 Table: `User_Master`
-*   **Description**: Core user profile data.
-*   **Primary Key**: `userId` (Email)
-*   **Foreign Keys**: `currentRole` -> `User_Role_Master(roleName)`
+*   **Description**: Core user profile data with enhanced numeric userId and validation.
+*   **Primary Key**: `userId` (BIGINT - supports up to 1 billion users)
+*   **Foreign Keys**: `currentRole` -> `User_Role_Master(roleId)`
+*   **Updated**: March 1, 2026 - BIGINT userId, email validation, 10-digit mobile validation
 
 | Column Name | Data Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `userId` | VARCHAR(100) | PK, Not Null | Email ID used as User ID |
-| `firstName` | VARCHAR(50) | Not Null | First Name |
-| `lastName` | VARCHAR(50) | Not Null | Last Name |
-| `currentRole` | VARCHAR(50) | FK, Not Null | Role Name |
-| `organisation` | VARCHAR(100) | | Organization Name |
-| `emailId` | VARCHAR(100) | Not Null | Contact Email |
-| `mobileNumber` | VARCHAR(15) | Unique, Not Null | Mobile Number |
-| `address1` | VARCHAR(255) | | Address Line 1 |
-| `address2` | VARCHAR(255) | | Address Line 2 |
-| `stateName` | VARCHAR(100) | | State |
-| `cityName` | VARCHAR(100) | | City |
-| `pinCode` | VARCHAR(10) | | Pin Code |
-| `status` | VARCHAR(20) | Not Null | 'Active', 'Inactive' |
+| `userId` | BIGINT | PK, Not Null | Numeric User ID (1-1000000000) |
+| `firstName` | VARCHAR(100) | Not Null | First Name |
+| `lastName` | VARCHAR(100) | Not Null | Last Name |
+| `currentRole` | VARCHAR(50) | FK, Not Null | Role ID (references User_Role_Master.roleId) |
+| `emailId` | VARCHAR(255) | Unique, Not Null | Email with RFC 5322 validation |
+| `mobileNumber` | NUMERIC(10) | Unique, Not Null | 10-digit mobile (1000000000-9999999999) |
+| `organisation` | VARCHAR(255) | | Organization Name |
+| `address` | TEXT | | Address |
+| `status` | VARCHAR(50) | Not Null | 'Active', 'Inactive', 'Suspended' |
+| `createdDate` | TIMESTAMP | Not Null | Auto-populated at creation |
+| `updatedDate` | TIMESTAMP | Not Null | Auto-populated at update |
 
 ```sql
 CREATE TABLE User_Master (
-    userId VARCHAR(100) PRIMARY KEY,
-    firstName VARCHAR(50) NOT NULL,
-    lastName VARCHAR(50) NOT NULL,
+    userId BIGINT PRIMARY KEY,
+    firstName VARCHAR(100) NOT NULL,
+    lastName VARCHAR(100) NOT NULL,
     currentRole VARCHAR(50) NOT NULL,
-    organisation VARCHAR(100),
-    emailId VARCHAR(100) NOT NULL,
-    mobileNumber VARCHAR(15) NOT NULL UNIQUE,
-    address1 VARCHAR(255),
-    address2 VARCHAR(255),
-    stateName VARCHAR(100),
-    cityName VARCHAR(100),
-    pinCode VARCHAR(10),
-    status VARCHAR(20) NOT NULL CHECK (status IN ('Active', 'Inactive')),
-    FOREIGN KEY (currentRole) REFERENCES User_Role_Master(roleName)
+    emailId VARCHAR(255) NOT NULL UNIQUE
+        CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
+    mobileNumber NUMERIC(10) NOT NULL UNIQUE
+        CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999),
+    organisation VARCHAR(255),
+    address TEXT,
+    status VARCHAR(50) DEFAULT 'Active' CHECK (status IN ('Active', 'Inactive', 'Suspended')),
+    createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (currentRole) REFERENCES User_Role_Master(roleId)
 );
 ```
+
+**Validation Rules**:
+- `userId`: BIGINT supports 1 to 1,000,000,000 users
+- `emailId`: RFC 5322 regex pattern validation (standard email format)
+- `mobileNumber`: Exactly 10 digits in range 1000000000-9999999999
+- `status`: Only 'Active', 'Inactive', or 'Suspended'
 
 #### 2.4 Table: `User_Login`
 *   **Description**: Authentication details.
 *   **Primary Key**: `userId`
-*   **Foreign Keys**: `userId` -> `User_Master(userId)`
+*   **Foreign Keys**: `userId` -> `User_Master(userId)`, `roleId` -> `User_Role_Master(roleId)`
+*   **Updated**: March 1, 2026 - Changed userId to BIGINT to match User_Master
 
 | Column Name | Data Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `userId` | VARCHAR(100) | PK, FK | Link to User Master |
-| `username` | VARCHAR(100) | Not Null | Login Username (same as userId) |
-| `passwordHash` | VARCHAR(255) | Not Null | Hashed Password |
-| `mobilePhone` | VARCHAR(15) | | Redundant for quick access |
-| `roleId` | VARCHAR(10) | FK | Link to Role ID |
+| `userId` | BIGINT | PK, FK | Link to User Master (Numeric ID) |
+| `username` | VARCHAR(100) | Not Null, Unique | Login Username |
+| `password` | VARCHAR(255) | Not Null | Hashed Password |
+| `roleId` | VARCHAR(50) | FK, Not Null | Link to Role ID |
 | `isActive` | BOOLEAN | Default TRUE | Account Active Status |
-| `lastLoginAt` | DATETIME | | Timestamp of last login |
-| `passwordLastChangedAt` | DATETIME | | Timestamp of last password change |
-| `createdAt` | DATETIME | | Record creation timestamp |
-| `updatedAt` | DATETIME | | Record update timestamp |
+| `lastLoginTime` | TIMESTAMP | | Timestamp of last login |
+| `loginAttempts` | INTEGER | Default 0 | Failed login attempts counter |
+| `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Record creation timestamp |
+| `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Record update timestamp |
 
 ```sql
 CREATE TABLE User_Login (
-    userId VARCHAR(100) PRIMARY KEY,
-    username VARCHAR(100) NOT NULL,
-    passwordHash VARCHAR(255) NOT NULL,
-    mobilePhone VARCHAR(15),
-    roleId VARCHAR(10),
+    userId BIGINT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    roleId VARCHAR(50) NOT NULL,
     isActive BOOLEAN DEFAULT TRUE,
-    lastLoginAt DATETIME,
-    passwordLastChangedAt DATETIME,
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    lastLoginTime TIMESTAMP,
+    loginAttempts INTEGER DEFAULT 0,
+    createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userId) REFERENCES User_Master(userId),
     FOREIGN KEY (roleId) REFERENCES User_Role_Master(roleId)
 );
 ```
 
 #### 2.5 Table: `New_User_Request`
-*   **Description**: Staging table for new user registrations.
+*   **Description**: Staging table for new user registrations with validation matching User_Master.
 *   **Primary Key**: `requestId`
+*   **Updated**: March 1, 2026 - Added email format validation and 10-digit mobile validation
 
 | Column Name | Data Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `requestId` | VARCHAR(20) | PK | Unique Request ID |
-| `userName` | VARCHAR(100) | Not Null | Requested Username/Email |
-| `firstName` | VARCHAR(50) | Not Null | First Name |
-| `lastName` | VARCHAR(50) | Not Null | Last Name |
+| `requestId` | VARCHAR(100) | PK | Unique Request ID |
+| `userName` | VARCHAR(100) | Not Null | Requested Username |
+| `firstName` | VARCHAR(100) | Not Null | First Name |
+| `lastName` | VARCHAR(100) | Not Null | Last Name |
 | `currentRole` | VARCHAR(50) | Not Null | Requested Role |
-| `organisation` | VARCHAR(100) | | Organization |
-| `emailId` | VARCHAR(100) | Not Null | Email |
-| `mobileNumber` | VARCHAR(15) | Not Null | Mobile |
-| `address1` | VARCHAR(255) | | Address 1 |
-| `address2` | VARCHAR(255) | | Address 2 |
-| `stateName` | VARCHAR(100) | | State |
-| `cityName` | VARCHAR(100) | | City |
-| `pinCode` | VARCHAR(10) | | Pin Code |
-| `requestStatus` | VARCHAR(20) | Not Null | 'Pending', 'Approved', 'Rejected' |
+| `emailId` | VARCHAR(255) | Unique, Not Null | Email with RFC 5322 validation |
+| `mobileNumber` | NUMERIC(10) | Not Null | 10-digit mobile (1000000000-9999999999) |
+| `address` | TEXT | | Address |
+| `requestStatus` | VARCHAR(50) | Default 'Pending' | 'Pending', 'Approved', 'Rejected' |
+| `approvalDate` | TIMESTAMP | | Approval timestamp |
+| `approvalComments` | TEXT | | Approval comments |
+| `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Creation timestamp |
+| `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Update timestamp |
 
 ```sql
 CREATE TABLE New_User_Request (
-    requestId VARCHAR(20) PRIMARY KEY,
+    requestId VARCHAR(100) PRIMARY KEY,
     userName VARCHAR(100) NOT NULL,
-    firstName VARCHAR(50) NOT NULL,
-    lastName VARCHAR(50) NOT NULL,
+    firstName VARCHAR(100) NOT NULL,
+    lastName VARCHAR(100) NOT NULL,
     currentRole VARCHAR(50) NOT NULL,
-    organisation VARCHAR(100),
-    emailId VARCHAR(100) NOT NULL,
-    mobileNumber VARCHAR(15) NOT NULL,
-    address1 VARCHAR(255),
-    address2 VARCHAR(255),
-    stateName VARCHAR(100),
-    cityName VARCHAR(100),
-    pinCode VARCHAR(10),
-    requestStatus VARCHAR(20) NOT NULL CHECK (requestStatus IN ('Pending', 'Approved', 'Rejected'))
+    emailId VARCHAR(255) NOT NULL UNIQUE
+        CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
+    mobileNumber NUMERIC(10) NOT NULL
+        CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999),
+    address TEXT,
+    requestStatus VARCHAR(50) DEFAULT 'Pending' CHECK (requestStatus IN ('Pending', 'Approved', 'Rejected')),
+    approvalDate TIMESTAMP,
+    approvalComments TEXT,
+    createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
+**Validation Rules**:
+- `emailId`: RFC 5322 regex pattern (same as User_Master)
+- `mobileNumber`: NUMERIC(10) with exactly 10 digits (1000000000-9999999999)
+
 #### 2.6 Table: `Report_History`
-*   **Description**: Stores metadata and links to generated reports.
+*   **Description**: Stores metadata and links to generated medical reports.
 *   **Primary Key**: `id`
 *   **Foreign Keys**: `userId` -> `User_Master(userId)`
+*   **Updated**: March 1, 2026 - Changed userId to BIGINT to match User_Master
 
 | Column Name | Data Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | VARCHAR(50) | PK | Unique Report ID |
-| `userId` | VARCHAR(100) | FK | Owner of the report |
-| `timestamp` | DATETIME | Not Null | Upload/Generation time |
-| `fileName` | VARCHAR(255) | Not Null | Original file name |
-| `fileType` | VARCHAR(10) | Not Null | 'pdf' or 'image' |
+| `id` | VARCHAR(100) | PK | Unique Report ID |
+| `userId` | BIGINT | FK, Not Null | Report owner (Numeric User ID) |
+| `fileName` | VARCHAR(255) | | Original file name |
+| `fileType` | VARCHAR(50) | | File type (pdf, image, etc.) |
 | `reportType` | VARCHAR(100) | | Type of report (e.g., Blood Test) |
+| `status` | VARCHAR(50) | Default 'Pending' | 'Pending', 'Completed', 'Failed' |
+| `diagnosis` | TEXT | | Medical diagnosis |
 | `inferredDiagnosis` | TEXT | | AI inferred diagnosis |
-| `pdfUrl` | TEXT | | URL to the generated PDF |
-| `bucketLocation` | VARCHAR(255) | | Storage bucket path |
-| `jsonData` | JSON | | Full analysis result in JSON |
+| `pdfUrl` | VARCHAR(500) | | URL to the generated PDF |
+| `bucketLocation` | VARCHAR(500) | | Cloud storage bucket path |
+| `jsonData` | JSONB | | Full analysis result in JSONB |
+| `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Creation timestamp |
+| `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Update timestamp |
 
 ```sql
 CREATE TABLE Report_History (
-    id VARCHAR(50) PRIMARY KEY,
-    userId VARCHAR(100) NOT NULL,
-    timestamp DATETIME NOT NULL,
-    fileName VARCHAR(255) NOT NULL,
-    fileType VARCHAR(10) NOT NULL,
+    id VARCHAR(100) PRIMARY KEY,
+    userId BIGINT NOT NULL,
+    fileName VARCHAR(255),
+    fileType VARCHAR(50),
     reportType VARCHAR(100),
+    status VARCHAR(50) DEFAULT 'Pending' CHECK (status IN ('Pending', 'Completed', 'Failed')),
+    diagnosis TEXT,
     inferredDiagnosis TEXT,
-    pdfUrl TEXT,
-    bucketLocation VARCHAR(255),
-    jsonData JSON,
+    pdfUrl VARCHAR(500),
+    bucketLocation VARCHAR(500),
+    jsonData JSONB,
+    createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userId) REFERENCES User_Master(userId)
 );
 ```

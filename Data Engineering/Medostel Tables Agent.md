@@ -238,14 +238,17 @@ INSERT INTO state_city_pincode_master (stateId, stateName, cityId, cityName, pin
 Stores user profile information for all system users (patients, doctors, staff, etc.).
 
 ### Table Structure
+
+**Updated March 1, 2026** ✅ - Enhanced schema with numeric userId, email validation, and 10-digit mobile validation
+
 ```sql
 CREATE TABLE IF NOT EXISTS user_master (
-    userId VARCHAR(255) PRIMARY KEY,
+    userId BIGINT PRIMARY KEY,
     firstName VARCHAR(100) NOT NULL,
     lastName VARCHAR(100) NOT NULL,
     currentRole VARCHAR(50) NOT NULL,
-    emailId VARCHAR(255) NOT NULL UNIQUE,
-    mobileNumber VARCHAR(20) NOT NULL,
+    emailId VARCHAR(255) NOT NULL UNIQUE CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
+    mobileNumber NUMERIC(10) NOT NULL UNIQUE CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999),
     organisation VARCHAR(255),
     address TEXT,
     status VARCHAR(50) DEFAULT 'Active',
@@ -259,12 +262,12 @@ CREATE TABLE IF NOT EXISTS user_master (
 
 | Column | Type | Constraints | Purpose |
 |--------|------|-------------|---------|
-| **userId** | VARCHAR(255) | PK | Unique user identifier (typically email) |
+| **userId** | BIGINT | PK | Unique numeric user identifier (1-1,000,000,000) |
 | **firstName** | VARCHAR(100) | NOT NULL | User's first name |
 | **lastName** | VARCHAR(100) | NOT NULL | User's last name |
 | **currentRole** | VARCHAR(50) | NOT NULL, FK | User's current role (references user_role_master) |
-| **emailId** | VARCHAR(255) | UNIQUE, NOT NULL | User's email address |
-| **mobileNumber** | VARCHAR(20) | NOT NULL | User's phone number |
+| **emailId** | VARCHAR(255) | UNIQUE, NOT NULL, CHECK | User's email address (validated against RFC 5322 regex pattern) |
+| **mobileNumber** | NUMERIC(10) | NOT NULL, UNIQUE, CHECK | User's phone number (exactly 10 digits, 1000000000-9999999999) |
 | **organisation** | VARCHAR(255) | NULLABLE | Hospital/clinic/organization name |
 | **address** | TEXT | NULLABLE | Full address of user |
 | **status** | VARCHAR(50) | DEFAULT 'Active' | User status: Active, Inactive, Suspended |
@@ -288,8 +291,11 @@ CREATE INDEX idx_user_updated ON user_master(updatedDate);
 ### Sample Data
 ```sql
 INSERT INTO user_master (userId, firstName, lastName, currentRole, emailId, mobileNumber, organisation, address, status) VALUES
-('doctor1@medostel.com', 'Dr. Rajesh', 'Kumar', 'ROLE_DOCTOR', 'rajesh.kumar@hospital.com', '9876543210', 'Apollo Hospital', 'Mumbai', 'Active'),
-('patient1@medostel.com', 'Amit', 'Singh', 'ROLE_PATIENT', 'amit.singh@example.com', '9123456789', 'Self', 'Delhi', 'Active');
+(1001, 'Dr. Rajesh', 'Kumar', 'DOCTOR', 'rajesh.kumar@hospital.com', 9876543210, 'Apollo Hospital', 'Mumbai', 'Active'),
+(1002, 'Amit', 'Singh', 'PATIENT', 'amit.singh@example.com', 9123456789, 'Self', 'Delhi', 'Active'),
+(1003, 'Dr. Priya', 'Sharma', 'DOCTOR', 'priya.sharma@hospital.com', 8765432109, 'Max Hospital', 'Bangalore', 'Active'),
+(1004, 'Nurse', 'Patel', 'NURSE', 'nurse.patel@hospital.com', 9876543211, 'Apollo Hospital', 'Mumbai', 'Active'),
+(1005, 'Admin', 'User', 'ADMIN', 'admin@medostel.com', 9000000000, 'Medostel HQ', 'Mumbai', 'Active');
 ```
 
 ### API Endpoints
@@ -298,16 +304,25 @@ INSERT INTO user_master (userId, firstName, lastName, currentRole, emailId, mobi
 - **API 6:** PUT `/api/v1/users/{userId}` - Update user
 - **API 6:** DELETE `/api/v1/users/{userId}` - Delete user
 
-### Data Validation Rules
-- userId: Required, must be unique (typically email format), max 255 chars
-- firstName: Required, max 100 chars
-- lastName: Required, max 100 chars
-- currentRole: Required, must exist in user_role_master
-- emailId: Required, must be unique, valid email format
-- mobileNumber: Required, 10 digits (Indian format)
-- organisation: Optional, max 255 chars
-- address: Optional, max 500 chars
-- status: Must be Active, Inactive, or Suspended
+### Data Validation Rules (Updated March 1, 2026)
+
+| Field | Constraint | Details |
+|-------|-----------|---------|
+| **userId** | BIGINT PK | Numeric (1-1,000,000,000), must be unique |
+| **firstName** | VARCHAR(100) | Required, max 100 characters |
+| **lastName** | VARCHAR(100) | Required, max 100 characters |
+| **currentRole** | VARCHAR(50) | Required, must exist in user_role_master |
+| **emailId** | VARCHAR(255) | Required, unique, validated email format (RFC 5322 regex) |
+| **mobileNumber** | NUMERIC(10) | Required, unique, exactly 10 digits (1000000000-9999999999) |
+| **organisation** | VARCHAR(255) | Optional, max 255 characters |
+| **address** | TEXT | Optional |
+| **status** | VARCHAR(50) | Must be one of: Active, Inactive, Suspended |
+
+**Enhanced Validation Features**:
+- ✅ Email validation using PostgreSQL CHECK constraint with regex pattern
+- ✅ Mobile number validation: CHECK constraint ensures exactly 10 digits
+- ✅ Numeric userId: BIGINT supports up to 1 billion+ users
+- ✅ UNIQUE constraints on emailId and mobileNumber
 
 ### Relationships
 - **Foreign Key:** currentRole → user_role_master(roleId)
@@ -321,9 +336,12 @@ INSERT INTO user_master (userId, firstName, lastName, currentRole, emailId, mobi
 Stores user authentication credentials and login tracking information.
 
 ### Table Structure
+
+**Updated March 1, 2026** ✅ - userId changed to BIGINT to match user_master schema
+
 ```sql
 CREATE TABLE IF NOT EXISTS user_login (
-    userId VARCHAR(255) PRIMARY KEY,
+    userId BIGINT PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     roleId VARCHAR(50) NOT NULL,
@@ -341,7 +359,7 @@ CREATE TABLE IF NOT EXISTS user_login (
 
 | Column | Type | Constraints | Purpose |
 |--------|------|-------------|---------|
-| **userId** | VARCHAR(255) | PK, FK | Reference to user in user_master |
+| **userId** | BIGINT | PK, FK | Reference to user in user_master (numeric) |
 | **username** | VARCHAR(100) | UNIQUE, NOT NULL | Login username |
 | **password** | VARCHAR(255) | NOT NULL | Hashed password (SHA256) |
 | **roleId** | VARCHAR(50) | NOT NULL, FK | User's role (from user_role_master) |

@@ -139,108 +139,109 @@
 ---
 
 ### TABLE 3: User_Master
-**Purpose**: Core user profile and demographic data
-**Primary Key**: `userId` (Email)
+**Purpose**: Core user profile and demographic data (ENHANCED - March 1, 2026)
+**Primary Key**: `userId` (BIGINT - Numeric, supports up to 1 billion users)
+**Schema Version**: 2.0 (Updated with enhanced validation)
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `userId` | VARCHAR(100) | PK | Email ID (User ID) |
-| `firstName` | VARCHAR(50) | Not Null | First name |
-| `lastName` | VARCHAR(50) | Not Null | Last name |
-| `currentRole` | VARCHAR(50) | FK, Not Null | References User_Role_Master |
-| `organisation` | VARCHAR(100) | | Organization name |
-| `emailId` | VARCHAR(100) | Not Null, Unique | Email address |
-| `mobileNumber` | VARCHAR(15) | Not Null, Unique | Mobile number |
-| `address1` | VARCHAR(255) | | Address line 1 |
-| `address2` | VARCHAR(255) | | Address line 2 |
-| `stateName` | VARCHAR(100) | | State |
-| `cityName` | VARCHAR(100) | | City |
-| `pinCode` | VARCHAR(10) | | Pin code |
-| `status` | VARCHAR(20) | Default 'Active' | Active/Inactive |
+| `userId` | BIGINT | PK, Not Null | Numeric User ID (1-1000000000) |
+| `firstName` | VARCHAR(100) | Not Null | First name |
+| `lastName` | VARCHAR(100) | Not Null | Last name |
+| `currentRole` | VARCHAR(50) | FK, Not Null | References User_Role_Master(roleId) |
+| `emailId` | VARCHAR(255) | Not Null, Unique | RFC 5322 email format validation |
+| `mobileNumber` | NUMERIC(10) | Not Null, Unique | 10-digit mobile (1000000000-9999999999) |
+| `organisation` | VARCHAR(255) | | Organization name |
+| `address` | TEXT | | Full address |
+| `status` | VARCHAR(50) | Default 'Active' | Active/Inactive/Suspended |
 | `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Creation timestamp |
 | `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Update timestamp |
 
-**Indexes**: `idx_user_email`, `idx_user_mobile`, `idx_user_role`, `idx_user_status`, `idx_user_created_date`
-**Size**: 72 kB | **Owner**: medostel_admin_user
+**Validation Constraints**:
+- `emailId`: CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
+- `mobileNumber`: CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999)
+- `status`: CHECK (status IN ('Active', 'Inactive', 'Suspended'))
+
+**Indexes**: `idx_user_email`, `idx_user_mobile`, `idx_user_role`, `idx_user_status`, `idx_user_name`, `idx_user_updated`
+**Size**: ~80 kB | **Owner**: medostel_admin_user
 
 ---
 
 ### TABLE 4: User_Login
-**Purpose**: Authentication and login credentials
+**Purpose**: Authentication and login credentials (UPDATED - March 1, 2026)
 **Primary Key**: `userId`
-**Foreign Keys**: `userId` → User_Master, `roleId` → User_Role_Master
+**Foreign Keys**: `userId` → User_Master(userId - BIGINT), `roleId` → User_Role_Master(roleId)
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `userId` | VARCHAR(100) | PK, FK | User ID (references User_Master) |
+| `userId` | BIGINT | PK, FK, Not Null | User ID (numeric, references User_Master) |
 | `username` | VARCHAR(100) | Not Null, Unique | Login username |
-| `passwordHash` | VARCHAR(255) | Not Null | Hashed password |
-| `mobilePhone` | VARCHAR(15) | | Mobile phone |
-| `roleId` | VARCHAR(10) | FK | Role ID (references User_Role_Master) |
+| `password` | VARCHAR(255) | Not Null | Hashed password |
+| `roleId` | VARCHAR(50) | FK, Not Null | Role ID (references User_Role_Master) |
 | `isActive` | BOOLEAN | Default TRUE | Account active status |
-| `lastLoginAt` | TIMESTAMP | | Last login timestamp |
-| `passwordLastChangedAt` | TIMESTAMP | | Password change timestamp |
-| `createdAt` | TIMESTAMP | Default CURRENT_TIMESTAMP | Creation timestamp |
-| `updatedAt` | TIMESTAMP | Default CURRENT_TIMESTAMP | Update timestamp |
+| `lastLoginTime` | TIMESTAMP | | Last login timestamp |
+| `loginAttempts` | INTEGER | Default 0 | Failed login attempts counter |
+| `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Creation timestamp |
+| `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Update timestamp |
 
-**Indexes**: `idx_login_username`, `idx_login_role_id`, `idx_login_active`, `idx_login_last_login`
-**Size**: 48 kB | **Owner**: medostel_admin_user
+**Indexes**: `idx_login_username`, `idx_login_role`, `idx_login_active`, `idx_login_attempts`, `idx_login_lastlogin`, `idx_login_updated`
+**Size**: ~48 kB | **Owner**: medostel_admin_user
 
 ---
 
 ### TABLE 5: New_User_Request
-**Purpose**: Staging table for new user registration requests
+**Purpose**: Staging table for new user registration requests (ENHANCED - March 1, 2026)
 **Primary Key**: `requestId`
+**Schema Version**: 2.0 (Added email & mobile validation matching User_Master)
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `requestId` | VARCHAR(20) | PK | Unique request ID |
+| `requestId` | VARCHAR(100) | PK | Unique request ID |
 | `userName` | VARCHAR(100) | Not Null | Requested username |
-| `firstName` | VARCHAR(50) | Not Null | First name |
-| `lastName` | VARCHAR(50) | Not Null | Last name |
+| `firstName` | VARCHAR(100) | Not Null | First name |
+| `lastName` | VARCHAR(100) | Not Null | Last name |
 | `currentRole` | VARCHAR(50) | Not Null | Requested role |
-| `organisation` | VARCHAR(100) | | Organization |
-| `emailId` | VARCHAR(100) | Not Null, Unique | Email address |
-| `mobileNumber` | VARCHAR(15) | Not Null, Unique | Mobile number |
-| `address1` | VARCHAR(255) | | Address line 1 |
-| `address2` | VARCHAR(255) | | Address line 2 |
-| `stateName` | VARCHAR(100) | | State |
-| `cityName` | VARCHAR(100) | | City |
-| `pinCode` | VARCHAR(10) | | Pin code |
-| `requestStatus` | VARCHAR(20) | Default 'Pending' | Pending/Approved/Rejected |
+| `emailId` | VARCHAR(255) | Not Null, Unique | RFC 5322 email format validation |
+| `mobileNumber` | NUMERIC(10) | Not Null | 10-digit mobile (1000000000-9999999999) |
+| `address` | TEXT | | Full address |
+| `requestStatus` | VARCHAR(50) | Default 'Pending' | Pending/Approved/Rejected |
+| `approvalDate` | TIMESTAMP | | Approval timestamp |
+| `approvalComments` | TEXT | | Approval comments |
 | `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Creation timestamp |
 | `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Update timestamp |
-| `approvedBy` | VARCHAR(100) | | Approver's email |
-| `approvalRemarks` | TEXT | | Approval comments |
 
-**Indexes**: `idx_new_user_email`, `idx_new_user_status`, `idx_new_user_created`
-**Size**: 56 kB | **Owner**: medostel_admin_user
+**Validation Constraints**:
+- `emailId`: CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
+- `mobileNumber`: CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999)
+
+**Indexes**: `idx_request_email`, `idx_request_mobile`, `idx_request_status`, `idx_request_role`, `idx_request_created`, `idx_request_updated`
+**Size**: ~64 kB | **Owner**: medostel_admin_user
 
 ---
 
 ### TABLE 6: Report_History
-**Purpose**: Medical report analysis and storage history
+**Purpose**: Medical report analysis and storage history (UPDATED - March 1, 2026)
 **Primary Key**: `id`
-**Foreign Key**: `userId` → User_Master
+**Foreign Key**: `userId` → User_Master(userId - BIGINT)
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | VARCHAR(50) | PK | Unique report ID |
-| `userId` | VARCHAR(100) | Not Null, FK | Report owner (references User_Master) |
-| `timestamp` | TIMESTAMP | Not Null | Upload/Generation time |
-| `fileName` | VARCHAR(255) | Not Null | Original file name |
-| `fileType` | VARCHAR(10) | Not Null | pdf/image/doc/docx |
+| `id` | VARCHAR(100) | PK | Unique report ID |
+| `userId` | BIGINT | Not Null, FK | Report owner (numeric, references User_Master) |
+| `fileName` | VARCHAR(255) | | Original file name |
+| `fileType` | VARCHAR(50) | | File type (pdf, image, etc.) |
 | `reportType` | VARCHAR(100) | | Report type (e.g., Blood Test) |
+| `status` | VARCHAR(50) | Default 'Pending' | Pending/Completed/Failed |
+| `diagnosis` | TEXT | | Medical diagnosis |
 | `inferredDiagnosis` | TEXT | | AI inferred diagnosis |
-| `pdfUrl` | TEXT | | URL to generated PDF |
-| `bucketLocation` | VARCHAR(255) | | Storage bucket path |
-| `jsonData` | JSONB | | Full analysis in JSON |
-| `status` | VARCHAR(20) | Default 'Pending' | Pending/Processing/Completed/Error |
+| `pdfUrl` | VARCHAR(500) | | URL to generated PDF |
+| `bucketLocation` | VARCHAR(500) | | Cloud storage bucket path |
+| `jsonData` | JSONB | | Full analysis in JSONB format |
 | `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Creation timestamp |
 | `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Update timestamp |
 
-**Indexes**: `idx_report_user_id`, `idx_report_timestamp`, `idx_report_type`, `idx_report_status`, `idx_report_created`
-**Size**: 56 kB | **Owner**: medostel_admin_user
+**Indexes**: `idx_report_user`, `idx_report_type`, `idx_report_status`, `idx_report_created`, `idx_report_updated`
+**Size**: ~64 kB | **Owner**: medostel_admin_user
 
 ---
 
