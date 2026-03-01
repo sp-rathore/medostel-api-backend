@@ -1067,145 +1067,339 @@ async def test_delete_location_success(client, sample_location_id):
 
 ---
 
-### API 5 & 6: User Management
+### API 5 & 6: User Management (Enhanced Schema v2.0)
 
-#### API 5: GET `/api/v1/users/all` - Select All Users
+#### API 5: GET `/api/v1/users/all` - Select All Users (Enhanced with BIGINT userId)
 
-**Test Case 5.1: Retrieve all users**
+**Test Case 5.1: Retrieve all users with numeric userId**
 ```python
 async def test_get_all_users_success(client):
-    """Should retrieve all users with 200 status"""
+    """Should retrieve all users with numeric userId (BIGINT)"""
     response = await client.get("/api/v1/users/all")
     assert response.status_code == 200
     assert response.json()["status"] == "success"
     assert "users" in response.json()["data"]
+    # Verify userId is numeric (BIGINT)
+    if response.json()["data"]["users"]:
+        for user in response.json()["data"]["users"]:
+            assert isinstance(user["userId"], int)
+            assert 1 <= user["userId"] <= 1000000000
 ```
 
-**Test Case 5.2: Filter users by status**
+**Test Case 5.2: Fetch user by numeric userId**
 ```python
-async def test_get_users_filter_by_status(client):
-    """Should filter users by status"""
-    response = await client.get("/api/v1/users/all?status=Active")
+async def test_get_user_by_userid(client):
+    """Should retrieve user by numeric userId (BIGINT)"""
+    response = await client.get("/api/v1/users/all?userId=1001")
+    assert response.status_code == 200
+    users = response.json()["data"]["users"]
+    if users:
+        assert users[0]["userId"] == 1001
+```
+
+**Test Case 5.3: Filter users by email (RFC 5322 format)**
+```python
+async def test_get_users_by_email(client):
+    """Should retrieve user by email with validation"""
+    response = await client.get("/api/v1/users/all?email=john.doe@medostel.com")
+    assert response.status_code == 200
+    users = response.json()["data"]["users"]
+    if users:
+        assert users[0]["emailId"] == "john.doe@medostel.com"
+```
+
+**Test Case 5.4: Filter users by role and status**
+```python
+async def test_get_users_filter_by_role_status(client):
+    """Should filter users by role and status"""
+    response = await client.get("/api/v1/users/all?role=DOCTOR&status=Active")
     assert response.status_code == 200
     users = response.json()["data"]["users"]
     for user in users:
+        assert user["currentRole"] == "DOCTOR"
         assert user["status"] == "Active"
 ```
 
-**Test Case 5.3: Filter users by role**
-```python
-async def test_get_users_filter_by_role(client):
-    """Should filter users by current role"""
-    response = await client.get("/api/v1/users/all?current_role=Doctor")
-    assert response.status_code == 200
-    users = response.json()["data"]["users"]
-    for user in users:
-        assert user["currentRole"] == "Doctor"
-```
-
-**Test Case 5.4: Pagination support**
+**Test Case 5.5: Pagination support with limit/offset**
 ```python
 async def test_get_users_pagination(client):
-    """Should support pagination"""
+    """Should support pagination with limit and offset"""
     response = await client.get("/api/v1/users/all?limit=10&offset=0")
     assert response.status_code == 200
     assert len(response.json()["data"]["users"]) <= 10
 ```
 
-#### API 6: CRUD Operations on Users
+**Test Case 5.6: Invalid email format in query parameter**
+```python
+async def test_get_users_invalid_email_format(client):
+    """Should validate email format in query parameter"""
+    response = await client.get("/api/v1/users/all?email=invalid-email")
+    assert response.status_code == 400
+    assert "email validation failed" in response.json()["message"].lower()
+```
 
-**Test Case 6.1: Create user successfully**
+**Test Case 5.7: Invalid userId range (exceeds BIGINT limit)**
+```python
+async def test_get_users_invalid_userid_range(client):
+    """Should reject userId outside range 1-1000000000"""
+    response = await client.get("/api/v1/users/all?userId=1000000001")
+    assert response.status_code == 400
+    assert "userid must be" in response.json()["message"].lower()
+```
+
+#### API 6: CRUD Operations on Users (Enhanced Schema v2.0)
+
+**Test Case 6.1: Create user with valid data (BIGINT userId, email validation, 10-digit mobile)**
 ```python
 async def test_create_user_success(client):
-    """Should create a new user with 201 status"""
+    """Should create user with enhanced schema validation"""
     user_data = {
-        "userId": "user@example.com",
+        "userId": 1001,  # BIGINT numeric
         "firstName": "John",
         "lastName": "Doe",
-        "currentRole": "Doctor",
-        "emailId": "john@example.com",
-        "mobileNumber": "9876543210",
-        "organisation": "Hospital XYZ",
-        "address": "123 Main St",
+        "currentRole": "DOCTOR",
+        "emailId": "john.doe@medostel.com",  # RFC 5322 valid
+        "mobileNumber": "9876543210",  # Exactly 10 digits
+        "organisation": "Apollo Hospital",
+        "address": "Mumbai, India",
         "status": "Active"
     }
     response = await client.post("/api/v1/users", json=user_data)
     assert response.status_code == 201
-    assert response.json()["data"]["user"]["userId"] == "user@example.com"
+    assert response.json()["data"]["userId"] == 1001  # BIGINT
+    assert response.json()["data"]["emailId"] == "john.doe@medostel.com"
+    assert response.json()["data"]["mobileNumber"] == "9876543210"
 ```
 
-**Test Case 6.2: Create duplicate user**
-```python
-async def test_create_duplicate_user_conflict(client, sample_user):
-    """Should reject duplicate user with 409"""
-    response = await client.post("/api/v1/users", json=sample_user)
-    assert response.status_code == 409
-```
-
-**Test Case 6.3: Create user with invalid email**
+**Test Case 6.2: Create user with invalid email format (RFC 5322 validation)**
 ```python
 async def test_create_user_invalid_email(client):
-    """Should validate email format"""
+    """Should reject invalid email format"""
     user_data = {
-        "userId": "invalid_user",
-        "firstName": "John",
-        "lastName": "Doe",
-        "currentRole": "Doctor",
-        "emailId": "not_an_email",
-        "mobileNumber": "9876543210",
-        "organisation": "Hospital XYZ",
-        "status": "Active"
-    }
-    response = await client.post("/api/v1/users", json=user_data)
-    # Validation may or may not enforce email format
-    assert response.status_code in [201, 422]
-```
-
-**Test Case 6.4: Create user with invalid phone number**
-```python
-async def test_create_user_invalid_phone(client):
-    """Should validate phone number format"""
-    user_data = {
-        "userId": "user@example.com",
-        "firstName": "John",
-        "lastName": "Doe",
-        "currentRole": "Doctor",
-        "emailId": "john@example.com",
-        "mobileNumber": "123",  # Too short
-        "organisation": "Hospital XYZ",
-        "status": "Active"
-    }
-    response = await client.post("/api/v1/users", json=user_data)
-    assert response.status_code in [201, 422]
-```
-
-**Test Case 6.5: Update user successfully**
-```python
-async def test_update_user_success(client, sample_user_id):
-    """Should update user with 200 status"""
-    update_data = {
+        "userId": 1002,
         "firstName": "Jane",
-        "status": "Inactive"
+        "lastName": "Smith",
+        "currentRole": "PATIENT",
+        "emailId": "not-a-valid-email",  # Invalid format
+        "mobileNumber": "9876543211",
+        "organisation": "Self",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/users", json=user_data)
+    assert response.status_code == 400
+    assert "email" in response.json()["message"].lower()
+    assert "format" in response.json()["message"].lower() or "validation" in response.json()["message"].lower()
+```
+
+**Test Case 6.3: Create user with invalid mobile (not exactly 10 digits)**
+```python
+async def test_create_user_invalid_mobile_short(client):
+    """Should reject mobile number with less than 10 digits"""
+    user_data = {
+        "userId": 1003,
+        "firstName": "Bob",
+        "lastName": "Wilson",
+        "currentRole": "DOCTOR",
+        "emailId": "bob.wilson@medostel.com",
+        "mobileNumber": "98765432",  # Only 8 digits
+        "organisation": "Max Hospital",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/users", json=user_data)
+    assert response.status_code == 400
+    assert "mobile" in response.json()["message"].lower() or "digit" in response.json()["message"].lower()
+```
+
+**Test Case 6.4: Create user with invalid mobile (more than 10 digits)**
+```python
+async def test_create_user_invalid_mobile_long(client):
+    """Should reject mobile number with more than 10 digits"""
+    user_data = {
+        "userId": 1004,
+        "firstName": "Alice",
+        "lastName": "Brown",
+        "currentRole": "NURSE",
+        "emailId": "alice.brown@medostel.com",
+        "mobileNumber": "98765432101",  # 11 digits
+        "organisation": "Fortis Hospital",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/users", json=user_data)
+    assert response.status_code == 400
+    assert "mobile" in response.json()["message"].lower() or "digit" in response.json()["message"].lower()
+```
+
+**Test Case 6.5: Create user with mobile number below range (< 1000000000)**
+```python
+async def test_create_user_mobile_below_range(client):
+    """Should reject mobile number starting with 0 (below 1000000000)"""
+    user_data = {
+        "userId": 1005,
+        "firstName": "Charlie",
+        "lastName": "Davis",
+        "currentRole": "TECHNICIAN",
+        "emailId": "charlie.davis@medostel.com",
+        "mobileNumber": "0876543210",  # Starts with 0, equals 876543210 < 1000000000
+        "organisation": "Lab XYZ",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/users", json=user_data)
+    assert response.status_code == 400
+    assert "range" in response.json()["message"].lower() or "1000000000" in response.json()["message"]
+```
+
+**Test Case 6.6: Create duplicate user by userId (BIGINT uniqueness)**
+```python
+async def test_create_duplicate_user_by_userid(client, sample_user_with_userid_1001):
+    """Should reject duplicate userId"""
+    user_data = {
+        "userId": 1001,  # Duplicate
+        "firstName": "Duplicate",
+        "lastName": "User",
+        "currentRole": "PATIENT",
+        "emailId": "duplicate@medostel.com",
+        "mobileNumber": "9999999999",
+        "organisation": "Self",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/users", json=user_data)
+    assert response.status_code == 409
+    assert "userid" in response.json()["message"].lower() or "already exists" in response.json()["message"].lower()
+```
+
+**Test Case 6.7: Create duplicate user by email (email uniqueness)**
+```python
+async def test_create_duplicate_user_by_email(client, sample_user_with_email):
+    """Should reject duplicate email address"""
+    user_data = {
+        "userId": 2001,
+        "firstName": "Different",
+        "lastName": "Person",
+        "currentRole": "DOCTOR",
+        "emailId": "john.doe@medostel.com",  # Duplicate email
+        "mobileNumber": "9999999998",
+        "organisation": "Different Hospital",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/users", json=user_data)
+    assert response.status_code == 409
+    assert "email" in response.json()["message"].lower() or "already exists" in response.json()["message"].lower()
+```
+
+**Test Case 6.8: Create duplicate user by mobile number (mobile uniqueness)**
+```python
+async def test_create_duplicate_user_by_mobile(client, sample_user_with_mobile):
+    """Should reject duplicate mobile number"""
+    user_data = {
+        "userId": 3001,
+        "firstName": "Another",
+        "lastName": "User",
+        "currentRole": "PATIENT",
+        "emailId": "another@medostel.com",
+        "mobileNumber": "9876543210",  # Duplicate mobile
+        "organisation": "Self",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/users", json=user_data)
+    assert response.status_code == 409
+    assert "mobile" in response.json()["message"].lower() or "already exists" in response.json()["message"].lower()
+```
+
+**Test Case 6.9: Update user email with validation**
+```python
+async def test_update_user_email_with_validation(client, sample_user_id):
+    """Should validate email format on update"""
+    update_data = {
+        "emailId": "newemail@medostel.com"
     }
     response = await client.put(f"/api/v1/users/{sample_user_id}", json=update_data)
     assert response.status_code == 200
-    assert response.json()["data"]["user"]["firstName"] == "Jane"
+    assert response.json()["data"]["emailId"] == "newemail@medostel.com"
 ```
 
-**Test Case 6.6: Update non-existent user**
+**Test Case 6.10: Update user email with invalid format**
+```python
+async def test_update_user_email_invalid(client, sample_user_id):
+    """Should reject invalid email on update"""
+    update_data = {
+        "emailId": "invalid-format"
+    }
+    response = await client.put(f"/api/v1/users/{sample_user_id}", json=update_data)
+    assert response.status_code == 400
+    assert "email" in response.json()["message"].lower()
+```
+
+**Test Case 6.11: Update user mobile number with validation**
+```python
+async def test_update_user_mobile_with_validation(client, sample_user_id):
+    """Should validate 10-digit mobile on update"""
+    update_data = {
+        "mobileNumber": "9988776655"
+    }
+    response = await client.put(f"/api/v1/users/{sample_user_id}", json=update_data)
+    assert response.status_code == 200
+    assert response.json()["data"]["mobileNumber"] == "9988776655"
+```
+
+**Test Case 6.12: Attempt to update immutable userId field**
+```python
+async def test_update_user_cannot_modify_userid(client, sample_user_id):
+    """Should prevent modification of immutable userId field"""
+    update_data = {
+        "userId": 9999,  # Attempt to change immutable field
+        "firstName": "Updated"
+    }
+    response = await client.put(f"/api/v1/users/{sample_user_id}", json=update_data)
+    assert response.status_code == 400
+    assert "immutable" in response.json()["message"].lower() or "cannot modify" in response.json()["message"].lower()
+```
+
+**Test Case 6.13: Update user status to valid value**
+```python
+async def test_update_user_status_active(client, sample_user_id):
+    """Should update status to Active/Inactive/Suspended"""
+    for status in ["Active", "Inactive", "Suspended"]:
+        update_data = {"status": status}
+        response = await client.put(f"/api/v1/users/{sample_user_id}", json=update_data)
+        assert response.status_code == 200
+        assert response.json()["data"]["status"] == status
+```
+
+**Test Case 6.14: Update user with invalid status**
+```python
+async def test_update_user_status_invalid(client, sample_user_id):
+    """Should reject invalid status values"""
+    update_data = {"status": "InvalidStatus"}
+    response = await client.put(f"/api/v1/users/{sample_user_id}", json=update_data)
+    assert response.status_code == 400
+    assert "status" in response.json()["message"].lower()
+```
+
+**Test Case 6.15: Update non-existent user**
 ```python
 async def test_update_nonexistent_user(client):
     """Should return 404 for non-existent user"""
-    response = await client.put("/api/v1/users/nonexistent@example.com", json={"firstName": "John"})
+    response = await client.put("/api/v1/users/9999", json={"firstName": "John"})
     assert response.status_code == 404
+    assert "not found" in response.json()["message"].lower()
 ```
 
-**Test Case 6.7: Delete user successfully**
+**Test Case 6.16: Verify updatedDate is auto-populated on update**
 ```python
-async def test_delete_user_success(client, sample_user_id):
-    """Should delete user with 204 status"""
-    response = await client.delete(f"/api/v1/users/{sample_user_id}")
-    assert response.status_code == 204
+async def test_update_user_auto_updated_timestamp(client, sample_user_id):
+    """Should auto-update updatedDate timestamp on PUT"""
+    import time
+    original_response = await client.get(f"/api/v1/users/all?userId={sample_user_id}")
+    original_date = original_response.json()["data"]["users"][0]["updatedDate"]
+
+    time.sleep(1)  # Wait to ensure different timestamp
+
+    update_data = {"firstName": "Updated"}
+    response = await client.put(f"/api/v1/users/{sample_user_id}", json=update_data)
+
+    assert response.status_code == 200
+    new_date = response.json()["data"]["updatedDate"]
+    assert new_date > original_date
 ```
 
 ---
@@ -2418,6 +2612,7 @@ fixture 'sample_role' not found
 |---------|------|---------|
 | 1.0 | 2026-03-01 | Initial release with comprehensive agent |
 | 2.0 | 2026-03-01 | Enhanced with design & execution context from all supporting files |
+| 2.1 | 2026-03-01 | Enhanced API 5 & 6 tests (16 tests) with schema v2.0 validation: email RFC 5322, mobile 10-digit, BIGINT userId |
 
 ---
 
@@ -2434,15 +2629,31 @@ This **Unit Testing Agent** provides everything needed to:
 7. **Monitor** test coverage and quality
 
 **Current Status:** Production Ready ✅
-- 50 tests implemented for APIs 1 & 2
-- Complete specifications for APIs 3-12
+- 50 tests implemented for APIs 1 & 2 (Roles - Enhanced)
+- 16 comprehensive tests specified for APIs 5 & 6 (User_Master - Enhanced Schema v2.0)
+  - Email format validation (RFC 5322) - 2 tests
+  - Mobile number validation (10 digits, 1000000000-9999999999) - 5 tests
+  - BIGINT userId validation (1-1000000000) - 2 tests
+  - Uniqueness constraints (userId, email, mobile) - 3 tests
+  - Immutable field protection (userId) - 1 test
+  - Auto-timestamp updates - 1 test
+- Complete specifications for APIs 3-4, 7-12
 - Full documentation and examples provided
 - CI/CD integration ready
 
+**Recent Updates (March 1, 2026):**
+- ✅ Enhanced API 5 & 6 test cases with schema v2.0 validation
+- ✅ Added email format validation tests (RFC 5322)
+- ✅ Added mobile number validation tests (10-digit, range check)
+- ✅ Added BIGINT userId validation tests (1-1000000000 range)
+- ✅ Added uniqueness constraint tests (userId, email, mobile)
+- ✅ Added immutable field protection tests
+- ✅ Added auto-timestamp validation tests
+
 **Next Steps:**
-1. Copy files to project
+1. Implement fixture support for sample_user_with_userid_1001, sample_user_with_email, etc.
 2. Run reference tests (test_roles_api.py)
-3. Implement tests for APIs 3-12 using template
+3. Implement tests for APIs 3-4, 7-12 using template
 4. Setup CI/CD pipeline
 5. Achieve 80%+ coverage target
 
@@ -2459,6 +2670,7 @@ This **Unit Testing Agent** provides everything needed to:
 ---
 
 **Last Updated:** March 1, 2026
-**Version:** 2.0 (Comprehensive Edition)
+**Version:** 2.1 (Enhanced with Schema v2.0 Tests)
 **Status:** Production Ready
 **Maintained By:** QA Testing Team
+**Schema Coverage:** APIs 1-2 (50 tests), APIs 5-6 (16 tests with email/mobile/userId validation)

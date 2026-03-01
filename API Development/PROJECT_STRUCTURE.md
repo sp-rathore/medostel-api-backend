@@ -300,8 +300,8 @@ class UserRoleService:
 | 2 | User_Role_Master | roles.py | POST/PUT /api/v1/roles | user_role_service | ✅ Enhanced |
 | 3 | State_City_PinCode | locations.py | GET /api/v1/locations/all | location_service | ⏳ Standard |
 | 4 | State_City_PinCode | locations.py | POST/PUT/DELETE /api/v1/locations | location_service | ⏳ Standard |
-| 5 | User_Master | users.py | GET /api/v1/users/all | user_service | ⏳ Standard |
-| 6 | User_Master | users.py | POST/PUT/DELETE /api/v1/users | user_service | ⏳ Standard |
+| 5 | User_Master | users.py | GET /api/v1/users/all | user_service | ✅ Enhanced (Schema v2.0) |
+| 6 | User_Master | users.py | POST/PUT /api/v1/users | user_service | ✅ Enhanced (Schema v2.0) |
 | 7 | User_Login | auth.py | GET /api/v1/auth/users | auth_service | ⏳ Standard |
 | 8 | User_Login | auth.py | POST/PUT/DELETE /api/v1/auth/credentials | auth_service | ⏳ Standard |
 | 9 | New_User_Request | registrations.py | GET /api/v1/requests/all | registration_service | ⏳ Standard |
@@ -623,6 +623,410 @@ CREATE TABLE user_role_master (
 
 ---
 
+## Detailed API Specifications: User_Master (API 5 & 6) - ENHANCED SCHEMA
+
+### Overview
+APIs 5 & 6 manage user profiles with **enhanced schema v2.0** (March 1, 2026):
+- `userId`: BIGINT (supports up to 1 billion users)
+- `emailId`: Email format validation using RFC 5322 regex
+- `mobileNumber`: NUMERIC(10) with 10-digit validation (1000000000-9999999999)
+- `status`: Active/Inactive/Suspended
+
+### API 5: GET `/api/v1/users/all` - Flexible User Retrieval
+
+#### Supported Request Scenarios
+
+**Scenario 1: Fetch by User ID (Numeric)**
+```
+GET /api/v1/users/all?userId=1001
+```
+- Retrieves complete user profile by numeric userId
+- Response: Single user object with all details
+
+**Scenario 2: Fetch by Email**
+```
+GET /api/v1/users/all?email=user@example.com
+```
+- Retrieves user by email address
+- Validates email format in query parameter
+
+**Scenario 3: Fetch by Role**
+```
+GET /api/v1/users/all?role=DOCTOR&status=Active
+```
+- Retrieves all users with specific role and status
+- Supports pagination with limit/offset
+
+**Scenario 4: Fetch All Users**
+```
+GET /api/v1/users/all?limit=10&offset=0
+```
+- Retrieves all users with pagination
+- Default limit: 100, max: 1000
+
+#### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `userId` | integer | No | Numeric user ID (BIGINT) |
+| `email` | string | No | Email address (RFC 5322 validated) |
+| `role` | string | No | Role ID (e.g., DOCTOR, PATIENT) |
+| `status` | string | No | Active, Inactive, or Suspended |
+| `limit` | integer | No | Results per page (default: 100, max: 1000) |
+| `offset` | integer | No | Pagination offset (default: 0) |
+
+#### Response Schema
+
+```json
+{
+  "status": "success",
+  "code": 200,
+  "message": "User profile retrieved successfully",
+  "data": {
+    "count": 1,
+    "users": [
+      {
+        "userId": 1001,
+        "firstName": "John",
+        "lastName": "Doe",
+        "currentRole": "DOCTOR",
+        "emailId": "john.doe@medostel.com",
+        "mobileNumber": "9876543210",
+        "organisation": "Apollo Hospital",
+        "address": "Mumbai, India",
+        "status": "Active",
+        "createdDate": "2026-02-28T10:00:00Z",
+        "updatedDate": "2026-03-01T12:00:00Z"
+      }
+    ]
+  },
+  "timestamp": "2026-03-01T16:00:00Z"
+}
+```
+
+#### Error Responses
+
+| Code | Error | Message |
+|------|-------|---------|
+| 400 | Invalid email format | Email validation failed for: '{email}' |
+| 400 | Invalid status | Status must be one of: Active, Inactive, Suspended |
+| 404 | User not found | User with ID '{userId}' not found |
+| 422 | Validation error | Invalid query parameter format |
+| 500 | Database error | Internal server error |
+
+---
+
+### API 6: CRUD Operations on User Profiles
+
+#### POST - Create New User
+
+**Endpoint**: `POST /api/v1/users`
+
+##### Request Body
+
+| Field | Type | Required | Constraints | Notes |
+|-------|------|----------|-------------|-------|
+| `userId` | integer | Yes | Unique, 1-1000000000 | Numeric user identifier |
+| `firstName` | string | Yes | Max 100 chars | User first name |
+| `lastName` | string | Yes | Max 100 chars | User last name |
+| `currentRole` | string | Yes | Valid roleId | Must reference User_Role_Master |
+| `emailId` | string | Yes | RFC 5322 valid, unique | Email format validation |
+| `mobileNumber` | string | Yes | Exactly 10 digits | Range: 1000000000-9999999999 |
+| `organisation` | string | No | Max 255 chars | Organization name |
+| `address` | string | No | Max 1000 chars | Full address |
+| `status` | string | No | Default: Active | Active, Inactive, or Suspended |
+
+**System-managed fields (AUTO-POPULATED):**
+- `createdDate`: Current timestamp
+- `updatedDate`: Current timestamp
+
+##### Request Example
+```bash
+curl -X POST http://localhost:8000/api/v1/users \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <jwt_token>" \
+  -d '{
+    "userId": 1001,
+    "firstName": "John",
+    "lastName": "Doe",
+    "currentRole": "DOCTOR",
+    "emailId": "john.doe@medostel.com",
+    "mobileNumber": "9876543210",
+    "organisation": "Apollo Hospital",
+    "address": "Mumbai, India",
+    "status": "Active"
+  }'
+```
+
+##### Response (201 - Created)
+```json
+{
+  "status": "success",
+  "code": 201,
+  "message": "User created successfully",
+  "data": {
+    "userId": 1001,
+    "firstName": "John",
+    "lastName": "Doe",
+    "currentRole": "DOCTOR",
+    "emailId": "john.doe@medostel.com",
+    "mobileNumber": "9876543210",
+    "organisation": "Apollo Hospital",
+    "address": "Mumbai, India",
+    "status": "Active",
+    "createdDate": "2026-03-01T16:00:00Z",
+    "updatedDate": "2026-03-01T16:00:00Z"
+  }
+}
+```
+
+##### Error Responses
+| Code | Error | Message |
+|------|-------|---------|
+| 400 | Invalid email | Email must be in format: name@domain.ext |
+| 400 | Invalid mobile | Mobile number must be exactly 10 digits (1000000000-9999999999) |
+| 400 | Invalid role | Role 'INVALID' does not exist |
+| 409 | Duplicate userId | User with ID 1001 already exists |
+| 409 | Duplicate email | Email 'john.doe@medostel.com' already exists |
+| 409 | Duplicate mobile | Mobile number '9876543210' already exists |
+| 422 | Validation error | Missing required field or invalid data type |
+| 500 | Database error | Internal server error |
+
+---
+
+#### PUT - Update User Profile
+
+**Endpoint**: `PUT /api/v1/users/{userId}`
+
+##### Request Body (Any fields can be updated)
+
+| Field | Type | Updateable | Notes |
+|-------|------|-----------|-------|
+| `firstName` | string | ✅ Yes | Update first name |
+| `lastName` | string | ✅ Yes | Update last name |
+| `currentRole` | string | ✅ Yes | Update user role |
+| `emailId` | string | ✅ Yes | RFC 5322 validation applied |
+| `mobileNumber` | string | ✅ Yes | 10-digit validation applied |
+| `organisation` | string | ✅ Yes | Update organization |
+| `address` | string | ✅ Yes | Update address |
+| `status` | string | ✅ Yes | Active, Inactive, Suspended |
+| `userId` | integer | ❌ No | Cannot be modified |
+| `createdDate` | timestamp | ❌ No | Auto-managed |
+| `updatedDate` | timestamp | ❌ No | Auto-managed (updated automatically) |
+
+##### Request Example
+```bash
+curl -X PUT http://localhost:8000/api/v1/users/1001 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <jwt_token>" \
+  -d '{
+    "firstName": "Jonathan",
+    "status": "Active",
+    "organisation": "Max Hospital"
+  }'
+```
+
+##### Response (200 - Success)
+```json
+{
+  "status": "success",
+  "code": 200,
+  "message": "User profile updated successfully",
+  "data": {
+    "userId": 1001,
+    "firstName": "Jonathan",
+    "lastName": "Doe",
+    "currentRole": "DOCTOR",
+    "emailId": "john.doe@medostel.com",
+    "mobileNumber": "9876543210",
+    "organisation": "Max Hospital",
+    "address": "Mumbai, India",
+    "status": "Active",
+    "createdDate": "2026-03-01T16:00:00Z",
+    "updatedDate": "2026-03-01T17:00:00Z"
+  }
+}
+```
+
+##### Error Responses
+| Code | Error | Message |
+|------|-------|---------|
+| 400 | Immutable field | Cannot modify 'userId' field |
+| 400 | Invalid email | Email validation failed: 'invalid-email' |
+| 400 | Invalid mobile | Mobile must be 10 digits: 1000000000-9999999999 |
+| 400 | Invalid status | Status must be one of: Active, Inactive, Suspended |
+| 404 | User not found | User with ID 1001 not found |
+| 409 | Duplicate email | Email already in use by another user |
+| 409 | Duplicate mobile | Mobile number already in use by another user |
+| 422 | Validation error | Invalid request body format |
+| 500 | Database error | Internal server error |
+
+---
+
+#### DELETE Operation
+
+**Status**: ❌ **NOT SUPPORTED** (Standard behavior)
+- User profiles can be deactivated by updating status to 'Inactive' or 'Suspended'
+- Hard delete is not recommended for audit trail purposes
+
+---
+
+### Schema Definitions (app/schemas/user.py)
+
+```python
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
+from datetime import datetime
+
+class UserCreate(BaseModel):
+    userId: int = Field(..., ge=1, le=1000000000, description="Numeric user ID")
+    firstName: str = Field(..., max_length=100)
+    lastName: str = Field(..., max_length=100)
+    currentRole: str = Field(..., max_length=50)
+    emailId: EmailStr  # RFC 5322 validation via pydantic
+    mobileNumber: str = Field(..., pattern="^[0-9]{10}$", description="10 digits")
+    organisation: Optional[str] = Field(None, max_length=255)
+    address: Optional[str] = None
+    status: str = Field(default="Active", pattern="^(Active|Inactive|Suspended)$")
+
+class UserUpdate(BaseModel):
+    firstName: Optional[str] = Field(None, max_length=100)
+    lastName: Optional[str] = Field(None, max_length=100)
+    currentRole: Optional[str] = Field(None, max_length=50)
+    emailId: Optional[EmailStr] = None
+    mobileNumber: Optional[str] = Field(None, pattern="^[0-9]{10}$")
+    organisation: Optional[str] = Field(None, max_length=255)
+    address: Optional[str] = None
+    status: Optional[str] = Field(None, pattern="^(Active|Inactive|Suspended)$")
+
+class UserResponse(BaseModel):
+    userId: int
+    firstName: str
+    lastName: str
+    currentRole: str
+    emailId: str
+    mobileNumber: str
+    organisation: Optional[str]
+    address: Optional[str]
+    status: str
+    createdDate: datetime
+    updatedDate: datetime
+
+    class Config:
+        from_attributes = True
+```
+
+---
+
+### Service Methods (app/services/user_service.py)
+
+```python
+class UserService:
+    @staticmethod
+    async def get_user_by_id(db, userId: int):
+        """Fetch user by numeric userId"""
+        # Validate userId range (1-1000000000)
+        # Query user_master table
+        # Return user details with timestamps
+
+    @staticmethod
+    async def get_user_by_email(db, emailId: str):
+        """Fetch user by email with validation"""
+        # Validate email format (RFC 5322)
+        # Query user_master table
+        # Return user details
+
+    @staticmethod
+    async def get_users_by_role(db, currentRole: str, status: str, limit: int, offset: int):
+        """Fetch users filtered by role and status"""
+        # Validate role exists in user_role_master
+        # Query with pagination
+        # Return users list
+
+    @staticmethod
+    async def create_user(db, user_data: dict):
+        """Create new user with validation"""
+        # Validate userId uniqueness (BIGINT range)
+        # Validate emailId format and uniqueness
+        # Validate mobileNumber (10 digits) and uniqueness
+        # Validate currentRole exists
+        # Auto-populate createdDate and updatedDate
+        # Insert into user_master table
+
+    @staticmethod
+    async def update_user(db, userId: int, update_data: dict):
+        """Update user profile with validation"""
+        # Prevent modification of userId and timestamps
+        # Validate emailId format if provided
+        # Validate mobileNumber if provided
+        # Auto-update updatedDate
+        # Update user_master table
+```
+
+---
+
+### Database Schema (User_Master)
+
+```sql
+CREATE TABLE user_master (
+    userId BIGINT PRIMARY KEY,
+    firstName VARCHAR(100) NOT NULL,
+    lastName VARCHAR(100) NOT NULL,
+    currentRole VARCHAR(50) NOT NULL,
+    emailId VARCHAR(255) NOT NULL UNIQUE
+        CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
+    mobileNumber NUMERIC(10) NOT NULL UNIQUE
+        CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999),
+    organisation VARCHAR(255),
+    address TEXT,
+    status VARCHAR(50) DEFAULT 'Active' CHECK (status IN ('Active', 'Inactive', 'Suspended')),
+    createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (currentRole) REFERENCES user_role_master(roleId)
+);
+
+-- Indexes for performance
+CREATE INDEX idx_user_email ON user_master(emailId);
+CREATE INDEX idx_user_mobile ON user_master(mobileNumber);
+CREATE INDEX idx_user_role ON user_master(currentRole);
+CREATE INDEX idx_user_status ON user_master(status);
+CREATE INDEX idx_user_name ON user_master(firstName, lastName);
+```
+
+---
+
+### Test Coverage (test_users_api.py)
+
+**GET Endpoint Tests**: 6+ test cases
+- Fetch by userId (numeric validation)
+- Fetch by email (format validation)
+- Fetch by role and status (filter validation)
+- Fetch all with pagination
+- Invalid userId range
+- Invalid email format
+- Non-existent user
+
+**POST Endpoint Tests**: 8+ test cases
+- Valid user creation with all fields
+- Email format validation (valid/invalid)
+- Mobile number validation (10 digits, range check)
+- Duplicate userId (409 error)
+- Duplicate email (409 error)
+- Duplicate mobile (409 error)
+- Invalid role reference
+- Missing required fields
+
+**PUT Endpoint Tests**: 7+ test cases
+- Update individual fields
+- Email format validation on update
+- Mobile number validation on update
+- Status update (Active/Inactive/Suspended)
+- Prevent userId modification (attempt = 400)
+- Non-existent user (404)
+- Concurrent update handling
+
+---
+
 ## Configuration Management
 
 ### Environment Variables (.env)
@@ -839,13 +1243,28 @@ All errors return standardized format:
 
 **Last Updated**: 2026-03-01
 **Created By**: Claude Code
-**Status**: API 1 & 2 Enhanced & Documented - Ready for Implementation
+**Status**: API 1-2 & 5-6 Enhanced & Documented - Ready for Implementation
 **Total APIs**: 12 (6 tables × 2 APIs each)
+**Database Schema**: v2.0 (User_Master enhanced with BIGINT userId, email validation, 10-digit mobile)
 
 ### Recent Updates (March 1, 2026)
+
+#### API Enhancement: User_Role_Master (API 1 & 2)
 - ✅ **API 1 (GET /api/v1/roles/all)**: Enhanced with 3 request scenarios (by ID, by status, fetch all)
 - ✅ **API 2 (POST /api/v1/roles)**: Status validation (Active/Inactive/Closed), auto-uppercase roleId, auto-timestamp population
 - ✅ **API 2 (PUT /api/v1/roles/{roleId})**: Status-only updates, protected fields (roleId, roleName, comments), auto-timestamp updates
 - ❌ **API 2 (DELETE)**: Removed - no delete operation supported
-- 📝 Comprehensive test cases added (18+ tests for API 1 & 2)
-- 📊 Complete schema and service method documentation
+
+#### Database Schema Enhancement: User_Master (API 5 & 6)
+- ✅ **userId**: Changed from VARCHAR to BIGINT (supports up to 1 billion users)
+- ✅ **emailId**: Added RFC 5322 regex validation via CHECK constraint
+- ✅ **mobileNumber**: Changed to NUMERIC(10) with 10-digit validation (1000000000-9999999999)
+- ✅ **API 5 (GET /api/v1/users/all)**: 4 flexible request scenarios with comprehensive validation
+- ✅ **API 6 (POST /api/v1/users)**: Full user creation with validation, auto-timestamp population
+- ✅ **API 6 (PUT /api/v1/users/{userId})**: Full profile updates with field-level validation, immutable field protection
+- ❌ **API 6 (DELETE)**: Not supported - use status update to deactivate
+
+#### Documentation
+- 📝 Comprehensive test cases documented (21+ tests for API 5 & 6)
+- 📊 Complete schema, service methods, and database schema documentation
+- 📈 Detailed API specifications with request/response examples
