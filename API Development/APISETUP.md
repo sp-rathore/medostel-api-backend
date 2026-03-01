@@ -1,5 +1,63 @@
 # Medostel API Backend - Setup & Implementation Guide
 
+---
+
+## ⭐ Latest Enhancements (March 1, 2026)
+
+### User_Role_Master APIs (API 1 & 2) - Major Improvements
+
+The User_Role_Master implementation has been significantly enhanced to provide flexible role management:
+
+#### **API 1: GET /api/v1/roles/all - Three Request Scenarios**
+✅ **Scenario 1**: Fetch by roleId with case-insensitive handling
+- Example: `GET /api/v1/roles/all?roleId=admin` → Returns `ADMIN` role
+- Auto-converts lowercase input to uppercase
+
+✅ **Scenario 2**: Fetch by status filter
+- Example: `GET /api/v1/roles/all?status=Active` → Returns all active roles
+- Filters by status (Active, Inactive, Pending)
+
+✅ **Scenario 3**: Fetch all roles (default)
+- Example: `GET /api/v1/roles/all` → Returns all 8 system roles
+- No filtering applied
+
+#### **API 2: POST /api/v1/roles - Create Role with Validation**
+✅ **Input validation**:
+- Required fields: roleId, roleName, status, comments
+- Status validation: Must be one of (Active, Inactive, Closed)
+
+✅ **Auto-conversion**:
+- roleId automatically converted to UPPERCASE
+
+✅ **Auto-population**:
+- createdDate: Set to current system date
+- updatedDate: Set to current system date
+
+✅ **Error handling**:
+- 409 Conflict if role already exists
+- 400 Bad Request if status is invalid
+- 422 Validation error for missing/invalid fields
+
+#### **API 2: PUT /api/v1/roles/{roleId} - Status-Only Updates**
+✅ **Status-only update**: Only the `status` field can be modified
+- Other fields protected: roleId, roleName, comments
+
+✅ **Case-insensitive**: URL parameter `roleId` auto-converted to uppercase
+
+✅ **Auto-updated**:
+- updatedDate: Set to current system date
+
+✅ **Error handling**:
+- 400 Bad Request if status field missing
+- 400 Bad Request if status value invalid
+- 404 Not Found if role doesn't exist
+
+#### **API 2: DELETE - NOT SUPPORTED**
+❌ Delete operation has been removed
+- Use status update to deactivate roles instead
+
+---
+
 ## Prerequisites
 
 - Python 3.11+
@@ -254,28 +312,38 @@ class ErrorResponse(APIResponse):
     status: str = "error"
 ```
 
-### 5.2 `app/schemas/user_role.py`
+### 5.2 `app/schemas/user_role.py` - Enhanced with Status-Only Updates
+
+**Updated March 1, 2026** ✅ - UserRoleUpdate now only allows status field updates
+
 ```python
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import date
 
 class UserRoleBase(BaseModel):
-    roleId: str = Field(..., max_length=10)
-    roleName: str = Field(..., max_length=50)
-    status: str = Field(default="Active")
-    comments: Optional[str] = Field(None, max_length=250)
+    roleId: str = Field(..., max_length=10, description="Unique role ID (auto-converted to uppercase)")
+    roleName: str = Field(..., max_length=50, description="Human-readable role name")
+    status: str = Field(default="Active", description="Role status: Active, Inactive, or Closed")
+    comments: Optional[str] = Field(None, max_length=250, description="Role description/comments")
 
 class UserRoleCreate(UserRoleBase):
+    """Schema for creating a new role - all fields required"""
     pass
 
 class UserRoleUpdate(BaseModel):
-    status: Optional[str] = None
-    comments: Optional[str] = None
+    """Schema for updating role - ONLY status field is editable"""
+    status: str = Field(..., description="New status value (Active, Inactive, or Closed)")
+
+    class Config:
+        json_schema_extra = {
+            "description": "Update role status only. Other fields (roleId, roleName, comments) are protected and cannot be modified."
+        }
 
 class UserRoleResponse(UserRoleBase):
-    createdDate: date
-    updatedDate: date
+    """Schema for role response with metadata"""
+    createdDate: date = Field(..., description="Role creation date (auto-populated)")
+    updatedDate: date = Field(..., description="Role last update date (auto-updated)")
 
     class Config:
         from_attributes = True
@@ -493,28 +561,77 @@ __all__ = [
 
 ## Step 6: Create Services Layer
 
-### 6.1 `app/services/user_role_service.py`
+### 6.1 `app/services/user_role_service.py` - Enhanced User_Role_Master Service
+
+**Updated March 1, 2026** ✅ - Status-only updates, no delete operation
+
 ```python
+"""
+Service layer for User_Role_Master operations
+Handles business logic for role management APIs
+"""
+
 import logging
 from typing import List, Optional
+from datetime import date
 
 logger = logging.getLogger(__name__)
 
 class UserRoleService:
-    """Service for User_Role_Master operations"""
+    """Service for User_Role_Master operations with enhanced validation"""
+
+    @staticmethod
+    async def get_role_by_id(db, role_id: str):
+        """
+        Fetch a single role by ID (case-sensitive, assumes ID already converted to uppercase)
+
+        Args:
+            db: Database connection
+            role_id: Role ID to fetch (should be uppercase)
+
+        Returns:
+            Role record or None if not found
+        """
+        cursor = db.cursor()
+        try:
+            query = "SELECT * FROM user_role_master WHERE roleId = %s"
+            cursor.execute(query, (role_id,))
+            return cursor.fetchone()
+        except Exception as e:
+            logger.error(f"Error retrieving role by ID {role_id}: {e}")
+            raise
+        finally:
+            cursor.close()
 
     @staticmethod
     async def get_all_roles(db, status: Optional[str] = None, limit: int = 100, offset: int = 0):
-        """Retrieve all user roles with optional filtering"""
+        """
+        Retrieve all user roles with optional status filtering and pagination
+
+        Supports two scenarios:
+        1. Filter by status (Active, Inactive, Pending)
+        2. Return all roles regardless of status
+
+        Args:
+            db: Database connection
+            status: Optional status filter (Active, Inactive, Pending)
+            limit: Maximum records to return (1-1000, default 100)
+            offset: Pagination offset (default 0)
+
+        Returns:
+            List of role records
+        """
         cursor = db.cursor()
         try:
             query = "SELECT * FROM user_role_master"
             params = []
 
+            # Add status filter if provided
             if status:
                 query += " WHERE status = %s"
                 params.append(status)
 
+            # Add pagination
             query += " ORDER BY createdDate DESC LIMIT %s OFFSET %s"
             params.extend([limit, offset])
 
@@ -529,23 +646,45 @@ class UserRoleService:
 
     @staticmethod
     async def create_role(db, role_data: dict):
-        """Create new user role"""
+        """
+        Create a new user role with auto-populated timestamps
+
+        Auto-populated fields:
+        - createdDate: Set to CURRENT_DATE
+        - updatedDate: Set to CURRENT_DATE
+
+        Args:
+            db: Database connection
+            role_data: Dictionary containing:
+                - roleId: Unique role ID (should already be uppercase)
+                - roleName: Human-readable role name
+                - status: Role status (Active, Inactive, Closed)
+                - comments: Optional role description
+
+        Returns:
+            Created role record with all fields
+
+        Raises:
+            Exception: If role creation fails
+        """
         cursor = db.cursor()
         try:
             query = """
                 INSERT INTO user_role_master
-                (roleId, roleName, status, createdDate, updatedDate, comments)
-                VALUES (%s, %s, %s, CURRENT_DATE, CURRENT_DATE, %s)
+                (roleId, roleName, status, comments, createdDate, updatedDate)
+                VALUES (%s, %s, %s, %s, CURRENT_DATE, CURRENT_DATE)
                 RETURNING *
             """
             cursor.execute(query, (
-                role_data['roleId'],
+                role_data['roleId'],           # Already uppercase from route
                 role_data['roleName'],
                 role_data.get('status', 'Active'),
                 role_data.get('comments')
             ))
             db.commit()
-            return cursor.fetchone()
+            result = cursor.fetchone()
+            logger.info(f"Role '{role_data['roleId']}' created successfully")
+            return result
         except Exception as e:
             db.rollback()
             logger.error(f"Error creating role: {e}")
@@ -555,64 +694,67 @@ class UserRoleService:
 
     @staticmethod
     async def update_role(db, role_id: str, role_data: dict):
-        """Update existing user role"""
+        """
+        Update user role - STATUS FIELD ONLY
+
+        Protected fields (cannot be updated):
+        - roleId: Cannot be changed
+        - roleName: Cannot be changed
+        - comments: Cannot be changed
+
+        Auto-updated field:
+        - updatedDate: Set to CURRENT_DATE
+
+        Args:
+            db: Database connection
+            role_id: Role ID to update (should already be uppercase)
+            role_data: Dictionary containing ONLY:
+                - status: New status value (Active, Inactive, Closed)
+
+        Returns:
+            Updated role record with new status and updatedDate
+
+        Raises:
+            Exception: If update fails
+        """
         cursor = db.cursor()
         try:
-            query = "UPDATE user_role_master SET "
-            updates = []
-            params = []
+            # Only status field is allowed to be updated
+            if 'status' not in role_data:
+                raise ValueError("status field is required for role update")
 
-            if 'status' in role_data:
-                updates.append("status = %s")
-                params.append(role_data['status'])
+            query = """
+                UPDATE user_role_master
+                SET status = %s, updatedDate = CURRENT_DATE
+                WHERE roleId = %s
+                RETURNING *
+            """
 
-            if 'comments' in role_data:
-                updates.append("comments = %s")
-                params.append(role_data['comments'])
-
-            if not updates:
-                return await UserRoleService.get_role_by_id(db, role_id)
-
-            query += ", ".join(updates) + ", updatedDate = CURRENT_DATE"
-            query += " WHERE roleId = %s RETURNING *"
-            params.append(role_id)
-
-            cursor.execute(query, params)
+            cursor.execute(query, (
+                role_data['status'],
+                role_id
+            ))
             db.commit()
-            return cursor.fetchone()
+            result = cursor.fetchone()
+
+            if result:
+                logger.info(f"Role '{role_id}' status updated to '{role_data['status']}'")
+            else:
+                logger.warning(f"Role '{role_id}' not found for update")
+
+            return result
         except Exception as e:
             db.rollback()
-            logger.error(f"Error updating role: {e}")
+            logger.error(f"Error updating role {role_id}: {e}")
             raise
         finally:
             cursor.close()
 
-    @staticmethod
-    async def delete_role(db, role_id: str):
-        """Delete user role"""
-        cursor = db.cursor()
-        try:
-            query = "DELETE FROM user_role_master WHERE roleId = %s"
-            cursor.execute(query, (role_id,))
-            db.commit()
-            return cursor.rowcount > 0
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Error deleting role: {e}")
-            raise
-        finally:
-            cursor.close()
-
-    @staticmethod
-    async def get_role_by_id(db, role_id: str):
-        """Get role by ID"""
-        cursor = db.cursor()
-        try:
-            query = "SELECT * FROM user_role_master WHERE roleId = %s"
-            cursor.execute(query, (role_id,))
-            return cursor.fetchone()
-        finally:
-            cursor.close()
+    # ========================================================================
+    # DELETE OPERATION NOT SUPPORTED
+    # ========================================================================
+    # Roles cannot be deleted from the system. Use status update to deactivate.
+    # The delete_role method has been removed as of March 1, 2026.
 ```
 
 ### 6.2 `app/services/__init__.py`
@@ -628,88 +770,258 @@ __all__ = [
 
 ## Step 7: Create Routes
 
-### 7.1 `app/routes/v1/roles.py`
+### 7.1 `app/routes/v1/roles.py` - Enhanced User_Role_Master APIs
+
+**Updated March 1, 2026** ✅ - Enhanced with flexible GET scenarios and status-only updates
+
 ```python
-from fastapi import APIRouter, Depends, HTTPException, Query
+"""
+API routes for User_Role_Master table (APIs 1 & 2)
+SELECT operations (API 1) and CRUD operations (API 2)
+"""
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from datetime import datetime
 from app.database import get_db
 from app.services.user_role_service import UserRoleService
 from app.schemas.user_role import UserRoleCreate, UserRoleUpdate, UserRoleResponse
 from app.schemas.common import APIResponse
-from datetime import datetime
+from app.constants import ErrorCodes, HTTPStatus
 
 router = APIRouter(prefix="/roles", tags=["User Roles"])
 
-# API 1: SELECT - Get all user roles
+
+# ============================================================================
+# API 1: SELECT - Get all user roles with flexible filtering
+# ============================================================================
+
 @router.get("/all", response_model=APIResponse)
 async def get_all_roles(
-    db = Depends(get_db),
-    status: str = Query(None),
-    limit: int = Query(100, ge=1, le=1000),
-    offset: int = Query(0, ge=0)
+    db=Depends(get_db),
+    roleId: str = Query(None, description="Fetch by specific Role ID (converted to uppercase)"),
+    status: str = Query(None, description="Filter by role status (Active, Inactive, Pending)"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    offset: int = Query(0, ge=0, description="Pagination offset")
 ):
-    """Retrieve all user roles (SELECT API)"""
+    """
+    API 1: SELECT Operation - Retrieve user roles with flexible filtering
+
+    Supports three request scenarios:
+
+    1. **Request with roleId parameter**:
+       - Fetch all details for a specific role by ID
+       - Role ID is automatically converted to UPPERCASE for case-insensitive matching
+       - Example: ?roleId=admin → fetches ADMIN role
+
+    2. **Request with status parameter**:
+       - Fetch all roles with a specific status
+       - Valid values: Active, Inactive, Pending
+       - Example: ?status=Active → fetches all active roles
+
+    3. **Request with no parameters**:
+       - Fetch all roles from User_Role_Master table
+       - Returns all columns and all rows irrespective of status
+       - Example: /api/v1/roles/all → fetches all roles
+    """
     try:
+        # Scenario 1: Fetch by specific Role ID (case-insensitive)
+        if roleId:
+            # Convert roleId to uppercase for case-insensitive matching
+            roleId_upper = roleId.upper()
+            role = await UserRoleService.get_role_by_id(db, roleId_upper)
+
+            if not role:
+                raise HTTPException(
+                    status_code=HTTPStatus.NOT_FOUND,
+                    detail=f"Role with ID '{roleId}' not found"
+                )
+
+            return APIResponse(
+                status="success",
+                code=HTTPStatus.OK,
+                message=f"Role '{roleId_upper}' retrieved successfully",
+                data={"roles": [role], "count": 1, "scenario": "Fetch by Role ID"},
+                timestamp=datetime.now()
+            )
+
+        # Scenario 2: Fetch by status or Scenario 3: Fetch all
         roles = await UserRoleService.get_all_roles(db, status, limit, offset)
+
+        scenario_message = "Fetch all roles with status filter" if status else "Fetch all roles"
+        detail_message = f"Retrieved {len(roles)} role(s) with status '{status}'" if status else "Retrieved all roles from User_Role_Master"
+
         return APIResponse(
             status="success",
-            code=200,
-            message="User roles retrieved successfully",
-            data={"roles": roles},
+            code=HTTPStatus.OK,
+            message=detail_message,
+            data={"roles": roles, "count": len(roles), "scenario": scenario_message},
             timestamp=datetime.now()
         )
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
 
-# API 2: CRUD - Create role
-@router.post("", response_model=APIResponse)
-async def create_role(role: UserRoleCreate, db = Depends(get_db)):
-    """Create new user role (CRUD API)"""
+
+# ============================================================================
+# API 2: CRUD - Create role (Insert)
+# ============================================================================
+
+@router.post("", response_model=APIResponse, status_code=HTTPStatus.CREATED)
+async def create_role(
+    role: UserRoleCreate,
+    db=Depends(get_db)
+):
+    """
+    API 2: CRUD Operation - Insert new user role
+
+    **Request Scenario: Insert New Role**
+
+    Input required:
+    - roleId: Unique role identifier (max 10 chars, uppercase)
+    - roleName: Human-readable role name (max 50 chars)
+    - status: Role status (Active, Inactive, or Closed)
+    - comments: Optional description (max 250 chars)
+
+    System-generated fields (auto-populated):
+    - createdDate: Set to current system timestamp
+    - updatedDate: Set to current system timestamp
+
+    Returns: Created role with all fields including timestamps
+    """
     try:
-        new_role = await UserRoleService.create_role(db, role.dict())
+        # Check if role already exists
+        role_id_upper = role.roleId.upper()
+        existing = await UserRoleService.get_role_by_id(db, role_id_upper)
+        if existing:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail=f"Role '{role_id_upper}' already exists"
+            )
+
+        # Validate status is one of the allowed values
+        allowed_statuses = ["Active", "Inactive", "Closed"]
+        if role.status not in allowed_statuses:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=f"Status must be one of: {', '.join(allowed_statuses)}"
+            )
+
+        # Create role data with uppercase roleId
+        role_data = role.dict()
+        role_data['roleId'] = role_id_upper
+
+        # createdDate and updatedDate are auto-set to current timestamp in the service layer
+        new_role = await UserRoleService.create_role(db, role_data)
+
         return APIResponse(
             status="success",
-            code=201,
+            code=HTTPStatus.CREATED,
             message="Role created successfully",
-            data={"role": new_role},
+            data={
+                "role": new_role,
+                "scenario": "Insert new role",
+                "info": "createdDate and updatedDate set to current system timestamp"
+            },
             timestamp=datetime.now()
         )
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=str(e)
+        )
 
-# API 2: CRUD - Update role
+
+# ============================================================================
+# API 2: CRUD - Update role (Status Update only)
+# ============================================================================
+
 @router.put("/{roleId}", response_model=APIResponse)
-async def update_role(roleId: str, role: UserRoleUpdate, db = Depends(get_db)):
-    """Update user role (CRUD API)"""
-    try:
-        updated_role = await UserRoleService.update_role(db, roleId, role.dict(exclude_unset=True))
-        if not updated_role:
-            raise HTTPException(status_code=404, detail="Role not found")
-        return APIResponse(
-            status="success",
-            code=200,
-            message="Role updated successfully",
-            data={"role": updated_role},
-            timestamp=datetime.now()
-        )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+async def update_role(
+    roleId: str,
+    status_update: dict,
+    db=Depends(get_db)
+):
+    """
+    API 2: CRUD Operation - Update user role status
 
-# API 2: CRUD - Delete role
-@router.delete("/{roleId}", response_model=APIResponse)
-async def delete_role(roleId: str, db = Depends(get_db)):
-    """Delete user role (CRUD API)"""
+    **Request Scenario: Update Role Status**
+
+    URL Parameter:
+    - roleId: The role ID to update (will be converted to uppercase)
+
+    Input required:
+    - status: New status value (must be one of: Active, Inactive, Closed)
+
+    System-managed fields:
+    - updatedDate: Automatically set to current system timestamp
+    - Other fields (roleId, roleName, comments): Cannot be updated through this endpoint
+
+    Returns: Updated role with new status and updated timestamp
+    """
     try:
-        success = await UserRoleService.delete_role(db, roleId)
-        if not success:
-            raise HTTPException(status_code=404, detail="Role not found")
+        # Convert roleId to uppercase for consistency
+        role_id_upper = roleId.upper()
+
+        # Check if role exists
+        existing = await UserRoleService.get_role_by_id(db, role_id_upper)
+        if not existing:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f"Role '{role_id_upper}' not found"
+            )
+
+        # Extract status from request body
+        if "status" not in status_update:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail="Request body must contain 'status' field"
+            )
+
+        new_status = status_update.get("status")
+
+        # Validate status is one of the allowed values
+        allowed_statuses = ["Active", "Inactive", "Closed"]
+        if new_status not in allowed_statuses:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=f"Status must be one of: {', '.join(allowed_statuses)}. Received: '{new_status}'"
+            )
+
+        # Update only the status field
+        update_data = {"status": new_status}
+        updated_role = await UserRoleService.update_role(db, role_id_upper, update_data)
+
         return APIResponse(
             status="success",
-            code=204,
-            message="Role deleted successfully",
+            code=HTTPStatus.OK,
+            message=f"Role '{role_id_upper}' status updated to '{new_status}' successfully",
+            data={
+                "role": updated_role,
+                "scenario": "Update role status",
+                "info": "updatedDate set to current system timestamp. Other fields cannot be modified."
+            },
             timestamp=datetime.now()
         )
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=str(e)
+        )
+
+
+# ============================================================================
+# API 2: DELETE Operation
+# ============================================================================
+# ❌ DELETE operation is NOT SUPPORTED as of March 1, 2026
+# Roles cannot be deleted from the system. Use status update to deactivate roles instead.
 ```
 
 ### 7.2 `app/routes/v1/__init__.py`
