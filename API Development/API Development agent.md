@@ -1197,6 +1197,19 @@ curl -X GET "http://localhost:8000/api/v1/reports/all?status=Completed&reportTyp
 
 ## Database Tables & Relationships
 
+> **📚 Comprehensive Reference**: For complete database schema documentation, indexes, validation rules, and data relationships, see **[Medostel Tables Agent.md](../../Data%20Engineering/Medostel%20Tables%20Agent.md)** in the Data Engineering folder.
+>
+> This section provides a quick overview. For detailed information including:
+> - Column constraints and validation rules
+> - All indexes and performance optimization
+> - Data relationships and foreign keys
+> - Sample data and query examples
+> - Backup and recovery procedures
+>
+> **Always refer to Medostel Tables Agent.md** for complete database documentation.
+
+---
+
 ### 1. user_role_master
 **Purpose**: Store user roles and permissions
 ```
@@ -1774,6 +1787,60 @@ This API specification is complemented by comprehensive documentation in the API
 
 ---
 
+#### 5. **Medostel Tables Agent.md** 📊 Database Schema Documentation
+**Location**: `repositories/medostel-api-backend/Data Engineering/Medostel Tables Agent.md`
+**Purpose**: Comprehensive database schema, tables, and relationships documentation
+**Contains**:
+- Complete table definitions (6 tables)
+- Column specifications and constraints
+- Primary keys and indexes (35+ indexes)
+- Foreign key relationships and data integrity rules
+- Data validation rules for each table
+- Sample data and 8 system roles
+- Query examples and best practices
+- Backup and recovery procedures
+- Performance optimization indexes
+- Data relationships diagram
+- Connection pool configuration
+
+**Use This For**: Understanding database structure, table schemas, validation rules, relationships, and all database-related implementation details
+
+**Critical Reference For**:
+- Defining ORM models in `app/database/models.py`
+- Understanding foreign key relationships
+- Validating data integrity rules
+- Setting up proper indexes
+- Designing Pydantic schemas
+- Writing database queries
+
+---
+
+### Repository Path
+
+**Main Documentation Files** (API Development folder):
+```
+/Users/shishupals/Documents/Claude/projects/Medostel/repositories/medostel-api-backend/
+
+API Development/
+├── README.md                          ← Navigation hub
+├── API Development agent.md           ← This file (Master API specs)
+├── PROJECT_STRUCTURE.md               ← Detailed structure & modules
+├── APISETUP.md                        ← Implementation guide with code
+├── API_STRUCTURE_GUIDE.md             ← Visual architecture & diagrams
+├── REPOSITORY_SUMMARY.md              ← Quick reference & checklist
+├── Kubernetes_Cluster/                ← K8s configuration
+├── Unit Testing/                      ← Testing documentation
+└── ...
+```
+
+**Database Documentation** (Data Engineering folder):
+```
+Data Engineering/
+└── Medostel Tables Agent.md           ← Complete database schema reference
+```
+
+---
+
 ### Repository Path
 
 ```
@@ -1862,6 +1929,7 @@ This API Development Agent is the **SOURCE OF TRUTH** for all API specifications
 | **API Unit Testing Agent.md** | Comprehensive test cases & testing strategy | `/API Development/Unit Testing/` |
 | **APISETUP.md** | Step-by-step implementation instructions | `/API Development/` |
 | **REPOSITORY_SUMMARY.md** | Quick reference & file index | `/API Development/` |
+| **Medostel Tables Agent.md** | Complete database schema & relationships | `/Data Engineering/` |
 | **README.md** | Project overview & getting started | Repository root |
 
 ### 🔄 API Change Synchronization Workflow
@@ -1978,5 +2046,5 @@ git push origin main
 **Total APIs Designed**: 12 (6 tables × 2 APIs each)
 **Platform**: GKE (Google Kubernetes Engine)
 **Framework**: FastAPI with Python 3.11+
-**Documentation Files**: 7 comprehensive guide files
+**Documentation Files**: 8 comprehensive guide files (7 in API Development + 1 in Data Engineering)
 **API Enhancement Status**: API 1 & 2 (User_Role_Master) ✅ Enhanced | APIs 3-12 ⏳ Standard
