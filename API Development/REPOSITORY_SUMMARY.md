@@ -36,7 +36,7 @@ medostel-api-backend/
 ├── docker-compose.yml            ← Local development stack
 ├── README.md                     ← Project overview
 ├── PROJECT_STRUCTURE.md          ← Detailed structure documentation
-├── SETUP.md                      ← Step-by-step setup guide
+├── APISETUP.md                      ← Step-by-step setup guide
 ├── API_STRUCTURE_GUIDE.md        ← Visual guide
 ├── REPOSITORY_SUMMARY.md         ← This file
 └── Makefile                      ← Development commands
@@ -211,7 +211,7 @@ tests/
 |----------|---------|----------|
 | **README.md** | Project overview & quick start | Root |
 | **PROJECT_STRUCTURE.md** | Detailed structure documentation | Root |
-| **SETUP.md** | Step-by-step setup instructions | Root |
+| **APISETUP.md** | Step-by-step setup instructions | Root |
 | **API_STRUCTURE_GUIDE.md** | Visual architecture & data flow | Root |
 | **REPOSITORY_SUMMARY.md** | This file - quick reference | Root |
 
@@ -369,7 +369,7 @@ python -m uvicorn app.main:app --reload
 
 ### 4. Read Documentation
 - **PROJECT_STRUCTURE.md** - For detailed structure
-- **SETUP.md** - For step-by-step implementation
+- **APISETUP.md** - For step-by-step implementation
 - **API_STRUCTURE_GUIDE.md** - For visual architecture
 
 ---
@@ -433,7 +433,7 @@ python -m uvicorn app.main:app --reload
 
 - [x] README.md - Project overview
 - [x] PROJECT_STRUCTURE.md - Detailed structure
-- [x] SETUP.md - Implementation guide
+- [x] APISETUP.md - Implementation guide
 - [x] API_STRUCTURE_GUIDE.md - Visual guide
 - [x] REPOSITORY_SUMMARY.md - This file
 - [ ] app/config.py - Configuration
@@ -453,7 +453,7 @@ python -m uvicorn app.main:app --reload
 
 This repository is **structured and documented** and ready for implementation following the API Development agent specifications. All documentation files are in place to guide development of the 12 APIs covering all 6 database tables.
 
-**Next Step**: Follow `SETUP.md` for step-by-step implementation.
+**Next Step**: Follow `APISETUP.md` for step-by-step implementation.
 
 ---
 

@@ -1712,8 +1712,8 @@ This API specification is complemented by comprehensive documentation in the API
 
 ---
 
-#### 2. **SETUP.md**
-**Location**: `repositories/medostel-api-backend/SETUP.md`
+#### 2. **APISETUP.md**
+**Location**: `repositories/medostel-api-backend/APISETUP.md`
 **Purpose**: Step-by-step implementation guide with code samples
 **Contains**:
 - Prerequisites and initial setup
@@ -1781,7 +1781,7 @@ This API specification is complemented by comprehensive documentation in the API
 
 Key Files:
 ├── PROJECT_STRUCTURE.md        ← Detailed structure & modules
-├── SETUP.md                    ← Implementation guide with code
+├── APISETUP.md                    ← Implementation guide with code
 ├── API_STRUCTURE_GUIDE.md      ← Visual architecture & diagrams
 ├── REPOSITORY_SUMMARY.md       ← Quick reference & checklist
 ├── README.md                   ← Project overview
@@ -1797,9 +1797,9 @@ Key Files:
 ### For First-Time Setup
 **Follow This Order**:
 1. Read **REPOSITORY_SUMMARY.md** - Get overview
-2. Read **SETUP.md** (Step 1-2) - Setup environment
+2. Read **APISETUP.md** (Step 1-2) - Setup environment
 3. Read **PROJECT_STRUCTURE.md** - Understand structure
-4. Continue **SETUP.md** - Implement step-by-step
+4. Continue **APISETUP.md** - Implement step-by-step
 
 ### For Understanding Architecture
 **Use These Files**:
@@ -1809,7 +1809,7 @@ Key Files:
 
 ### For Implementation
 **Reference**:
-1. **SETUP.md** - Code templates and examples
+1. **APISETUP.md** - Code templates and examples
 2. **PROJECT_STRUCTURE.md** - Module descriptions
 3. This **API Development agent.md** - API specifications
 
@@ -1823,7 +1823,7 @@ Key Files:
 ## 🔗 Cross-References Between Documents
 
 ### From This File (API Development agent.md)
-→ For implementation details: See **SETUP.md**
+→ For implementation details: See **APISETUP.md**
 → For project structure: See **PROJECT_STRUCTURE.md**
 → For architecture diagrams: See **API_STRUCTURE_GUIDE.md**
 → For quick reference: See **REPOSITORY_SUMMARY.md**
@@ -1840,12 +1840,12 @@ For each of the 12 APIs, follow these documentation references:
 
 | API # | Table | Select API | CRUD API | Structure Ref | Setup Ref | Status |
 |-------|-------|-----------|----------|---------------|-----------|--------|
-| 1-2 | User_Role_Master | GET /roles/all | POST/PUT/DELETE /roles | PROJECT_STRUCTURE.md (API 1-2) | SETUP.md (Section 6.1) | Documented |
-| 3-4 | State_City_PinCode | GET /locations/all | POST/PUT/DELETE /locations | PROJECT_STRUCTURE.md (API 3-4) | SETUP.md (Section 6.2) | Documented |
-| 5-6 | User_Master | GET /users/all | POST/PUT/DELETE /users | PROJECT_STRUCTURE.md (API 5-6) | SETUP.md (Section 6.3) | Documented |
-| 7-8 | User_Login | GET /auth/users | POST/PUT/DELETE /auth/credentials | PROJECT_STRUCTURE.md (API 7-8) | SETUP.md (Section 6.4) | Documented |
-| 9-10 | New_User_Request | GET /requests/all | POST/PUT/DELETE /requests | PROJECT_STRUCTURE.md (API 9-10) | SETUP.md (Section 6.5) | Documented |
-| 11-12 | Report_History | GET /reports/all | POST/PUT/DELETE /reports | PROJECT_STRUCTURE.md (API 11-12) | SETUP.md (Section 6.6) | Documented |
+| 1-2 | User_Role_Master | GET /roles/all | POST/PUT/DELETE /roles | PROJECT_STRUCTURE.md (API 1-2) | APISETUP.md (Section 6.1) | Documented |
+| 3-4 | State_City_PinCode | GET /locations/all | POST/PUT/DELETE /locations | PROJECT_STRUCTURE.md (API 3-4) | APISETUP.md (Section 6.2) | Documented |
+| 5-6 | User_Master | GET /users/all | POST/PUT/DELETE /users | PROJECT_STRUCTURE.md (API 5-6) | APISETUP.md (Section 6.3) | Documented |
+| 7-8 | User_Login | GET /auth/users | POST/PUT/DELETE /auth/credentials | PROJECT_STRUCTURE.md (API 7-8) | APISETUP.md (Section 6.4) | Documented |
+| 9-10 | New_User_Request | GET /requests/all | POST/PUT/DELETE /requests | PROJECT_STRUCTURE.md (API 9-10) | APISETUP.md (Section 6.5) | Documented |
+| 11-12 | Report_History | GET /reports/all | POST/PUT/DELETE /reports | PROJECT_STRUCTURE.md (API 11-12) | APISETUP.md (Section 6.6) | Documented |
 
 ---
 
@@ -1860,7 +1860,7 @@ This API Development Agent is the **SOURCE OF TRUTH** for all API specifications
 | **PROJECT_STRUCTURE.md** | Project directory structure & module descriptions | `/API Development/` |
 | **API_STRUCTURE_GUIDE.md** | Visual architecture & endpoint mapping | `/API Development/` |
 | **API Unit Testing Agent.md** | Comprehensive test cases & testing strategy | `/API Development/Unit Testing/` |
-| **SETUP.md** | Step-by-step implementation instructions | `/API Development/` |
+| **APISETUP.md** | Step-by-step implementation instructions | `/API Development/` |
 | **REPOSITORY_SUMMARY.md** | Quick reference & file index | `/API Development/` |
 | **README.md** | Project overview & getting started | Repository root |
 
@@ -1893,7 +1893,7 @@ This API Development Agent is the **SOURCE OF TRUTH** for all API specifications
 - [ ] Update test execution examples
 - [ ] Update expected response validation
 
-#### Step 5: Update SETUP.md
+#### Step 5: Update APISETUP.md
 - [ ] Update code implementation examples
 - [ ] Update environment setup instructions (if applicable)
 - [ ] Update dependency requirements (if applicable)
@@ -1915,7 +1915,7 @@ git add "API Development/API Development agent.md"
 git add "API Development/PROJECT_STRUCTURE.md"
 git add "API Development/API_STRUCTURE_GUIDE.md"
 git add "API Development/Unit Testing/API Unit Testing Agent.md"
-git add "API Development/SETUP.md"
+git add "API Development/APISETUP.md"
 git add "API Development/REPOSITORY_SUMMARY.md"
 git add README.md
 
@@ -1930,7 +1930,7 @@ Documentation Updated:
 - PROJECT_STRUCTURE.md: [Brief change description]
 - API_STRUCTURE_GUIDE.md: [Brief change description]
 - API Unit Testing Agent.md: [Brief change description]
-- SETUP.md: [Brief change description]
+- APISETUP.md: [Brief change description]
 - REPOSITORY_SUMMARY.md: [Brief change description]
 - README.md: [Brief change description]"
 
@@ -1951,7 +1951,7 @@ git push origin main
 2. ✅ Updated PROJECT_STRUCTURE.md with detailed specifications section
 3. ⏳ Updated API_STRUCTURE_GUIDE.md with new endpoint diagrams
 4. ✅ Updated API Unit Testing Agent.md with new test cases
-5. ⏳ Updated SETUP.md with new implementation code examples
+5. ⏳ Updated APISETUP.md with new implementation code examples
 6. ⏳ Updated REPOSITORY_SUMMARY.md with new endpoint reference
 7. ⏳ Updated README.md with new feature descriptions
 8. ✅ Created comprehensive commit with all changes
@@ -1962,7 +1962,7 @@ git push origin main
 ↓
 ├── PROJECT_STRUCTURE.md (Detailed specifications)
 ├── API Unit Testing Agent.md (Test coverage)
-├── SETUP.md (Implementation steps)
+├── APISETUP.md (Implementation steps)
 ├── API_STRUCTURE_GUIDE.md (Visual representation)
 └── REPOSITORY_SUMMARY.md (Quick reference)
     ↓

@@ -90,7 +90,7 @@ medostel-api-backend/
 ├── requirements.txt                    # Python dependencies
 ├── README.md                           # Project README
 ├── PROJECT_STRUCTURE.md                # This file
-├── SETUP.md                            # Setup instructions
+├── APISETUP.md                            # Setup instructions
 └── Makefile                            # Make commands for development
 ```
 

@@ -51,7 +51,7 @@ Medostel/
         ├── API_STRUCTURE_GUIDE.md
         ├── PROJECT_STRUCTURE.md
         ├── REPOSITORY_SUMMARY.md
-        ├── SETUP.md
+        ├── APISETUP.md
         ├── Dockerfile
         ├── requirements.txt
         └── README.md
@@ -267,7 +267,7 @@ After reorganization, key documentation locations are:
 | DBA Documentation | `/DevOps Development/DBA/DBA.md` | Database administration |
 | Kubernetes Config | `/API Development/Kubernetes Cluster Configuration.md` | K8s deployment |
 | Project Structure | `/PROJECT_STRUCTURE.md` | API project overview |
-| Setup Guide | `/SETUP.md` | Development setup |
+| Setup Guide | `/APISETUP.md` | Development setup |
 
 ---
 

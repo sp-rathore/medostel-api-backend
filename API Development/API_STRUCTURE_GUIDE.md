@@ -7,7 +7,7 @@ medostel-api-backend/
 │
 ├── 📄 README.md                          # Project overview
 ├── 📄 PROJECT_STRUCTURE.md               # Detailed structure documentation
-├── 📄 SETUP.md                           # Step-by-step setup guide
+├── 📄 APISETUP.md                           # Step-by-step setup guide
 ├── 📄 API_STRUCTURE_GUIDE.md             # This file - visual guide
 ├── 📄 requirements.txt                   # Python dependencies
 ├── 📄 Dockerfile                         # Docker container config

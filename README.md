@@ -34,7 +34,7 @@ All API specifications, architecture, and development guides are located in the 
 | **[API Development Agent.md](./API%20Development/API%20Development%20agent.md)** | Master API specifications & design |
 | **[PROJECT_STRUCTURE.md](./API%20Development/PROJECT_STRUCTURE.md)** | Project directory structure & modules |
 | **[API_STRUCTURE_GUIDE.md](./API%20Development/API_STRUCTURE_GUIDE.md)** | Visual architecture & endpoint mapping |
-| **[SETUP.md](./API%20Development/SETUP.md)** | Step-by-step implementation guide |
+| **[APISETUP.md](./API%20Development/APISETUP.md)** | Step-by-step implementation guide |
 | **[REPOSITORY_SUMMARY.md](./API%20Development/REPOSITORY_SUMMARY.md)** | Quick reference & file index |
 
 ### 🧪 Testing Documentation
@@ -100,7 +100,7 @@ medostel-api-backend/
 │   ├── API Development agent.md         # Master specifications
 │   ├── PROJECT_STRUCTURE.md
 │   ├── API_STRUCTURE_GUIDE.md
-│   ├── SETUP.md
+│   ├── APISETUP.md
 │   ├── REPOSITORY_SUMMARY.md
 │   ├── README.md                        # (Moved from root)
 │   ├── Unit Testing/                    # Testing documentation
@@ -165,7 +165,7 @@ medostel-api-backend/
 ### For API Development
 1. Start with **[API Development Agent.md](./API%20Development/API%20Development%20agent.md)** for complete API specifications
 2. Reference **[PROJECT_STRUCTURE.md](./API%20Development/PROJECT_STRUCTURE.md)** for implementation details
-3. Follow **[SETUP.md](./API%20Development/SETUP.md)** for code implementation
+3. Follow **[APISETUP.md](./API%20Development/APISETUP.md)** for code implementation
 
 ### For Testing
 1. Read **[API Unit Testing Agent.md](./API%20Development/Unit%20Testing/API%20Unit%20Testing%20Agent.md)** for test strategy
@@ -188,7 +188,7 @@ medostel-api-backend/
 1. **API Development Agent.md** (Master source)
 2. **PROJECT_STRUCTURE.md**
 3. **API Unit Testing Agent.md**
-4. **SETUP.md**
+4. **APISETUP.md**
 5. **API_STRUCTURE_GUIDE.md**
 6. **REPOSITORY_SUMMARY.md**
 
