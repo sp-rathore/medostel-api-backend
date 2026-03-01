@@ -1,0 +1,188 @@
+---
+# Resource Quotas for Medostel API Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: medostel-api
+  labels:
+    name: medostel-api
+    environment: production
+
+---
+# Resource Quota - Controls total resource allocation
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: medostel-quota
+  namespace: medostel-api
+spec:
+  hard:
+    # Pod limits
+    pods: "20"
+    # CPU limits
+    requests.cpu: "4"
+    limits.cpu: "8"
+    # Memory limits
+    requests.memory: "8Gi"
+    limits.memory: "16Gi"
+    # Service limits
+    services: "5"
+    services.loadbalancers: "1"
+    services.nodeports: "2"
+    # Storage limits
+    requests.storage: "50Gi"
+    persistentvolumeclaims: "5"
+  scopeSelector:
+    matchExpressions:
+    - operator: In
+      scopeName: PriorityClass
+      values: ["default"]
+
+---
+# Limit Range - Controls individual pod/container limits
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: medostel-limits
+  namespace: medostel-api
+spec:
+  limits:
+  # Container limits
+  - type: Container
+    max:
+      cpu: "500m"
+      memory: "512Mi"
+    min:
+      cpu: "50m"
+      memory: "64Mi"
+    default:
+      cpu: "200m"
+      memory: "256Mi"
+    defaultRequest:
+      cpu: "100m"
+      memory: "128Mi"
+
+  # Pod limits
+  - type: Pod
+    max:
+      cpu: "1000m"
+      memory: "1Gi"
+    min:
+      cpu: "50m"
+      memory: "64Mi"
+
+---
+# Pod Disruption Budget - Ensures availability during node maintenance
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: medostel-api-pdb
+  namespace: medostel-api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: medostel-api
+
+---
+# Network Policy - Default Deny All
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: medostel-api
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+
+---
+# Network Policy - Allow DNS
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: medostel-api
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+
+---
+# Network Policy - Allow API Traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-traffic
+  namespace: medostel-api
+spec:
+  podSelector:
+    matchLabels:
+      app: medostel-api
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 8000
+  egress:
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 5432  # PostgreSQL
+    - protocol: TCP
+      port: 443   # HTTPS
+    - protocol: UDP
+      port: 53    # DNS
+
+---
+# RBAC - Service Account for API
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: medostel-api-sa
+  namespace: medostel-api
+
+---
+# RBAC - Role for API
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: medostel-api-role
+  namespace: medostel-api
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+
+---
+# RBAC - Role Binding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: medostel-api-binding
+  namespace: medostel-api
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: medostel-api-role
+subjects:
+- kind: ServiceAccount
+  name: medostel-api-sa
+  namespace: medostel-api

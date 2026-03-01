@@ -1,0 +1,37 @@
+# Medostel API - Test Dependencies
+# Version: 1.0
+# Python 3.11+
+
+# Core testing framework
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+
+# HTTP client for async testing
+httpx==0.24.1
+
+# Test data generation
+faker==20.0.0
+
+# Mocking and fixtures
+pytest-mock==3.12.0
+
+# Optional: Advanced reporting
+pytest-html==4.1.1
+pytest-xdist==3.5.0
+allure-pytest==2.13.2
+
+# Optional: Performance testing
+pytest-benchmark==4.0.0
+
+# Optional: Load testing
+locust==2.17.0
+
+# Code quality
+coverage==7.3.2
+black==23.12.0
+flake8==6.1.0
+isort==5.13.2
+
+# Type checking (optional)
+mypy==1.7.1

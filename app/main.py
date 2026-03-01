@@ -7,6 +7,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
 
+from app.database import init_db_pool, close_db
+from app.routes.v1 import (
+    roles_router,
+    locations_router,
+    users_router,
+    auth_router,
+    registrations_router,
+    reports_router,
+)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,9 +28,22 @@ async def lifespan(app: FastAPI):
     """Manage application startup and shutdown events"""
     # Startup
     logger.info("Medostel API Starting...")
+    try:
+        init_db_pool()
+        logger.info("Database connection pool initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize database pool: {e}")
+        raise
+
     yield
+
     # Shutdown
     logger.info("Medostel API Shutting down...")
+    try:
+        close_db()
+        logger.info("Database connection pool closed successfully")
+    except Exception as e:
+        logger.error(f"Error closing database pool: {e}")
 
 
 # Create FastAPI application
@@ -86,12 +109,13 @@ async def root():
     }
 
 
-# TODO: Import and include routers
-# from app.routes import auth, users, reports, locations
-# app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-# app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
-# app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
-# app.include_router(locations.router, prefix="/api/v1/locations", tags=["Locations"])
+# Register API v1 routers
+app.include_router(roles_router, prefix="/api/v1", tags=["User Roles"])
+app.include_router(locations_router, prefix="/api/v1", tags=["Locations"])
+app.include_router(users_router, prefix="/api/v1", tags=["Users"])
+app.include_router(auth_router, prefix="/api/v1", tags=["Authentication"])
+app.include_router(registrations_router, prefix="/api/v1", tags=["User Registrations"])
+app.include_router(reports_router, prefix="/api/v1", tags=["Reports"])
 
 
 @app.exception_handler(HTTPException)
