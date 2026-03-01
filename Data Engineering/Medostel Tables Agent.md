@@ -69,25 +69,25 @@ Stores user role definitions for the Medostel Healthcare system. Roles define ac
 ### Table Structure
 ```sql
 CREATE TABLE IF NOT EXISTS user_role_master (
-    roleId VARCHAR(50) PRIMARY KEY,
-    roleName VARCHAR(255) NOT NULL UNIQUE,
-    status VARCHAR(50) DEFAULT 'Active',
-    comments TEXT,
-    createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    roleId VARCHAR(10) PRIMARY KEY,
+    roleName VARCHAR(50) NOT NULL UNIQUE,
+    status VARCHAR(20) DEFAULT 'Active',
+    comments VARCHAR(250),
+    createdDate DATE DEFAULT CURRENT_DATE,
+    updatedDate DATE DEFAULT CURRENT_DATE
 );
 ```
 
 ### Column Details
 
-| Column | Type | Constraints | Purpose |
-|--------|------|-------------|---------|
-| **roleId** | VARCHAR(50) | PK, NOT NULL | Unique role identifier (e.g., ROLE_ADMIN, ROLE_DOCTOR) |
-| **roleName** | VARCHAR(255) | UNIQUE, NOT NULL | Human-readable role name (e.g., "Administrator", "Doctor") |
-| **status** | VARCHAR(50) | DEFAULT 'Active' | Current status: Active, Inactive, Pending |
-| **comments** | TEXT | NULLABLE | Additional description or notes about the role |
-| **createdDate** | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Timestamp when role was created |
-| **updatedDate** | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Timestamp of last modification |
+| Column | Type | Constraints | Max Length | Purpose |
+|--------|------|-------------|-----------|---------|
+| **roleId** | VARCHAR | PK, NOT NULL | 10 | Unique role identifier (e.g., ADMIN, DOCTOR, HOSPITAL) |
+| **roleName** | VARCHAR | UNIQUE, NOT NULL | 50 | Human-readable role name (e.g., "System Administrator") |
+| **status** | VARCHAR | DEFAULT 'Active' | 20 | Current status: Active, Inactive, Pending |
+| **comments** | VARCHAR | NULLABLE | 250 | Additional description or notes about the role |
+| **createdDate** | DATE | DEFAULT CURRENT_DATE | - | Date when role was created |
+| **updatedDate** | DATE | DEFAULT CURRENT_DATE | - | Date of last modification |
 
 ### Indexes
 ```sql
@@ -100,14 +100,17 @@ CREATE INDEX idx_role_name ON user_role_master(roleName);
 CREATE INDEX idx_role_updated ON user_role_master(updatedDate);
 ```
 
-### Sample Data
+### Sample Data (Production - 8 Active Roles)
 ```sql
 INSERT INTO user_role_master (roleId, roleName, status, comments) VALUES
-('ROLE_ADMIN', 'System Administrator', 'Active', 'Full system access'),
-('ROLE_DOCTOR', 'Doctor/Physician', 'Active', 'Can view and manage patient records'),
-('ROLE_PATIENT', 'Patient', 'Active', 'Can view own medical reports'),
-('ROLE_NURSE', 'Nurse', 'Active', 'Can assist with patient records'),
-('ROLE_RECEPTION', 'Reception Staff', 'Active', 'Can manage appointments and records');
+('ADMIN', 'System Administrator', 'Active', 'Full system access and database management'),
+('DOCTOR', 'Doctor/Physician', 'Active', 'Can view and manage patient records and create medical reports'),
+('HOSPITAL', 'Hospital', 'Active', 'Hospital administrator - manages hospital operations and staff'),
+('NURSE', 'Nurse', 'Active', 'Can assist with patient records, blood work, and vitals'),
+('PARTNER', 'Sales Partner', 'Active', 'Sales and marketing partner - manages partnerships and revenue'),
+('PATIENT', 'Patient', 'Active', 'Can view own medical reports and health history'),
+('RECEPTION', 'Reception Staff', 'Active', 'Can manage appointments, check-in/check-out, and scheduling'),
+('TECHNICIAN', 'Lab Technician', 'Active', 'Can create and upload laboratory test reports and results');
 ```
 
 ### API Endpoints
@@ -117,10 +120,25 @@ INSERT INTO user_role_master (roleId, roleName, status, comments) VALUES
 - **API 2:** DELETE `/api/v1/roles/{roleId}` - Delete role
 
 ### Data Validation Rules
-- roleId: Must be unique, alphanumeric with underscores, max 50 chars
-- roleName: Required, must be unique, max 255 chars
-- status: Must be one of: Active, Inactive, Pending
-- comments: Optional, max 1000 chars
+- roleId: Must be unique, uppercase alphanumeric, max 10 chars (PRIMARY KEY)
+- roleName: Required, must be unique, max 50 chars
+- status: Must be one of: Active, Inactive, Pending, default is 'Active'
+- comments: Optional, max 250 chars
+- createdDate: Auto-populated with CURRENT_DATE on insert
+- updatedDate: Auto-populated with CURRENT_DATE on insert, updates on modification
+
+### All System Roles (8 Total)
+
+| # | Role ID | Role Name | Status | Description |
+|---|---------|-----------|--------|-------------|
+| 1 | ADMIN | System Administrator | Active | Full system access and database management |
+| 2 | DOCTOR | Doctor/Physician | Active | Can view and manage patient records and create medical reports |
+| 3 | HOSPITAL | Hospital | Active | Hospital administrator - manages hospital operations and staff |
+| 4 | NURSE | Nurse | Active | Can assist with patient records, blood work, and vitals |
+| 5 | PARTNER | Sales Partner | Active | Sales and marketing partner - manages partnerships and revenue |
+| 6 | PATIENT | Patient | Active | Can view own medical reports and health history |
+| 7 | RECEPTION | Reception Staff | Active | Can manage appointments, check-in/check-out, and scheduling |
+| 8 | TECHNICIAN | Lab Technician | Active | Can create and upload laboratory test reports and results |
 
 ### Relationships
 - **Referenced by:** User_Master (currentRole), User_Login (roleId)
