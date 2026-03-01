@@ -88,33 +88,63 @@ async def get_all_roles(
         )
 
 
-# API 2: CRUD - Create role
+# API 2: CRUD - Create role (Insert)
 @router.post("", response_model=APIResponse, status_code=HTTPStatus.CREATED)
 async def create_role(
     role: UserRoleCreate,
     db=Depends(get_db)
 ):
     """
-    API 2: CRUD Operation - Create new user role
-    - Creates a new role with provided data
-    - Returns the created role
+    API 2: CRUD Operation - Insert new user role
+
+    **Request Scenario: Insert New Role**
+
+    Input required:
+    - roleId: Unique role identifier (max 10 chars, uppercase)
+    - roleName: Human-readable role name (max 50 chars)
+    - status: Role status (Active, Inactive, or Closed)
+    - comments: Optional description (max 250 chars)
+
+    System-generated fields (auto-populated):
+    - createdDate: Set to current system timestamp
+    - updatedDate: Set to current system timestamp
+
+    Returns: Created role with all fields including timestamps
     """
     try:
         # Check if role already exists
-        existing = await UserRoleService.get_role_by_id(db, role.roleId)
+        role_id_upper = role.roleId.upper()
+        existing = await UserRoleService.get_role_by_id(db, role_id_upper)
         if existing:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail=f"Role {role.roleId} already exists"
+                detail=f"Role '{role_id_upper}' already exists"
             )
 
-        new_role = await UserRoleService.create_role(db, role.dict())
+        # Validate status is one of the allowed values
+        allowed_statuses = ["Active", "Inactive", "Closed"]
+        if role.status not in allowed_statuses:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=f"Status must be one of: {', '.join(allowed_statuses)}"
+            )
+
+        # Create role data with uppercase roleId
+        role_data = role.dict()
+        role_data['roleId'] = role_id_upper
+
+        # createdDate and updatedDate are auto-set to current timestamp in the service layer
+        new_role = await UserRoleService.create_role(db, role_data)
 
         return APIResponse(
             status="success",
             code=HTTPStatus.CREATED,
             message="Role created successfully",
-            data={"role": new_role},
+            data={
+                "role": new_role,
+                "scenario": "Insert new role",
+                "info": "createdDate and updatedDate set to current system timestamp"
+            },
             timestamp=datetime.now()
         )
     except HTTPException:
@@ -126,72 +156,74 @@ async def create_role(
         )
 
 
-# API 2: CRUD - Update role
+# API 2: CRUD - Update role (Status Update only)
 @router.put("/{roleId}", response_model=APIResponse)
 async def update_role(
     roleId: str,
-    role: UserRoleUpdate,
+    status_update: dict,
     db=Depends(get_db)
 ):
     """
-    API 2: CRUD Operation - Update user role
-    - Updates an existing role
-    - Returns the updated role
+    API 2: CRUD Operation - Update user role status
+
+    **Request Scenario: Update Role Status**
+
+    URL Parameter:
+    - roleId: The role ID to update (will be converted to uppercase)
+
+    Input required:
+    - status: New status value (must be one of: Active, Inactive, Closed)
+
+    System-managed fields:
+    - updatedDate: Automatically set to current system timestamp
+    - Other fields (roleId, roleName, comments): Cannot be updated through this endpoint
+
+    Returns: Updated role with new status and updated timestamp
     """
     try:
+        # Convert roleId to uppercase for consistency
+        role_id_upper = roleId.upper()
+
         # Check if role exists
-        existing = await UserRoleService.get_role_by_id(db, roleId)
+        existing = await UserRoleService.get_role_by_id(db, role_id_upper)
         if not existing:
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND,
-                detail=f"Role {roleId} not found"
+                detail=f"Role '{role_id_upper}' not found"
             )
 
-        updated_role = await UserRoleService.update_role(db, roleId, role.dict(exclude_unset=True))
+        # Extract status from request body
+        if "status" not in status_update:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail="Request body must contain 'status' field"
+            )
+
+        new_status = status_update.get("status")
+
+        # Validate status is one of the allowed values
+        allowed_statuses = ["Active", "Inactive", "Closed"]
+        if new_status not in allowed_statuses:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=f"Status must be one of: {', '.join(allowed_statuses)}. Received: '{new_status}'"
+            )
+
+        # Update only the status field
+        update_data = {"status": new_status}
+        updated_role = await UserRoleService.update_role(db, role_id_upper, update_data)
 
         return APIResponse(
             status="success",
             code=HTTPStatus.OK,
-            message="Role updated successfully",
-            data={"role": updated_role},
+            message=f"Role '{role_id_upper}' status updated to '{new_status}' successfully",
+            data={
+                "role": updated_role,
+                "scenario": "Update role status",
+                "info": "updatedDate set to current system timestamp. Other fields cannot be modified."
+            },
             timestamp=datetime.now()
         )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=str(e)
-        )
-
-
-# API 2: CRUD - Delete role
-@router.delete("/{roleId}", status_code=HTTPStatus.NO_CONTENT)
-async def delete_role(
-    roleId: str,
-    db=Depends(get_db)
-):
-    """
-    API 2: CRUD Operation - Delete user role
-    - Deletes a role by ID
-    - Returns 204 No Content on success
-    """
-    try:
-        # Check if role exists
-        existing = await UserRoleService.get_role_by_id(db, roleId)
-        if not existing:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=f"Role {roleId} not found"
-            )
-
-        success = await UserRoleService.delete_role(db, roleId)
-
-        if not success:
-            raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail="Failed to delete role"
-            )
     except HTTPException:
         raise
     except Exception as e:

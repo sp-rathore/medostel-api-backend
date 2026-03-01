@@ -459,13 +459,30 @@ curl -X GET "http://localhost:8000/api/v1/roles/all?limit=10&offset=0" \
 
 ### API 2: User_Role_Master - CRUD Operations
 
-**Purpose**: Create, Update, Delete user roles
-
-#### A. Create Role
-**Endpoint**: `POST /api/v1/roles`
+**Purpose**: Insert and Update user roles (No Delete operation)
 **Authentication**: Required (Admin only)
 
-##### Request
+---
+
+#### **Scenario A: Insert New Role (POST)**
+
+**Endpoint**: `POST /api/v1/roles`
+
+##### Request Description
+Insert a new role into the User_Role_Master table with the following required fields:
+
+| Field | Type | Required | Constraints | Notes |
+|-------|------|----------|-------------|-------|
+| `roleId` | string | Yes | Max 10 chars, unique, uppercase | Unique role identifier |
+| `roleName` | string | Yes | Max 50 chars, unique | Human-readable role name |
+| `status` | string | Yes | Active, Inactive, or Closed | Role activation status |
+| `comments` | string | No | Max 250 chars | Optional description |
+
+**System-managed fields (AUTO-POPULATED):**
+- `createdDate`: Set to current system timestamp
+- `updatedDate`: Set to current system timestamp
+
+##### Request Example
 ```bash
 curl -X POST http://localhost:8000/api/v1/roles \
   -H "Content-Type: application/json" \
@@ -478,14 +495,6 @@ curl -X POST http://localhost:8000/api/v1/roles \
   }'
 ```
 
-##### Request Body
-| Field | Type | Required | Constraints |
-|-------|------|----------|-------------|
-| `roleId` | string | Yes | Max 10 chars, unique |
-| `roleName` | string | Yes | Max 50 chars, unique |
-| `status` | string | Yes | Active/Inactive/Closed |
-| `comments` | string | No | Max 250 chars |
-
 ##### Response (201 - Created)
 ```json
 {
@@ -493,29 +502,68 @@ curl -X POST http://localhost:8000/api/v1/roles \
   "code": 201,
   "message": "Role created successfully",
   "data": {
-    "roleId": "ADMIN",
-    "roleName": "System Administrator",
-    "status": "Active",
-    "createdDate": "2026-03-01",
-    "updatedDate": "2026-03-01",
-    "comments": "Full system access and database management"
+    "scenario": "Insert new role",
+    "info": "createdDate and updatedDate set to current system timestamp",
+    "role": {
+      "roleId": "ADMIN",
+      "roleName": "System Administrator",
+      "status": "Active",
+      "createdDate": "2026-03-01",
+      "updatedDate": "2026-03-01",
+      "comments": "Full system access and database management"
+    }
   },
   "timestamp": "2026-03-01T16:00:00Z"
 }
 ```
 
-#### B. Update Role
-**Endpoint**: `PUT /api/v1/roles/{roleId}`
-**Authentication**: Required (Admin only)
+##### Response (400 - Bad Request - Invalid Status)
+```json
+{
+  "status": "error",
+  "code": 400,
+  "message": "Status must be one of: Active, Inactive, Closed",
+  "timestamp": "2026-03-01T16:00:00Z"
+}
+```
 
-##### Request
+##### Response (409 - Conflict - Role Already Exists)
+```json
+{
+  "status": "error",
+  "code": 409,
+  "message": "Role 'ADMIN' already exists",
+  "timestamp": "2026-03-01T16:00:00Z"
+}
+```
+
+---
+
+#### **Scenario B: Update Role Status (PUT)**
+
+**Endpoint**: `PUT /api/v1/roles/{roleId}`
+
+##### Request Description
+Update the status of an existing role. This endpoint **ONLY** updates the status field.
+
+**URL Parameter:**
+- `roleId`: The role ID to update (will be converted to uppercase automatically)
+
+**Input Required:**
+- `status`: New status value (must be one of: Active, Inactive, or Closed)
+
+**System-managed fields:**
+- `updatedDate`: Automatically set to current system timestamp
+- Other fields (roleId, roleName, comments): **CANNOT be modified** through this endpoint
+
+##### Request Example
 ```bash
-curl -X PUT http://localhost:8000/api/v1/roles/DOCTOR \
+# Update DOCTOR role status from Active to Inactive
+curl -X PUT http://localhost:8000/api/v1/roles/doctor \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <jwt_token>" \
   -d '{
-    "status": "Active",
-    "comments": "Can view and manage patient records and create medical reports"
+    "status": "Inactive"
   }'
 ```
 
@@ -524,30 +572,58 @@ curl -X PUT http://localhost:8000/api/v1/roles/DOCTOR \
 {
   "status": "success",
   "code": 200,
-  "message": "Role updated successfully",
+  "message": "Role 'DOCTOR' status updated to 'Inactive' successfully",
   "data": {
-    "roleId": "DOCTOR",
-    "roleName": "Doctor/Physician",
-    "status": "Active",
-    "createdDate": "2026-02-28",
-    "updatedDate": "2026-03-01T16:15:00Z",
-    "comments": "Can view and manage patient records and create medical reports"
+    "scenario": "Update role status",
+    "info": "updatedDate set to current system timestamp. Other fields cannot be modified.",
+    "role": {
+      "roleId": "DOCTOR",
+      "roleName": "Doctor/Physician",
+      "status": "Inactive",
+      "createdDate": "2026-02-28",
+      "updatedDate": "2026-03-01T16:15:00Z",
+      "comments": "Can view and manage patient records and create medical reports"
+    }
   },
   "timestamp": "2026-03-01T16:00:00Z"
 }
 ```
 
-#### C. Delete Role
-**Endpoint**: `DELETE /api/v1/roles/{roleId}`
-**Authentication**: Required (Admin only)
-
-##### Request
-```bash
-curl -X DELETE http://localhost:8000/api/v1/roles/ADMIN \
-  -H "Authorization: Bearer <jwt_token>"
+##### Response (400 - Bad Request - Invalid Status)
+```json
+{
+  "status": "error",
+  "code": 400,
+  "message": "Status must be one of: Active, Inactive, Closed. Received: 'Invalid'",
+  "timestamp": "2026-03-01T16:00:00Z"
+}
 ```
 
-##### Response (204 - Deleted)
+##### Response (400 - Bad Request - Missing Status Field)
+```json
+{
+  "status": "error",
+  "code": 400,
+  "message": "Request body must contain 'status' field",
+  "timestamp": "2026-03-01T16:00:00Z"
+}
+```
+
+##### Response (404 - Not Found)
+```json
+{
+  "status": "error",
+  "code": 404,
+  "message": "Role 'INVALID' not found",
+  "timestamp": "2026-03-01T16:00:00Z"
+}
+```
+
+---
+
+#### **Note: No Delete Operation**
+
+The `/api/v1/roles` endpoint does **NOT** support DELETE operations. Roles can only be managed through:
 ```json
 {
   "status": "success",
