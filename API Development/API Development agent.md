@@ -221,32 +221,98 @@ These are the user roles available in the system. Use the **Role ID** when makin
 ### API 1: User_Role_Master - SELECT Operations
 
 **Endpoint**: `GET /api/v1/roles/all`
-**Purpose**: Retrieve all user roles (read-only)
+**Purpose**: Retrieve user roles with flexible filtering options
 **Authentication**: Required (Admin/Doctor)
 **Rate Limit**: 100 requests/minute
 
-#### Request
-```bash
-curl -X GET http://localhost:8000/api/v1/roles/all \
-  -H "Authorization: Bearer <jwt_token>"
-```
+#### Overview
+This endpoint supports **three different request scenarios**:
+
+1. **Fetch by Role ID**: Get a specific role by ID (case-insensitive)
+2. **Fetch by Status**: Get all roles with a specific status
+3. **Fetch All**: Get all roles from the table irrespective of status
 
 #### Query Parameters
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `status` | string | No | Filter by status: Active, Inactive, Closed |
-| `limit` | integer | No | Limit results (default: 100) |
+| `roleId` | string | No | Fetch specific role by ID (automatically converted to UPPERCASE) |
+| `status` | string | No | Filter by status: Active, Inactive, Pending |
+| `limit` | integer | No | Limit results (default: 100, max: 1000) |
 | `offset` | integer | No | Pagination offset (default: 0) |
-| `sort` | string | No | Sort field: roleId, roleName, createdDate |
 
-#### Response (200 - Success)
+---
+
+#### **Scenario 1: Fetch by Role ID (Case-Insensitive)**
+
+##### Request
+```bash
+# Request with lowercase roleId - will be converted to ADMIN
+curl -X GET "http://localhost:8000/api/v1/roles/all?roleId=admin" \
+  -H "Authorization: Bearer <jwt_token>"
+
+# Or with mixed case - will be converted to DOCTOR
+curl -X GET "http://localhost:8000/api/v1/roles/all?roleId=DoCtOr" \
+  -H "Authorization: Bearer <jwt_token>"
+```
+
+##### Response (200 - Success)
 ```json
 {
   "status": "success",
   "code": 200,
-  "message": "User roles retrieved successfully",
+  "message": "Role 'ADMIN' retrieved successfully",
+  "data": {
+    "count": 1,
+    "scenario": "Fetch by Role ID",
+    "roles": [
+      {
+        "roleId": "ADMIN",
+        "roleName": "System Administrator",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Full system access and database management"
+      }
+    ]
+  },
+  "timestamp": "2026-03-01T16:00:00Z"
+}
+```
+
+##### Response (404 - Not Found)
+```json
+{
+  "status": "error",
+  "code": 404,
+  "message": "Role with ID 'INVALID' not found",
+  "timestamp": "2026-03-01T16:00:00Z"
+}
+```
+
+---
+
+#### **Scenario 2: Fetch by Status**
+
+##### Request
+```bash
+# Fetch all ACTIVE roles
+curl -X GET "http://localhost:8000/api/v1/roles/all?status=Active" \
+  -H "Authorization: Bearer <jwt_token>"
+
+# Fetch with pagination
+curl -X GET "http://localhost:8000/api/v1/roles/all?status=Active&limit=5&offset=0" \
+  -H "Authorization: Bearer <jwt_token>"
+```
+
+##### Response (200 - Success)
+```json
+{
+  "status": "success",
+  "code": 200,
+  "message": "Retrieved 8 role(s) with status 'Active'",
   "data": {
     "count": 8,
+    "scenario": "Fetch all roles with status filter",
     "roles": [
       {
         "roleId": "ADMIN",
@@ -273,12 +339,12 @@ curl -X GET http://localhost:8000/api/v1/roles/all \
         "comments": "Hospital administrator - manages hospital operations and staff"
       },
       {
-        "roleId": "PATIENT",
-        "roleName": "Patient",
+        "roleId": "NURSE",
+        "roleName": "Nurse",
         "status": "Active",
         "createdDate": "2026-02-28",
         "updatedDate": "2026-02-28",
-        "comments": "Can view own medical reports and health history"
+        "comments": "Can assist with patient records, blood work, and vitals"
       },
       {
         "roleId": "PARTNER",
@@ -294,14 +360,98 @@ curl -X GET http://localhost:8000/api/v1/roles/all \
 }
 ```
 
-#### Response (404 - Not Found)
+---
+
+#### **Scenario 3: Fetch All Roles (Irrespective of Status)**
+
+##### Request
+```bash
+# Fetch all roles from User_Role_Master table
+curl -X GET "http://localhost:8000/api/v1/roles/all" \
+  -H "Authorization: Bearer <jwt_token>"
+
+# With pagination
+curl -X GET "http://localhost:8000/api/v1/roles/all?limit=10&offset=0" \
+  -H "Authorization: Bearer <jwt_token>"
+```
+
+##### Response (200 - Success)
 ```json
 {
-  "status": "error",
-  "code": 404,
-  "message": "No roles found",
-  "error": "NO_ROLES_FOUND",
-  "timestamp": "2026-02-28T16:00:00Z"
+  "status": "success",
+  "code": 200,
+  "message": "Retrieved all roles from User_Role_Master",
+  "data": {
+    "count": 8,
+    "scenario": "Fetch all roles",
+    "roles": [
+      {
+        "roleId": "ADMIN",
+        "roleName": "System Administrator",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Full system access and database management"
+      },
+      {
+        "roleId": "DOCTOR",
+        "roleName": "Doctor/Physician",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Can view and manage patient records and create medical reports"
+      },
+      {
+        "roleId": "HOSPITAL",
+        "roleName": "Hospital",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Hospital administrator - manages hospital operations and staff"
+      },
+      {
+        "roleId": "NURSE",
+        "roleName": "Nurse",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Can assist with patient records, blood work, and vitals"
+      },
+      {
+        "roleId": "PARTNER",
+        "roleName": "Sales Partner",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Sales and marketing partner - manages partnerships and revenue"
+      },
+      {
+        "roleId": "PATIENT",
+        "roleName": "Patient",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Can view own medical reports and health history"
+      },
+      {
+        "roleId": "RECEPTION",
+        "roleName": "Reception Staff",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Can manage appointments, check-in/check-out, and scheduling"
+      },
+      {
+        "roleId": "TECHNICIAN",
+        "roleName": "Lab Technician",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Can create and upload laboratory test reports and results"
+      }
+    ]
+  },
+  "timestamp": "2026-03-01T16:00:00Z"
 }
 ```
 

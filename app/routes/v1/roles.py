@@ -18,25 +18,69 @@ router = APIRouter(prefix="/roles", tags=["User Roles"])
 @router.get("/all", response_model=APIResponse)
 async def get_all_roles(
     db=Depends(get_db),
-    status: str = Query(None),
-    limit: int = Query(100, ge=1, le=1000),
-    offset: int = Query(0, ge=0)
+    roleId: str = Query(None, description="Fetch by specific Role ID (converted to uppercase)"),
+    status: str = Query(None, description="Filter by role status (Active, Inactive, Pending)"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    offset: int = Query(0, ge=0, description="Pagination offset")
 ):
     """
-    API 1: SELECT Operation - Retrieve all user roles
-    - Returns all roles with optional filtering by status
-    - Supports pagination with limit and offset
+    API 1: SELECT Operation - Retrieve user roles with flexible filtering
+
+    Supports three request scenarios:
+
+    1. **Request with roleId parameter**:
+       - Fetch all details for a specific role by ID
+       - Role ID is automatically converted to UPPERCASE for case-insensitive matching
+       - Example: ?roleId=admin → fetches ADMIN role
+
+    2. **Request with status parameter**:
+       - Fetch all roles with a specific status
+       - Valid values: Active, Inactive, Pending
+       - Example: ?status=Active → fetches all active roles
+
+    3. **Request with no parameters**:
+       - Fetch all roles from User_Role_Master table
+       - Returns all columns and all rows irrespective of status
+       - Example: /api/v1/roles/all → fetches all 8 roles
+
+    Pagination: Use limit and offset parameters for result pagination
     """
     try:
+        # Scenario 1: Fetch by specific Role ID (case-insensitive)
+        if roleId:
+            # Convert roleId to uppercase for case-insensitive matching
+            roleId_upper = roleId.upper()
+            role = await UserRoleService.get_role_by_id(db, roleId_upper)
+
+            if not role:
+                raise HTTPException(
+                    status_code=HTTPStatus.NOT_FOUND,
+                    detail=f"Role with ID '{roleId}' not found"
+                )
+
+            return APIResponse(
+                status="success",
+                code=HTTPStatus.OK,
+                message=f"Role '{roleId_upper}' retrieved successfully",
+                data={"roles": [role], "count": 1, "scenario": "Fetch by Role ID"},
+                timestamp=datetime.now()
+            )
+
+        # Scenario 2: Fetch by status or Scenario 3: Fetch all
         roles = await UserRoleService.get_all_roles(db, status, limit, offset)
+
+        scenario_message = "Fetch all roles with status filter" if status else "Fetch all roles"
+        detail_message = f"Retrieved {len(roles)} role(s) with status '{status}'" if status else "Retrieved all roles from User_Role_Master"
 
         return APIResponse(
             status="success",
             code=HTTPStatus.OK,
-            message="User roles retrieved successfully",
-            data={"roles": roles, "count": len(roles)},
+            message=detail_message,
+            data={"roles": roles, "count": len(roles), "scenario": scenario_message},
             timestamp=datetime.now()
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
