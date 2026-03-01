@@ -294,20 +294,332 @@ class UserRoleService:
 
 ## API Implementation Mapping
 
-| API # | Table | Module | Route | Service |
-|-------|-------|--------|-------|---------|
-| 1 | User_Role_Master | roles.py | GET /api/v1/roles/all | user_role_service |
-| 2 | User_Role_Master | roles.py | POST/PUT/DELETE /api/v1/roles | user_role_service |
-| 3 | State_City_PinCode | locations.py | GET /api/v1/locations/all | location_service |
-| 4 | State_City_PinCode | locations.py | POST/PUT/DELETE /api/v1/locations | location_service |
-| 5 | User_Master | users.py | GET /api/v1/users/all | user_service |
-| 6 | User_Master | users.py | POST/PUT/DELETE /api/v1/users | user_service |
-| 7 | User_Login | auth.py | GET /api/v1/auth/users | auth_service |
-| 8 | User_Login | auth.py | POST/PUT/DELETE /api/v1/auth/credentials | auth_service |
-| 9 | New_User_Request | registrations.py | GET /api/v1/requests/all | registration_service |
-| 10 | New_User_Request | registrations.py | POST/PUT/DELETE /api/v1/requests | registration_service |
-| 11 | Report_History | reports.py | GET /api/v1/reports/all | report_service |
-| 12 | Report_History | reports.py | POST/PUT/DELETE /api/v1/reports | report_service |
+| API # | Table | Module | Route | Service | Status |
+|-------|-------|--------|-------|---------|--------|
+| 1 | User_Role_Master | roles.py | GET /api/v1/roles/all | user_role_service | ✅ Enhanced |
+| 2 | User_Role_Master | roles.py | POST/PUT /api/v1/roles | user_role_service | ✅ Enhanced |
+| 3 | State_City_PinCode | locations.py | GET /api/v1/locations/all | location_service | ⏳ Standard |
+| 4 | State_City_PinCode | locations.py | POST/PUT/DELETE /api/v1/locations | location_service | ⏳ Standard |
+| 5 | User_Master | users.py | GET /api/v1/users/all | user_service | ⏳ Standard |
+| 6 | User_Master | users.py | POST/PUT/DELETE /api/v1/users | user_service | ⏳ Standard |
+| 7 | User_Login | auth.py | GET /api/v1/auth/users | auth_service | ⏳ Standard |
+| 8 | User_Login | auth.py | POST/PUT/DELETE /api/v1/auth/credentials | auth_service | ⏳ Standard |
+| 9 | New_User_Request | registrations.py | GET /api/v1/requests/all | registration_service | ⏳ Standard |
+| 10 | New_User_Request | registrations.py | POST/PUT/DELETE /api/v1/requests | registration_service | ⏳ Standard |
+| 11 | Report_History | reports.py | GET /api/v1/reports/all | report_service | ⏳ Standard |
+| 12 | Report_History | reports.py | POST/PUT/DELETE /api/v1/reports | report_service | ⏳ Standard |
+
+---
+
+## Detailed API Specifications: User_Role_Master (API 1 & 2)
+
+### Overview
+APIs 1 & 2 provide comprehensive role management functionality with enhanced GET endpoint supporting multiple scenarios and status-only updates via PUT. **Note**: DELETE operation is not supported.
+
+### API 1: GET `/api/v1/roles/all` - Flexible Role Retrieval
+
+#### Supported Request Scenarios
+
+**Scenario 1: Fetch by Role ID (Case-Insensitive)**
+```
+GET /api/v1/roles/all?roleId=admin
+```
+- Retrieves all details for a specific role by ID
+- Role ID is automatically converted to UPPERCASE for consistency
+- Input: `admin` → Fetches: `ADMIN`
+- Response: Single role object in array with scenario metadata
+
+**Scenario 2: Fetch by Status Filter**
+```
+GET /api/v1/roles/all?status=Active
+```
+- Retrieves all roles matching the specified status
+- Valid status values: `Active`, `Inactive`, `Pending`
+- Response: Array of roles matching the status filter
+
+**Scenario 3: Fetch All Roles (Default)**
+```
+GET /api/v1/roles/all
+```
+- Retrieves all roles from User_Role_Master table
+- Returns all columns and all rows irrespective of status
+- Response: Complete array of all 8 system roles
+
+#### Query Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| roleId | string | No | Fetch specific role (auto-uppercase conversion) |
+| status | string | No | Filter by status (Active, Inactive, Pending) |
+| limit | integer | No | Max records to return (1-1000, default: 100) |
+| offset | integer | No | Pagination offset (default: 0) |
+
+#### Example Response (Scenario 1)
+```json
+{
+  "status": "success",
+  "code": 200,
+  "message": "Role 'ADMIN' retrieved successfully",
+  "data": {
+    "roles": [
+      {
+        "roleId": "ADMIN",
+        "roleName": "Administrator",
+        "status": "Active",
+        "comments": "System administrator with full access",
+        "createdDate": "2026-01-15",
+        "updatedDate": "2026-03-01"
+      }
+    ],
+    "count": 1,
+    "scenario": "Fetch by Role ID"
+  },
+  "timestamp": "2026-03-01T10:30:00Z"
+}
+```
+
+#### Error Responses
+| Status | Condition | Message |
+|--------|-----------|---------|
+| 404 | Role not found | Role with ID '{roleId}' not found |
+| 422 | Invalid query parameter | Validation error |
+| 500 | Database error | Internal server error |
+
+---
+
+### API 2: CRUD Operations on Roles
+
+#### POST - Insert New Role
+
+**Endpoint**: `POST /api/v1/roles`
+
+**Request Body** (All fields required):
+```json
+{
+  "roleId": "CONTRACTOR",
+  "roleName": "Contractor",
+  "status": "Active",
+  "comments": "External contractor role with limited access"
+}
+```
+
+**Required Fields**:
+| Field | Type | Max Length | Description |
+|-------|------|-----------|-------------|
+| roleId | string | 10 chars | Unique role identifier (auto-converted to UPPERCASE) |
+| roleName | string | 50 chars | Human-readable role name |
+| status | string | - | Role status: **Active**, **Inactive**, or **Closed** |
+| comments | string | 250 chars | Optional description of the role |
+
+**Auto-Populated Fields** (System-generated):
+- `createdDate`: Set to current system timestamp
+- `updatedDate`: Set to current system timestamp
+
+**Success Response** (HTTP 201):
+```json
+{
+  "status": "success",
+  "code": 201,
+  "message": "Role created successfully",
+  "data": {
+    "role": {
+      "roleId": "CONTRACTOR",
+      "roleName": "Contractor",
+      "status": "Active",
+      "comments": "External contractor role with limited access",
+      "createdDate": "2026-03-01",
+      "updatedDate": "2026-03-01"
+    },
+    "scenario": "Insert new role",
+    "info": "createdDate and updatedDate set to current system timestamp"
+  },
+  "timestamp": "2026-03-01T10:30:00Z"
+}
+```
+
+**Error Responses**:
+| Status | Condition | Message |
+|--------|-----------|---------|
+| 400 | Invalid status | Status must be one of: Active, Inactive, Closed |
+| 409 | Duplicate role | Role '{roleId}' already exists |
+| 422 | Validation error | Missing required field or invalid data type |
+| 500 | Database error | Internal server error |
+
+---
+
+#### PUT - Update Role Status (Status-Only Update)
+
+**Endpoint**: `PUT /api/v1/roles/{roleId}`
+
+**URL Parameter**:
+- `roleId`: Role identifier (auto-converted to UPPERCASE for case-insensitive matching)
+
+**Request Body**:
+```json
+{
+  "status": "Inactive"
+}
+```
+
+**Input Validation**:
+- Only field accepted: `status`
+- Valid values: **Active**, **Inactive**, **Closed**
+- Status field is mandatory in request body
+
+**Protected Fields** (Cannot be modified):
+- `roleId`: Cannot be changed
+- `roleName`: Cannot be changed
+- `comments`: Cannot be changed
+
+**Auto-Updated Field**:
+- `updatedDate`: Set to current system timestamp
+
+**Success Response** (HTTP 200):
+```json
+{
+  "status": "success",
+  "code": 200,
+  "message": "Role 'CONTRACTOR' status updated to 'Inactive' successfully",
+  "data": {
+    "role": {
+      "roleId": "CONTRACTOR",
+      "roleName": "Contractor",
+      "status": "Inactive",
+      "comments": "External contractor role with limited access",
+      "createdDate": "2026-03-01",
+      "updatedDate": "2026-03-01"
+    },
+    "scenario": "Update role status",
+    "info": "updatedDate set to current system timestamp. Other fields cannot be modified."
+  },
+  "timestamp": "2026-03-01T10:35:00Z"
+}
+```
+
+**Error Responses**:
+| Status | Condition | Message |
+|--------|-----------|---------|
+| 400 | Missing status field | Request body must contain 'status' field |
+| 400 | Invalid status | Status must be one of: Active, Inactive, Closed. Received: '{value}' |
+| 404 | Role not found | Role '{roleId}' not found |
+| 422 | Validation error | Invalid request body format |
+| 500 | Database error | Internal server error |
+
+---
+
+#### DELETE Operation
+
+**Status**: ❌ **NOT SUPPORTED** - Removed as of March 1, 2026
+- No delete operation is available for roles
+- Roles cannot be deleted from the system
+- Use status update to deactivate roles instead
+
+---
+
+### Schema Definitions (app/schemas/user_role.py)
+
+```python
+class UserRoleCreate(BaseModel):
+    """Schema for creating a new role"""
+    roleId: str = Field(..., max_length=10, description="Unique role ID")
+    roleName: str = Field(..., max_length=50, description="Role name")
+    status: str = Field(..., regex="^(Active|Inactive|Closed)$", description="Role status")
+    comments: str = Field(..., max_length=250, description="Role comments")
+
+class UserRoleUpdate(BaseModel):
+    """Schema for updating role status only"""
+    status: str = Field(..., regex="^(Active|Inactive|Closed)$", description="Role status")
+
+class UserRoleResponse(BaseModel):
+    """Schema for role response"""
+    roleId: str
+    roleName: str
+    status: str
+    comments: str
+    createdDate: date
+    updatedDate: date
+
+    class Config:
+        from_attributes = True
+```
+
+---
+
+### Service Methods (app/services/user_role_service.py)
+
+```python
+class UserRoleService:
+
+    @staticmethod
+    async def get_role_by_id(db, roleId: str):
+        """Fetch single role by ID (case-insensitive)"""
+        # Converts roleId to uppercase internally
+
+    @staticmethod
+    async def get_all_roles(db, status: str = None, limit: int = 100, offset: int = 0):
+        """Fetch all roles with optional status filter and pagination"""
+
+    @staticmethod
+    async def create_role(db, role_data: dict):
+        """Create new role with auto-populated timestamps"""
+        # createdDate and updatedDate set to current timestamp
+
+    @staticmethod
+    async def update_role(db, roleId: str, update_data: dict):
+        """Update role status only; auto-updates updatedDate"""
+        # Only status field can be modified
+```
+
+---
+
+### Database Schema (User_Role_Master)
+
+```sql
+CREATE TABLE user_role_master (
+    roleId VARCHAR(10) PRIMARY KEY,
+    roleName VARCHAR(50) NOT NULL,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('Active', 'Inactive', 'Closed', 'Pending')),
+    comments VARCHAR(250),
+    createdDate DATE NOT NULL DEFAULT CURRENT_DATE,
+    updatedDate DATE NOT NULL DEFAULT CURRENT_DATE
+);
+```
+
+**System Roles** (8 total):
+- ADMIN: Administrator
+- DOCTOR: Doctor
+- HOSPITAL: Hospital administrator
+- NURSE: Nurse
+- PARTNER: Sales and marketing partner
+- PATIENT: Patient
+- RECEPTION: Reception staff
+- TECHNICIAN: Technician
+
+---
+
+### Test Coverage (test_roles_api.py)
+
+**GET Endpoint Tests**: 8+ test cases
+- Fetch by roleId (case-insensitive)
+- Fetch by status (Active, Inactive, Pending)
+- Fetch all roles
+- Pagination support
+- Invalid parameters
+- Empty results
+
+**POST Endpoint Tests**: 5+ test cases
+- Create role successfully
+- Duplicate role conflict (409)
+- Invalid status value (400)
+- Missing required fields (422)
+- Auto-timestamp population verification
+
+**PUT Endpoint Tests**: 5+ test cases
+- Update status successfully
+- Case-insensitive roleId handling
+- Invalid status value (400)
+- Missing status field (400)
+- Non-existent role (404)
+- Protected field enforcement
 
 ---
 
@@ -525,7 +837,15 @@ All errors return standardized format:
 
 ---
 
-**Last Updated**: 2026-02-28
+**Last Updated**: 2026-03-01
 **Created By**: Claude Code
-**Status**: Structure Defined - Ready for Implementation
+**Status**: API 1 & 2 Enhanced & Documented - Ready for Implementation
 **Total APIs**: 12 (6 tables × 2 APIs each)
+
+### Recent Updates (March 1, 2026)
+- ✅ **API 1 (GET /api/v1/roles/all)**: Enhanced with 3 request scenarios (by ID, by status, fetch all)
+- ✅ **API 2 (POST /api/v1/roles)**: Status validation (Active/Inactive/Closed), auto-uppercase roleId, auto-timestamp population
+- ✅ **API 2 (PUT /api/v1/roles/{roleId})**: Status-only updates, protected fields (roleId, roleName, comments), auto-timestamp updates
+- ❌ **API 2 (DELETE)**: Removed - no delete operation supported
+- 📝 Comprehensive test cases added (18+ tests for API 1 & 2)
+- 📊 Complete schema and service method documentation
