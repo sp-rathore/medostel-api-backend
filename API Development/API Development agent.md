@@ -189,6 +189,35 @@ GET /api/v1/locations/pincodes/{pinCode}
 
 ---
 
+## System Roles Reference
+
+### All Available Roles (8 Total)
+
+These are the user roles available in the system. Use the **Role ID** when making API requests.
+
+| # | Role ID | Role Name | Description |
+|---|---------|-----------|-------------|
+| 1 | ADMIN | System Administrator | Full system access and database management |
+| 2 | DOCTOR | Doctor/Physician | Can view and manage patient records and create medical reports |
+| 3 | HOSPITAL | Hospital | Hospital administrator - manages hospital operations and staff |
+| 4 | NURSE | Nurse | Can assist with patient records, blood work, and vitals |
+| 5 | PARTNER | Sales Partner | Sales and marketing partner - manages partnerships and revenue |
+| 6 | PATIENT | Patient | Can view own medical reports and health history |
+| 7 | RECEPTION | Reception Staff | Can manage appointments, check-in/check-out, and scheduling |
+| 8 | TECHNICIAN | Lab Technician | Can create and upload laboratory test reports and results |
+
+**Usage Example in API Requests:**
+```json
+{
+  "roleId": "DOCTOR",
+  "roleName": "Doctor/Physician",
+  "status": "Active",
+  "comments": "Can view and manage patient records and create medical reports"
+}
+```
+
+---
+
 ### API 1: User_Role_Master - SELECT Operations
 
 **Endpoint**: `GET /api/v1/roles/all`
@@ -217,28 +246,51 @@ curl -X GET http://localhost:8000/api/v1/roles/all \
   "code": 200,
   "message": "User roles retrieved successfully",
   "data": {
-    "total": 5,
-    "count": 5,
+    "count": 8,
     "roles": [
       {
-        "roleId": "DOC01",
-        "roleName": "Doctor",
+        "roleId": "ADMIN",
+        "roleName": "System Administrator",
         "status": "Active",
         "createdDate": "2026-02-28",
         "updatedDate": "2026-02-28",
-        "comments": "Medical professional role"
+        "comments": "Full system access and database management"
       },
       {
-        "roleId": "PAT01",
+        "roleId": "DOCTOR",
+        "roleName": "Doctor/Physician",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Can view and manage patient records and create medical reports"
+      },
+      {
+        "roleId": "HOSPITAL",
+        "roleName": "Hospital",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Hospital administrator - manages hospital operations and staff"
+      },
+      {
+        "roleId": "PATIENT",
         "roleName": "Patient",
         "status": "Active",
         "createdDate": "2026-02-28",
         "updatedDate": "2026-02-28",
-        "comments": "Patient user role"
+        "comments": "Can view own medical reports and health history"
+      },
+      {
+        "roleId": "PARTNER",
+        "roleName": "Sales Partner",
+        "status": "Active",
+        "createdDate": "2026-02-28",
+        "updatedDate": "2026-02-28",
+        "comments": "Sales and marketing partner - manages partnerships and revenue"
       }
     ]
   },
-  "timestamp": "2026-02-28T16:00:00Z"
+  "timestamp": "2026-03-01T16:00:00Z"
 }
 ```
 
@@ -269,10 +321,10 @@ curl -X POST http://localhost:8000/api/v1/roles \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <jwt_token>" \
   -d '{
-    "roleId": "ADM01",
-    "roleName": "Administrator",
+    "roleId": "ADMIN",
+    "roleName": "System Administrator",
     "status": "Active",
-    "comments": "System administrator role"
+    "comments": "Full system access and database management"
   }'
 ```
 
@@ -291,14 +343,14 @@ curl -X POST http://localhost:8000/api/v1/roles \
   "code": 201,
   "message": "Role created successfully",
   "data": {
-    "roleId": "ADM01",
-    "roleName": "Administrator",
+    "roleId": "ADMIN",
+    "roleName": "System Administrator",
     "status": "Active",
-    "createdDate": "2026-02-28",
-    "updatedDate": "2026-02-28",
-    "comments": "System administrator role"
+    "createdDate": "2026-03-01",
+    "updatedDate": "2026-03-01",
+    "comments": "Full system access and database management"
   },
-  "timestamp": "2026-02-28T16:00:00Z"
+  "timestamp": "2026-03-01T16:00:00Z"
 }
 ```
 
@@ -308,12 +360,12 @@ curl -X POST http://localhost:8000/api/v1/roles \
 
 ##### Request
 ```bash
-curl -X PUT http://localhost:8000/api/v1/roles/DOC01 \
+curl -X PUT http://localhost:8000/api/v1/roles/DOCTOR \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <jwt_token>" \
   -d '{
-    "status": "Inactive",
-    "comments": "Updated comments"
+    "status": "Active",
+    "comments": "Can view and manage patient records and create medical reports"
   }'
 ```
 
@@ -324,13 +376,14 @@ curl -X PUT http://localhost:8000/api/v1/roles/DOC01 \
   "code": 200,
   "message": "Role updated successfully",
   "data": {
-    "roleId": "DOC01",
-    "roleName": "Doctor",
-    "status": "Inactive",
-    "updatedDate": "2026-02-28T16:15:00Z",
-    "comments": "Updated comments"
+    "roleId": "DOCTOR",
+    "roleName": "Doctor/Physician",
+    "status": "Active",
+    "createdDate": "2026-02-28",
+    "updatedDate": "2026-03-01T16:15:00Z",
+    "comments": "Can view and manage patient records and create medical reports"
   },
-  "timestamp": "2026-02-28T16:00:00Z"
+  "timestamp": "2026-03-01T16:00:00Z"
 }
 ```
 
@@ -340,7 +393,7 @@ curl -X PUT http://localhost:8000/api/v1/roles/DOC01 \
 
 ##### Request
 ```bash
-curl -X DELETE http://localhost:8000/api/v1/roles/ADM01 \
+curl -X DELETE http://localhost:8000/api/v1/roles/ADMIN \
   -H "Authorization: Bearer <jwt_token>"
 ```
 
@@ -619,7 +672,7 @@ curl -X GET "http://localhost:8000/api/v1/auth/users?isActive=true" \
         "userId": "john.doe@medostel.com",
         "username": "john.doe@medostel.com",
         "mobilePhone": "+919876543210",
-        "roleId": "DOC01",
+        "roleId": "DOCTOR",
         "isActive": true,
         "lastLoginAt": "2026-02-28T15:30:00Z",
         "passwordLastChangedAt": "2026-02-20T10:00:00Z",
@@ -647,7 +700,7 @@ curl -X GET "http://localhost:8000/api/v1/auth/users?isActive=true" \
   "userId": "jane.smith@medostel.com",
   "username": "jane.smith@medostel.com",
   "password": "SecurePassword@123",
-  "roleId": "PAT01"
+  "roleId": "PATIENT"
 }
 ```
 
