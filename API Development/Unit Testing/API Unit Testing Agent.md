@@ -822,12 +822,17 @@ async def test_get_roles_empty_result(client):
 
 #### API 2: CRUD Operations on Roles
 
+> **API 2 Enhancement Summary (March 1, 2026):**
+> - **POST** (Insert): Requires roleId, roleName, status, comments. Auto-converts roleId to uppercase. Auto-populates createdDate and updatedDate. Validates status is one of: Active, Inactive, Closed.
+> - **PUT** (Update): Status-only update. Only accepts roleId (URL param, auto-uppercase) and status (request body). Auto-updates updatedDate. Protected fields: roleId, roleName, comments.
+> - **DELETE**: Completely removed - no delete operation supported for roles.
+
 **Test Case 2.1: Create role successfully**
 ```python
 async def test_create_role_success(client):
-    """Should create a new role with 201 status"""
+    """Should create a new role with 201 status and auto-convert roleId to uppercase"""
     role_data = {
-        "roleId": "TESTADMIN",
+        "roleId": "testadmin",  # Will be converted to TESTADMIN
         "roleName": "Test Administrator",
         "status": "Active",
         "comments": "Test role for unit testing"
@@ -835,7 +840,9 @@ async def test_create_role_success(client):
     response = await client.post("/api/v1/roles", json=role_data)
     assert response.status_code == 201
     assert response.json()["status"] == "success"
-    assert response.json()["data"]["role"]["roleId"] == "TESTADMIN"
+    assert response.json()["data"]["role"]["roleId"] == "TESTADMIN"  # Verified uppercase conversion
+    assert "createdDate" in response.json()["data"]["role"]  # Auto-populated
+    assert "updatedDate" in response.json()["data"]["role"]  # Auto-populated
 ```
 
 **Test Case 2.2: Create duplicate role fails**
@@ -850,66 +857,90 @@ async def test_create_duplicate_role_conflict(client, sample_role):
 **Test Case 2.3: Create role with missing required field**
 ```python
 async def test_create_role_missing_field(client):
-    """Should reject role missing required roleId"""
+    """Should reject role missing required fields (roleId, roleName, status, comments)"""
     role_data = {
         "roleName": "Test Role",
         "status": "Active"
+        # Missing: roleId, comments
     }
     response = await client.post("/api/v1/roles", json=role_data)
     assert response.status_code == 422  # Validation error
 ```
 
-**Test Case 2.4: Update role successfully**
+**Test Case 2.3a: Create role with invalid status**
 ```python
-async def test_update_role_success(client, sample_role_id):
-    """Should update role with 200 status"""
+async def test_create_role_invalid_status(client):
+    """Should reject role with invalid status value"""
+    role_data = {
+        "roleId": "INVALID_STATUS",
+        "roleName": "Test Role",
+        "status": "InvalidStatus",  # Not one of: Active, Inactive, Closed
+        "comments": "Test comments"
+    }
+    response = await client.post("/api/v1/roles", json=role_data)
+    assert response.status_code == 400  # Bad request
+    assert "Status must be one of" in response.json()["detail"]
+```
+
+**Test Case 2.4: Update role status successfully**
+```python
+async def test_update_role_status_success(client, sample_role_id):
+    """Should update role status only with 200 status"""
     update_data = {
-        "roleName": "Updated Role Name",
         "status": "Inactive"
     }
     response = await client.put(f"/api/v1/roles/{sample_role_id}", json=update_data)
     assert response.status_code == 200
-    assert response.json()["data"]["role"]["roleName"] == "Updated Role Name"
+    assert response.json()["status"] == "success"
     assert response.json()["data"]["role"]["status"] == "Inactive"
+    assert "updatedDate" in response.json()["data"]["role"]  # Auto-updated timestamp
 ```
 
 **Test Case 2.5: Update non-existent role**
 ```python
 async def test_update_nonexistent_role(client):
     """Should return 404 for non-existent role"""
-    response = await client.put("/api/v1/roles/NON_EXISTENT", json={"status": "Active"})
+    response = await client.put("/api/v1/roles/NONEXISTENT", json={"status": "Active"})
     assert response.status_code == 404
     assert "not found" in response.json()["detail"]
 ```
 
-**Test Case 2.6: Partial update role**
+**Test Case 2.6: Attempt to update non-status field (should fail)**
 ```python
-async def test_partial_update_role(client, sample_role_id):
-    """Should update only specified fields"""
-    update_data = {"comments": "Updated comments"}
+async def test_update_role_protected_fields_ignored(client, sample_role_id):
+    """Should only allow status updates; other fields are protected"""
+    update_data = {
+        "roleId": "CHANGED_ID",
+        "roleName": "Changed Name",
+        "comments": "Changed comments"
+    }
     response = await client.put(f"/api/v1/roles/{sample_role_id}", json=update_data)
+    # Should fail because status is missing from request body
+    assert response.status_code == 400
+    assert "Request body must contain 'status' field" in response.json()["detail"]
+```
+
+**Test Case 2.6a: Update role with invalid status in PUT**
+```python
+async def test_update_role_invalid_status(client, sample_role_id):
+    """Should reject invalid status values in update"""
+    update_data = {
+        "status": "InvalidStatus"  # Not one of: Active, Inactive, Closed
+    }
+    response = await client.put(f"/api/v1/roles/{sample_role_id}", json=update_data)
+    assert response.status_code == 400
+    assert "Status must be one of" in response.json()["detail"]
+```
+
+**Test Case 2.7: Update role with case-insensitive roleId**
+```python
+async def test_update_role_case_insensitive_id(client, sample_role_id):
+    """Should handle case-insensitive roleId in URL"""
+    update_data = {"status": "Closed"}
+    # Try with lowercase roleId
+    response = await client.put(f"/api/v1/roles/{sample_role_id.lower()}", json=update_data)
     assert response.status_code == 200
-    assert response.json()["data"]["role"]["comments"] == "Updated comments"
-```
-
-**Test Case 2.7: Delete role successfully**
-```python
-async def test_delete_role_success(client, sample_role_id):
-    """Should delete role with 204 status"""
-    response = await client.delete(f"/api/v1/roles/{sample_role_id}")
-    assert response.status_code == 204
-
-    # Verify role is deleted
-    get_response = await client.get(f"/api/v1/roles/{sample_role_id}")
-    assert get_response.status_code == 404
-```
-
-**Test Case 2.8: Delete non-existent role**
-```python
-async def test_delete_nonexistent_role(client):
-    """Should return 404 when deleting non-existent role"""
-    response = await client.delete("/api/v1/roles/NON_EXISTENT")
-    assert response.status_code == 404
+    assert response.json()["data"]["role"]["status"] == "Closed"
 ```
 
 ---
@@ -1789,17 +1820,18 @@ async def test_database_timeout_handling(client, mocker):
 ```python
 @pytest.mark.reliability
 async def test_concurrent_updates_conflict(client, sample_role_id):
-    """Should handle concurrent updates safely"""
-    update_data1 = {"roleName": "Updated Name 1"}
-    update_data2 = {"status": "Inactive"}
+    """Should handle concurrent status updates safely"""
+    update_data1 = {"status": "Inactive"}
+    update_data2 = {"status": "Closed"}
 
-    # Make concurrent updates
+    # Make concurrent status updates
     response1, response2 = await asyncio.gather(
         client.put(f"/api/v1/roles/{sample_role_id}", json=update_data1),
         client.put(f"/api/v1/roles/{sample_role_id}", json=update_data2)
     )
 
     # Both should succeed (database handles concurrency)
+    # Final status will be one of Inactive or Closed depending on timing
     assert response1.status_code == 200
     assert response2.status_code == 200
 ```
@@ -1827,16 +1859,17 @@ async def client():
 
 @pytest.fixture
 async def sample_role(client):
-    """Create and return a sample role"""
+    """Create and return a sample role with all required fields"""
     role_data = {
-        "roleId": f"ROLE_{fake.word().upper()}",
+        "roleId": f"TEST_{fake.lexify('???').upper()}",  # e.g., TEST_ABC
         "roleName": fake.job(),
         "status": "Active",
-        "comments": fake.text()
+        "comments": "Sample test role created for unit testing"
     }
     response = await client.post("/api/v1/roles", json=role_data)
     if response.status_code == 201:
-        return role_data
+        # Return the response data which includes auto-populated timestamps
+        return response.json()["data"]["role"]
     return None
 
 @pytest.fixture
