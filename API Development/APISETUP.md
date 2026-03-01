@@ -4,9 +4,15 @@
 
 ## ⭐ Latest Enhancements (March 1, 2026)
 
-### User_Role_Master APIs (API 1 & 2) - Major Improvements
+### Dual API Enhancement: User_Role_Master (API 1 & 2) + User_Master (API 5 & 6)
 
-The User_Role_Master implementation has been significantly enhanced to provide flexible role management:
+Two major API implementations with comprehensive implementation code, schemas, and services.
+
+---
+
+## API 1 & 2: User_Role_Master - Flexible Role Management
+
+The User_Role_Master implementation provides flexible role management:
 
 #### **API 1: GET /api/v1/roles/all - Three Request Scenarios**
 ✅ **Scenario 1**: Fetch by roleId with case-insensitive handling
@@ -55,6 +61,74 @@ The User_Role_Master implementation has been significantly enhanced to provide f
 #### **API 2: DELETE - NOT SUPPORTED**
 ❌ Delete operation has been removed
 - Use status update to deactivate roles instead
+
+---
+
+## API 5 & 6: User_Master - Enhanced Schema v2.0
+
+The User_Master implementation with enhanced schema featuring BIGINT userId, email validation, and mobile number validation.
+
+#### **API 5: GET /api/v1/users/all - Four Flexible Scenarios**
+✅ **Scenario 1**: Fetch by numeric userId (BIGINT)
+- Example: `GET /api/v1/users/all?userId=1001` → Returns user with that numeric ID
+- Validates userId range: 1-1000000000
+
+✅ **Scenario 2**: Fetch by email (RFC 5322 validated)
+- Example: `GET /api/v1/users/all?email=john.doe@medostel.com` → Returns user with matching email
+- Validates email format on query parameter
+
+✅ **Scenario 3**: Filter by role and status
+- Example: `GET /api/v1/users/all?role=DOCTOR&status=Active` → Returns filtered users
+- Optional role and status filters
+
+✅ **Scenario 4**: Fetch all with pagination
+- Example: `GET /api/v1/users/all?limit=10&offset=0` → Paginated results
+- Default limit: 100, max: 1000
+
+#### **API 6: POST /api/v1/users - Create User with Enhanced Validation**
+✅ **BIGINT userId**: Supports 1 billion users (1-1000000000)
+
+✅ **Email RFC 5322 Validation**:
+- Pattern: `^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$`
+- Uniqueness enforced
+
+✅ **Mobile Number Validation**:
+- Exactly 10 digits
+- Range: 1000000000-9999999999
+- Uniqueness enforced
+
+✅ **Auto-population**:
+- createdDate: Set to current timestamp
+- updatedDate: Set to current timestamp
+
+✅ **Error handling**:
+- 409 Conflict if userId/email/mobile already exists
+- 400 Bad Request for validation failures
+- 422 Validation error for missing/invalid fields
+
+#### **API 6: PUT /api/v1/users/{userId} - Update with Field-Level Validation**
+✅ **Updateable Fields**: firstName, lastName, currentRole, emailId, mobileNumber, organisation, address, status
+
+✅ **Immutable Field Protection**:
+- userId: Cannot be modified
+- createdDate: Preserved
+
+✅ **Field Validation on Update**:
+- Email: RFC 5322 format
+- Mobile: 10 digits in range 1000000000-9999999999
+- Status: Active/Inactive/Suspended
+
+✅ **Auto-updated**:
+- updatedDate: Set to current timestamp
+
+✅ **Error handling**:
+- 400 Bad Request if userId modification attempted
+- 404 Not Found if user doesn't exist
+- 409 Conflict if email/mobile duplicate
+
+#### **API 6: DELETE - NOT SUPPORTED**
+❌ Delete operation not supported
+- Use status update to deactivate users instead
 
 ---
 
@@ -557,6 +631,158 @@ __all__ = [
 ]
 ```
 
+### 5.3 `app/schemas/user.py` - User_Master Schemas (Enhanced Schema v2.0)
+
+**Updated March 1, 2026** ✅ - BIGINT userId, Email RFC 5322 validation, 10-digit mobile
+
+```python
+"""
+User_Master Pydantic Schemas - Enhanced Schema v2.0
+- Email validation: RFC 5322 regex pattern
+- Mobile validation: NUMERIC(10), range 1000000000-9999999999 (10 digits)
+- userId: BIGINT (1-1000000000)
+"""
+
+from pydantic import BaseModel, Field, EmailStr, field_validator
+from typing import Optional
+from datetime import datetime
+
+# ============================================================================
+# Schema 1: UserCreate (POST request)
+# ============================================================================
+class UserCreate(BaseModel):
+    """
+    Create user request schema with enhanced validation.
+    System-managed fields are auto-populated:
+    - createdDate: Set to current timestamp
+    - updatedDate: Set to current timestamp
+    """
+    userId: int = Field(..., ge=1, le=1000000000, description="Numeric User ID (BIGINT, 1-1000000000)")
+    firstName: str = Field(..., max_length=100, description="First name")
+    lastName: str = Field(..., max_length=100, description="Last name")
+    currentRole: str = Field(..., max_length=50, description="Role ID (must reference User_Role_Master)")
+    emailId: EmailStr = Field(..., description="Email address (RFC 5322 validated)")
+    mobileNumber: str = Field(..., description="Mobile number (exactly 10 digits)")
+    organisation: Optional[str] = Field(None, max_length=255, description="Organization name")
+    address: Optional[str] = Field(None, description="Full address")
+    status: str = Field(default="Active", pattern="^(Active|Inactive|Suspended)$", description="Account status")
+
+    @field_validator('mobileNumber')
+    @classmethod
+    def validate_mobile(cls, v):
+        """Validate mobile: exactly 10 digits in range 1000000000-9999999999"""
+        if len(v) != 10 or not v.isdigit():
+            raise ValueError('Mobile number must be exactly 10 digits')
+
+        mobile_int = int(v)
+        if mobile_int < 1000000000 or mobile_int > 9999999999:
+            raise ValueError('Mobile number must be in range 1000000000-9999999999')
+
+        return v
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "userId": 1001,
+                "firstName": "John",
+                "lastName": "Doe",
+                "currentRole": "DOCTOR",
+                "emailId": "john.doe@medostel.com",
+                "mobileNumber": "9876543210",
+                "organisation": "Apollo Hospital",
+                "address": "Mumbai, India",
+                "status": "Active"
+            }
+        }
+
+
+# ============================================================================
+# Schema 2: UserUpdate (PUT request - all fields optional)
+# ============================================================================
+class UserUpdate(BaseModel):
+    """
+    Update user request schema.
+
+    Updateable Fields: All except userId, createdDate, updatedDate
+    - updatedDate: Auto-set to current timestamp
+
+    Immutable Fields: Cannot be modified
+    - userId: BIGINT primary key cannot change
+    - createdDate: Original creation timestamp preserved
+    """
+    firstName: Optional[str] = Field(None, max_length=100)
+    lastName: Optional[str] = Field(None, max_length=100)
+    currentRole: Optional[str] = Field(None, max_length=50)
+    emailId: Optional[EmailStr] = Field(None, description="Email (RFC 5322 validated)")
+    mobileNumber: Optional[str] = Field(None, description="Mobile (exactly 10 digits)")
+    organisation: Optional[str] = Field(None, max_length=255)
+    address: Optional[str] = Field(None)
+    status: Optional[str] = Field(None, pattern="^(Active|Inactive|Suspended)$")
+    userId: Optional[int] = Field(None, description="⚠️ IMMUTABLE - Cannot be modified")
+
+    @field_validator('mobileNumber')
+    @classmethod
+    def validate_mobile(cls, v):
+        """Validate mobile if provided: exactly 10 digits in range 1000000000-9999999999"""
+        if v is not None:
+            if len(v) != 10 or not v.isdigit():
+                raise ValueError('Mobile number must be exactly 10 digits')
+
+            mobile_int = int(v)
+            if mobile_int < 1000000000 or mobile_int > 9999999999:
+                raise ValueError('Mobile number must be in range 1000000000-9999999999')
+
+        return v
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "firstName": "Jonathan",
+                "emailId": "jonathan.doe@medostel.com",
+                "status": "Active"
+            }
+        }
+
+
+# ============================================================================
+# Schema 3: UserResponse (API response)
+# ============================================================================
+class UserResponse(BaseModel):
+    """
+    User response schema - returned from API calls.
+    Includes all fields plus auto-managed timestamps.
+    """
+    userId: int = Field(..., description="Numeric User ID (BIGINT)")
+    firstName: str
+    lastName: str
+    currentRole: str
+    emailId: str
+    mobileNumber: str = Field(..., description="10-digit mobile")
+    organisation: Optional[str]
+    address: Optional[str]
+    status: str
+    createdDate: datetime = Field(..., description="Auto-populated at creation")
+    updatedDate: datetime = Field(..., description="Auto-updated on modifications")
+
+    class Config:
+        from_attributes = True
+        schema_extra = {
+            "example": {
+                "userId": 1001,
+                "firstName": "John",
+                "lastName": "Doe",
+                "currentRole": "DOCTOR",
+                "emailId": "john.doe@medostel.com",
+                "mobileNumber": "9876543210",
+                "organisation": "Apollo Hospital",
+                "address": "Mumbai, India",
+                "status": "Active",
+                "createdDate": "2026-03-01T10:00:00",
+                "updatedDate": "2026-03-01T12:00:00"
+            }
+        }
+```
+
 ---
 
 ## Step 6: Create Services Layer
@@ -757,12 +983,423 @@ class UserRoleService:
     # The delete_role method has been removed as of March 1, 2026.
 ```
 
-### 6.2 `app/services/__init__.py`
+### 6.2 `app/services/user_service.py` - User_Master Service (Enhanced Schema v2.0)
+
+**Updated March 1, 2026** ✅ - BIGINT userId, Email RFC 5322, 10-digit mobile
+
+```python
+"""
+User_Master Service Layer - Business Logic for User Management
+Handles all database operations for User_Master table with enhanced schema v2.0
+"""
+
+from datetime import datetime
+from typing import Optional, List
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class UserService:
+    """Service class for User_Master operations"""
+
+    @staticmethod
+    async def get_user_by_id(db, userId: int):
+        """
+        Fetch user by numeric userId (BIGINT)
+        Args:
+            db: Database connection
+            userId: Numeric user ID (1-1000000000)
+        Returns:
+            User object or None
+        """
+        try:
+            cursor = db.cursor()
+            cursor.execute(
+                """
+                SELECT userId, firstName, lastName, currentRole, emailId, mobileNumber,
+                       organisation, address, status, createdDate, updatedDate
+                FROM user_master
+                WHERE userId = %s
+                """
+            , (userId,))
+            result = cursor.fetchone()
+            cursor.close()
+
+            if result:
+                return {
+                    "userId": result[0],
+                    "firstName": result[1],
+                    "lastName": result[2],
+                    "currentRole": result[3],
+                    "emailId": result[4],
+                    "mobileNumber": str(result[5]),
+                    "organisation": result[6],
+                    "address": result[7],
+                    "status": result[8],
+                    "createdDate": result[9],
+                    "updatedDate": result[10]
+                }
+            return None
+        except Exception as e:
+            logger.error(f"Error fetching user {userId}: {e}")
+            raise
+
+    @staticmethod
+    async def get_user_by_email(db, email: str):
+        """
+        Fetch user by email (RFC 5322 validated)
+        Args:
+            db: Database connection
+            email: Email address
+        Returns:
+            User object or None
+        """
+        try:
+            cursor = db.cursor()
+            cursor.execute(
+                """
+                SELECT userId, firstName, lastName, currentRole, emailId, mobileNumber,
+                       organisation, address, status, createdDate, updatedDate
+                FROM user_master
+                WHERE emailId = %s
+                """
+            , (email,))
+            result = cursor.fetchone()
+            cursor.close()
+
+            if result:
+                return {
+                    "userId": result[0],
+                    "firstName": result[1],
+                    "lastName": result[2],
+                    "currentRole": result[3],
+                    "emailId": result[4],
+                    "mobileNumber": str(result[5]),
+                    "organisation": result[6],
+                    "address": result[7],
+                    "status": result[8],
+                    "createdDate": result[9],
+                    "updatedDate": result[10]
+                }
+            return None
+        except Exception as e:
+            logger.error(f"Error fetching user with email {email}: {e}")
+            raise
+
+    @staticmethod
+    async def get_user_by_mobile(db, mobile: str):
+        """
+        Fetch user by mobile number (10 digits)
+        Args:
+            db: Database connection
+            mobile: Mobile number (exactly 10 digits)
+        Returns:
+            User object or None
+        """
+        try:
+            cursor = db.cursor()
+            cursor.execute(
+                """
+                SELECT userId, firstName, lastName, currentRole, emailId, mobileNumber,
+                       organisation, address, status, createdDate, updatedDate
+                FROM user_master
+                WHERE mobileNumber = %s
+                """
+            , (int(mobile),))
+            result = cursor.fetchone()
+            cursor.close()
+
+            if result:
+                return {
+                    "userId": result[0],
+                    "firstName": result[1],
+                    "lastName": result[2],
+                    "currentRole": result[3],
+                    "emailId": result[4],
+                    "mobileNumber": str(result[5]),
+                    "organisation": result[6],
+                    "address": result[7],
+                    "status": result[8],
+                    "createdDate": result[9],
+                    "updatedDate": result[10]
+                }
+            return None
+        except Exception as e:
+            logger.error(f"Error fetching user with mobile {mobile}: {e}")
+            raise
+
+    @staticmethod
+    async def get_all_users(db, limit: int = 100, offset: int = 0):
+        """
+        Fetch all users with pagination
+        Args:
+            db: Database connection
+            limit: Maximum number of records (default: 100, max: 1000)
+            offset: Pagination offset (default: 0)
+        Returns:
+            List of user objects
+        """
+        try:
+            cursor = db.cursor()
+            cursor.execute(
+                """
+                SELECT userId, firstName, lastName, currentRole, emailId, mobileNumber,
+                       organisation, address, status, createdDate, updatedDate
+                FROM user_master
+                ORDER BY userId DESC
+                LIMIT %s OFFSET %s
+                """
+            , (limit, offset))
+            results = cursor.fetchall()
+            cursor.close()
+
+            users = []
+            for result in results:
+                users.append({
+                    "userId": result[0],
+                    "firstName": result[1],
+                    "lastName": result[2],
+                    "currentRole": result[3],
+                    "emailId": result[4],
+                    "mobileNumber": str(result[5]),
+                    "organisation": result[6],
+                    "address": result[7],
+                    "status": result[8],
+                    "createdDate": result[9],
+                    "updatedDate": result[10]
+                })
+            return users
+        except Exception as e:
+            logger.error(f"Error fetching all users: {e}")
+            raise
+
+    @staticmethod
+    async def get_users_by_role_status(db, role: Optional[str] = None, status: Optional[str] = None,
+                                       limit: int = 100, offset: int = 0):
+        """
+        Fetch users filtered by role and/or status
+        Args:
+            db: Database connection
+            role: Role ID to filter by
+            status: Status to filter by (Active/Inactive/Suspended)
+            limit: Maximum number of records
+            offset: Pagination offset
+        Returns:
+            List of user objects
+        """
+        try:
+            query = """
+                SELECT userId, firstName, lastName, currentRole, emailId, mobileNumber,
+                       organisation, address, status, createdDate, updatedDate
+                FROM user_master
+                WHERE 1=1
+            """
+            params = []
+
+            if role:
+                query += " AND currentRole = %s"
+                params.append(role)
+
+            if status:
+                query += " AND status = %s"
+                params.append(status)
+
+            query += " ORDER BY userId DESC LIMIT %s OFFSET %s"
+            params.extend([limit, offset])
+
+            cursor = db.cursor()
+            cursor.execute(query, params)
+            results = cursor.fetchall()
+            cursor.close()
+
+            users = []
+            for result in results:
+                users.append({
+                    "userId": result[0],
+                    "firstName": result[1],
+                    "lastName": result[2],
+                    "currentRole": result[3],
+                    "emailId": result[4],
+                    "mobileNumber": str(result[5]),
+                    "organisation": result[6],
+                    "address": result[7],
+                    "status": result[8],
+                    "createdDate": result[9],
+                    "updatedDate": result[10]
+                })
+            return users
+        except Exception as e:
+            logger.error(f"Error fetching users by role/status: {e}")
+            raise
+
+    @staticmethod
+    async def create_user(db, user_data: dict):
+        """
+        Create new user with schema v2.0 validation
+        System-managed fields auto-populated:
+        - createdDate: Current timestamp
+        - updatedDate: Current timestamp
+
+        Args:
+            db: Database connection
+            user_data: User data dict with validated fields
+        Returns:
+            Created user object
+        """
+        try:
+            now = datetime.now()
+            cursor = db.cursor()
+
+            cursor.execute(
+                """
+                INSERT INTO user_master
+                (userId, firstName, lastName, currentRole, emailId, mobileNumber,
+                 organisation, address, status, createdDate, updatedDate)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING userId, firstName, lastName, currentRole, emailId, mobileNumber,
+                          organisation, address, status, createdDate, updatedDate
+                """,
+                (
+                    user_data["userId"],
+                    user_data["firstName"],
+                    user_data["lastName"],
+                    user_data["currentRole"],
+                    user_data["emailId"],
+                    int(user_data["mobileNumber"]),
+                    user_data.get("organisation"),
+                    user_data.get("address"),
+                    user_data.get("status", "Active"),
+                    now,
+                    now
+                )
+            )
+
+            result = cursor.fetchone()
+            cursor.close()
+            db.commit()
+
+            if result:
+                return {
+                    "userId": result[0],
+                    "firstName": result[1],
+                    "lastName": result[2],
+                    "currentRole": result[3],
+                    "emailId": result[4],
+                    "mobileNumber": str(result[5]),
+                    "organisation": result[6],
+                    "address": result[7],
+                    "status": result[8],
+                    "createdDate": result[9],
+                    "updatedDate": result[10]
+                }
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Error creating user: {e}")
+            raise
+
+    @staticmethod
+    async def update_user(db, userId: int, update_data: dict):
+        """
+        Update user profile with field validation
+        - Prevents userId modification (immutable)
+        - Auto-updates updatedDate to current timestamp
+        - Other fields validated per schema v2.0
+
+        Args:
+            db: Database connection
+            userId: Numeric user ID (BIGINT)
+            update_data: Fields to update
+        Returns:
+            Updated user object
+        """
+        try:
+            now = datetime.now()
+            cursor = db.cursor()
+
+            # Build dynamic update query
+            update_fields = []
+            params = []
+
+            if "firstName" in update_data and update_data["firstName"] is not None:
+                update_fields.append("firstName = %s")
+                params.append(update_data["firstName"])
+
+            if "lastName" in update_data and update_data["lastName"] is not None:
+                update_fields.append("lastName = %s")
+                params.append(update_data["lastName"])
+
+            if "currentRole" in update_data and update_data["currentRole"] is not None:
+                update_fields.append("currentRole = %s")
+                params.append(update_data["currentRole"])
+
+            if "emailId" in update_data and update_data["emailId"] is not None:
+                update_fields.append("emailId = %s")
+                params.append(update_data["emailId"])
+
+            if "mobileNumber" in update_data and update_data["mobileNumber"] is not None:
+                update_fields.append("mobileNumber = %s")
+                params.append(int(update_data["mobileNumber"]))
+
+            if "organisation" in update_data and update_data["organisation"] is not None:
+                update_fields.append("organisation = %s")
+                params.append(update_data["organisation"])
+
+            if "address" in update_data and update_data["address"] is not None:
+                update_fields.append("address = %s")
+                params.append(update_data["address"])
+
+            if "status" in update_data and update_data["status"] is not None:
+                update_fields.append("status = %s")
+                params.append(update_data["status"])
+
+            # Always update updatedDate
+            update_fields.append("updatedDate = %s")
+            params.append(now)
+
+            params.append(userId)
+
+            query = f"""
+                UPDATE user_master
+                SET {', '.join(update_fields)}
+                WHERE userId = %s
+                RETURNING userId, firstName, lastName, currentRole, emailId, mobileNumber,
+                          organisation, address, status, createdDate, updatedDate
+            """
+
+            cursor.execute(query, params)
+            result = cursor.fetchone()
+            cursor.close()
+            db.commit()
+
+            if result:
+                return {
+                    "userId": result[0],
+                    "firstName": result[1],
+                    "lastName": result[2],
+                    "currentRole": result[3],
+                    "emailId": result[4],
+                    "mobileNumber": str(result[5]),
+                    "organisation": result[6],
+                    "address": result[7],
+                    "status": result[8],
+                    "createdDate": result[9],
+                    "updatedDate": result[10]
+                }
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Error updating user {userId}: {e}")
+            raise
+```
+
+### 6.3 `app/services/__init__.py`
 ```python
 from app.services.user_role_service import UserRoleService
+from app.services.user_service import UserService
 
 __all__ = [
     "UserRoleService",
+    "UserService",
 ]
 ```
 
@@ -1024,7 +1661,343 @@ async def update_role(
 # Roles cannot be deleted from the system. Use status update to deactivate roles instead.
 ```
 
-### 7.2 `app/routes/v1/__init__.py`
+### 7.2 `app/routes/v1/users.py` - User_Master APIs (API 5 & 6 - Enhanced Schema v2.0)
+
+**Updated March 1, 2026** ✅ - BIGINT userId, Email RFC 5322 validation, 10-digit mobile validation
+
+```python
+"""
+User_Master API Routes - Enhanced Schema v2.0
+- API 5: GET /api/v1/users/all (Flexible retrieval with filtering)
+- API 6: POST /api/v1/users (Create user with validation)
+- API 6: PUT /api/v1/users/{userId} (Update with field validation)
+"""
+
+from fastapi import APIRouter, HTTPException, Query, Depends, status
+from typing import Optional, List
+from datetime import datetime
+from http import HTTPStatus
+from app.schemas.user import UserCreate, UserUpdate, UserResponse
+from app.services.user_service import UserService
+from app.schemas.common import APIResponse
+from app.database.connection import get_db
+
+router = APIRouter(prefix="/api/v1/users", tags=["User_Master"])
+
+# ============================================================================
+# API 5: GET /api/v1/users/all - Flexible User Retrieval (4 Scenarios)
+# ============================================================================
+
+@router.get("/all", response_model=APIResponse, status_code=HTTPStatus.OK)
+async def get_users(
+    userId: Optional[int] = Query(None, ge=1, le=1000000000, description="Numeric User ID (BIGINT)"),
+    email: Optional[str] = Query(None, description="Email address (RFC 5322)"),
+    role: Optional[str] = Query(None, description="Role ID"),
+    status: Optional[str] = Query(None, pattern="^(Active|Inactive|Suspended)$"),
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+    db = Depends(get_db)
+):
+    """
+    Retrieve users with flexible filtering options (4 scenarios):
+
+    Scenario 1: Fetch by userId
+    - GET /api/v1/users/all?userId=1001
+
+    Scenario 2: Fetch by email (RFC 5322 validated)
+    - GET /api/v1/users/all?email=john.doe@medostel.com
+
+    Scenario 3: Filter by role and status
+    - GET /api/v1/users/all?role=DOCTOR&status=Active
+
+    Scenario 4: Fetch all with pagination
+    - GET /api/v1/users/all?limit=10&offset=0
+    """
+    try:
+        # Validate email format if provided
+        if email:
+            import re
+            email_pattern = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'
+            if not re.match(email_pattern, email):
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_REQUEST,
+                    detail=f"Email validation failed for: '{email}'"
+                )
+
+        # Determine which scenario to execute
+        users = []
+        count = 0
+        scenario = "Fetch all users"
+
+        if userId is not None:
+            # Scenario 1: Fetch by userId
+            users = await UserService.get_user_by_id(db, userId)
+            if not users:
+                raise HTTPException(
+                    status_code=HTTPStatus.NOT_FOUND,
+                    detail=f"User with ID '{userId}' not found"
+                )
+            users = [users]
+            count = 1
+            scenario = f"Fetch by userId {userId}"
+
+        elif email:
+            # Scenario 2: Fetch by email
+            user = await UserService.get_user_by_email(db, email)
+            if not user:
+                raise HTTPException(
+                    status_code=HTTPStatus.NOT_FOUND,
+                    detail=f"User with email '{email}' not found"
+                )
+            users = [user]
+            count = 1
+            scenario = f"Fetch by email {email}"
+
+        elif role or status:
+            # Scenario 3: Filter by role and/or status
+            users = await UserService.get_users_by_role_status(
+                db, role, status, limit, offset
+            )
+            count = len(users)
+            scenario = f"Filter by role={role}, status={status}"
+
+        else:
+            # Scenario 4: Fetch all with pagination
+            users = await UserService.get_all_users(db, limit, offset)
+            count = len(users)
+            scenario = "Fetch all users with pagination"
+
+        return APIResponse(
+            status="success",
+            code=HTTPStatus.OK,
+            message=f"Retrieved {count} user(s) successfully",
+            data={
+                "count": count,
+                "scenario": scenario,
+                "users": users
+            },
+            timestamp=datetime.now()
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
+# ============================================================================
+# API 6: POST /api/v1/users - Create User (Schema v2.0 Validation)
+# ============================================================================
+
+@router.post("", response_model=APIResponse, status_code=HTTPStatus.CREATED)
+async def create_user(
+    user_data: UserCreate,
+    db = Depends(get_db)
+):
+    """
+    Create a new user with enhanced schema validation:
+
+    Required Fields:
+    - userId: BIGINT (1-1000000000)
+    - firstName: str (max 100 chars)
+    - lastName: str (max 100 chars)
+    - currentRole: str (must reference User_Role_Master)
+    - emailId: str (RFC 5322 format, unique)
+    - mobileNumber: str (exactly 10 digits, 1000000000-9999999999)
+
+    Optional Fields:
+    - organisation: str
+    - address: str
+    - status: str (default: Active, values: Active/Inactive/Suspended)
+
+    System-managed Fields (AUTO-POPULATED):
+    - createdDate: current timestamp
+    - updatedDate: current timestamp
+    """
+    try:
+        # Validate userId range
+        if user_data.userId < 1 or user_data.userId > 1000000000:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=f"userId must be between 1 and 1000000000"
+            )
+
+        # Validate mobile number (10 digits, range 1000000000-9999999999)
+        if len(user_data.mobileNumber) != 10 or not user_data.mobileNumber.isdigit():
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=f"Mobile number must be exactly 10 digits"
+            )
+
+        mobile_int = int(user_data.mobileNumber)
+        if mobile_int < 1000000000 or mobile_int > 9999999999:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=f"Mobile number must be in range 1000000000-9999999999"
+            )
+
+        # Check for duplicate userId
+        existing = await UserService.get_user_by_id(db, user_data.userId)
+        if existing:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail=f"User with ID {user_data.userId} already exists"
+            )
+
+        # Check for duplicate email
+        existing = await UserService.get_user_by_email(db, user_data.emailId)
+        if existing:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail=f"Email '{user_data.emailId}' already in use"
+            )
+
+        # Check for duplicate mobile
+        existing = await UserService.get_user_by_mobile(db, user_data.mobileNumber)
+        if existing:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail=f"Mobile number '{user_data.mobileNumber}' already in use"
+            )
+
+        # Create user
+        new_user = await UserService.create_user(db, user_data)
+
+        return APIResponse(
+            status="success",
+            code=HTTPStatus.CREATED,
+            message=f"User with ID {new_user.userId} created successfully",
+            data=new_user,
+            timestamp=datetime.now()
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
+# ============================================================================
+# API 6: PUT /api/v1/users/{userId} - Update User Profile
+# ============================================================================
+
+@router.put("/{userId}", response_model=APIResponse, status_code=HTTPStatus.OK)
+async def update_user(
+    userId: int = Query(..., ge=1, le=1000000000, description="Numeric User ID"),
+    user_update: UserUpdate = None,
+    db = Depends(get_db)
+):
+    """
+    Update user profile with field-level validation:
+
+    Updateable Fields:
+    - firstName, lastName: str
+    - currentRole: str (must reference User_Role_Master)
+    - emailId: str (RFC 5322 format, unique)
+    - mobileNumber: str (10 digits, 1000000000-9999999999)
+    - organisation: str
+    - address: str
+    - status: str (Active/Inactive/Suspended)
+
+    Immutable Fields (CANNOT be modified):
+    - userId: Prevents modification
+    - createdDate: Auto-managed
+    - updatedDate: Auto-updated to current timestamp
+    """
+    try:
+        # Check if user exists
+        existing = await UserService.get_user_by_id(db, userId)
+        if not existing:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f"User with ID {userId} not found"
+            )
+
+        # Prevent userId modification
+        if user_update.userId is not None and user_update.userId != userId:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=f"Cannot modify immutable field 'userId'"
+            )
+
+        # Validate email if provided
+        if user_update.emailId:
+            import re
+            email_pattern = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'
+            if not re.match(email_pattern, user_update.emailId):
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_REQUEST,
+                    detail=f"Email validation failed: '{user_update.emailId}'"
+                )
+
+            # Check email uniqueness (if different from current)
+            if user_update.emailId != existing.emailId:
+                dup = await UserService.get_user_by_email(db, user_update.emailId)
+                if dup:
+                    raise HTTPException(
+                        status_code=HTTPStatus.CONFLICT,
+                        detail=f"Email '{user_update.emailId}' already in use"
+                    )
+
+        # Validate mobile if provided
+        if user_update.mobileNumber:
+            if len(user_update.mobileNumber) != 10 or not user_update.mobileNumber.isdigit():
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_REQUEST,
+                    detail=f"Mobile number must be exactly 10 digits"
+                )
+
+            mobile_int = int(user_update.mobileNumber)
+            if mobile_int < 1000000000 or mobile_int > 9999999999:
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_REQUEST,
+                    detail=f"Mobile number must be in range 1000000000-9999999999"
+                )
+
+            # Check mobile uniqueness (if different from current)
+            if user_update.mobileNumber != existing.mobileNumber:
+                dup = await UserService.get_user_by_mobile(db, user_update.mobileNumber)
+                if dup:
+                    raise HTTPException(
+                        status_code=HTTPStatus.CONFLICT,
+                        detail=f"Mobile number '{user_update.mobileNumber}' already in use"
+                    )
+
+        # Validate status if provided
+        if user_update.status:
+            valid_statuses = ["Active", "Inactive", "Suspended"]
+            if user_update.status not in valid_statuses:
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_REQUEST,
+                    detail=f"Status must be one of: {', '.join(valid_statuses)}"
+                )
+
+        # Update user
+        updated_user = await UserService.update_user(db, userId, user_update)
+
+        return APIResponse(
+            status="success",
+            code=HTTPStatus.OK,
+            message=f"User profile updated successfully. updatedDate auto-set to current timestamp.",
+            data=updated_user,
+            timestamp=datetime.now()
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+```
+
+---
+
+### 7.3 `app/routes/v1/__init__.py`
 ```python
 # This file is intentionally left empty for package initialization
 ```
@@ -1044,7 +2017,7 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
-from app.routes.v1 import roles  # Import when ready
+from app.routes.v1 import roles, users  # API 1-2 (Roles), API 5-6 (Users)
 from app.config import settings
 from app.database import close_db
 
@@ -1124,8 +2097,8 @@ async def root():
 
 # Include routers (uncomment as you create them)
 app.include_router(roles.router, prefix="/api/v1", tags=["Roles"])
+app.include_router(users.router, prefix="/api/v1", tags=["Users"])
 # app.include_router(locations.router, prefix="/api/v1", tags=["Locations"])
-# app.include_router(users.router, prefix="/api/v1", tags=["Users"])
 # app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
 # app.include_router(registrations.router, prefix="/api/v1", tags=["Registrations"])
 # app.include_router(reports.router, prefix="/api/v1", tags=["Reports"])
@@ -1317,6 +2290,14 @@ gcloud run deploy medostel-api \
 
 ---
 
-**Last Updated**: 2026-02-28
-**Status**: Ready for Step-by-Step Implementation
+**Last Updated**: 2026-03-01 (Added User_Master implementation - Schema v2.0)
+**Status**: APIs 1-2 & 5-6 Complete - Ready for Implementation
+**Implementation Coverage**:
+- ✅ Section 5.2: user_role.py schemas (User_Role_Master)
+- ✅ Section 5.3: user.py schemas (User_Master - Enhanced Schema v2.0)
+- ✅ Section 6.1: user_role_service.py (User_Role_Master service)
+- ✅ Section 6.2: user_service.py (User_Master service - Schema v2.0)
+- ✅ Section 7.1: roles.py routes (API 1 & 2)
+- ✅ Section 7.2: users.py routes (API 5 & 6 - Schema v2.0)
+- ✅ Step 8: main.py with both routers imported and registered
 **Total APIs to Implement**: 12 (6 tables × 2 APIs each)
