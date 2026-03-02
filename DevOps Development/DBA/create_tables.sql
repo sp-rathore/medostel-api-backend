@@ -29,17 +29,21 @@ CREATE INDEX IF NOT EXISTS idx_user_role_status ON User_Role_Master(status);
 
 -- ============================================================================
 -- TABLE 2: State_City_PinCode_Master
--- Description: Master table for geographic data
+-- Description: Master table for geographic data with hierarchical structure
+-- Hierarchy: Country (India) -> State -> District -> City -> PinCode
 -- Primary Key: pinCode (Numeric, unique identifier for postal codes)
--- Note: Schema updated 2026-03-02 - changed to numeric data types
+-- Updated: 2026-03-02 - changed to numeric data types
+-- Updated: 2026-03-03 - added District columns and hierarchy support
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS State_City_PinCode_Master (
     pinCode INTEGER PRIMARY KEY,
     stateId INTEGER NOT NULL,
     stateName VARCHAR(100) NOT NULL,
-    cityName VARCHAR(100) NOT NULL,
+    districtId INTEGER NOT NULL,
+    districtName VARCHAR(100) NOT NULL,
     cityId INTEGER NOT NULL,
+    cityName VARCHAR(100) NOT NULL,
     countryName VARCHAR(50) NOT NULL DEFAULT 'India',
     status VARCHAR(20) NOT NULL DEFAULT 'Active'
         CHECK (status IN ('Active', 'Inactive')),
@@ -48,12 +52,20 @@ CREATE TABLE IF NOT EXISTS State_City_PinCode_Master (
 );
 
 -- Create indexes for State_City_PinCode_Master
-CREATE INDEX IF NOT EXISTS idx_state_name ON State_City_PinCode_Master(stateName);
-CREATE INDEX IF NOT EXISTS idx_city_name ON State_City_PinCode_Master(cityName);
+-- Single column indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_state_id ON State_City_PinCode_Master(stateId);
+CREATE INDEX IF NOT EXISTS idx_district_id ON State_City_PinCode_Master(districtId);
 CREATE INDEX IF NOT EXISTS idx_city_id ON State_City_PinCode_Master(cityId);
-CREATE INDEX IF NOT EXISTS idx_state_city ON State_City_PinCode_Master(stateId, cityId);
+CREATE INDEX IF NOT EXISTS idx_state_name ON State_City_PinCode_Master(stateName);
+CREATE INDEX IF NOT EXISTS idx_district_name ON State_City_PinCode_Master(districtName);
+CREATE INDEX IF NOT EXISTS idx_city_name ON State_City_PinCode_Master(cityName);
 CREATE INDEX IF NOT EXISTS idx_status ON State_City_PinCode_Master(status);
+
+-- Composite indexes for hierarchical queries
+CREATE INDEX IF NOT EXISTS idx_state_district ON State_City_PinCode_Master(stateId, districtId);
+CREATE INDEX IF NOT EXISTS idx_district_city ON State_City_PinCode_Master(districtId, cityId);
+CREATE INDEX IF NOT EXISTS idx_state_district_city ON State_City_PinCode_Master(stateId, districtId, cityId);
+CREATE INDEX IF NOT EXISTS idx_district_status ON State_City_PinCode_Master(districtId, status);
 
 -- ============================================================================
 -- TABLE 3: User_Master
