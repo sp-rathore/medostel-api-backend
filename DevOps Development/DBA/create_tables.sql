@@ -30,15 +30,16 @@ CREATE INDEX IF NOT EXISTS idx_user_role_status ON User_Role_Master(status);
 -- ============================================================================
 -- TABLE 2: State_City_PinCode_Master
 -- Description: Master table for geographic data
+-- Primary Key: pinCode (Numeric, unique identifier for postal codes)
+-- Note: Schema updated 2026-03-02 - changed to numeric data types
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS State_City_PinCode_Master (
-    id SERIAL PRIMARY KEY,
-    stateId VARCHAR(10) NOT NULL,
+    pinCode INTEGER PRIMARY KEY,
+    stateId INTEGER NOT NULL,
     stateName VARCHAR(100) NOT NULL,
     cityName VARCHAR(100) NOT NULL,
-    cityId VARCHAR(10) NOT NULL,
-    pinCode VARCHAR(10) NOT NULL,
+    cityId INTEGER NOT NULL,
     countryName VARCHAR(50) NOT NULL DEFAULT 'India',
     status VARCHAR(20) NOT NULL DEFAULT 'Active'
         CHECK (status IN ('Active', 'Inactive')),
@@ -49,8 +50,10 @@ CREATE TABLE IF NOT EXISTS State_City_PinCode_Master (
 -- Create indexes for State_City_PinCode_Master
 CREATE INDEX IF NOT EXISTS idx_state_name ON State_City_PinCode_Master(stateName);
 CREATE INDEX IF NOT EXISTS idx_city_name ON State_City_PinCode_Master(cityName);
-CREATE INDEX IF NOT EXISTS idx_pincode ON State_City_PinCode_Master(pinCode);
+CREATE INDEX IF NOT EXISTS idx_state_id ON State_City_PinCode_Master(stateId);
+CREATE INDEX IF NOT EXISTS idx_city_id ON State_City_PinCode_Master(cityId);
 CREATE INDEX IF NOT EXISTS idx_state_city ON State_City_PinCode_Master(stateId, cityId);
+CREATE INDEX IF NOT EXISTS idx_status ON State_City_PinCode_Master(status);
 
 -- ============================================================================
 -- TABLE 3: User_Master

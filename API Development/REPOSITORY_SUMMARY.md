@@ -163,13 +163,15 @@ tests/
   - `PUT /api/v1/roles/{roleId}` - Update role
   - `DELETE /api/v1/roles/{roleId}` - Delete role
 
-#### APIs 3-4: State_City_PinCode_Master (Location Management)
+#### APIs 3-4: State_City_PinCode_Master (Location Management) ⭐ Updated Mar 2, 2026
 - **File**: `routes/v1/locations.py` + `services/location_service.py`
-- **API 3 (SELECT)**: `GET /api/v1/locations/all` - Retrieve all locations
+- **API 3 (SELECT)**: `GET /api/v1/locations/all` - Retrieve all locations (numeric stateId filter)
+- **API 3.1 (SELECT - NEW)**: `GET /api/v1/locations/pincodes` - Get pinCodes by city_id or city_name
 - **API 4 (CRUD)**:
-  - `POST /api/v1/locations` - Create location
-  - `PUT /api/v1/locations/{id}` - Update location
-  - `DELETE /api/v1/locations/{id}` - Delete location
+  - `POST /api/v1/locations` - Create location (pinCode, stateId, cityId now INTEGER)
+  - `PUT /api/v1/locations/{pin_code}` - Update location (changed from {id} to {pin_code})
+  - `DELETE /api/v1/locations/{id}` - ❌ REMOVED (use status field instead)
+- **Changes**: pinCode is now PRIMARY KEY, numeric data types, DELETE removed
 
 #### APIs 5-6: User_Master (User Management)
 - **File**: `routes/v1/users.py` + `services/user_service.py`

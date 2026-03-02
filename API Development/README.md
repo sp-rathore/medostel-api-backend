@@ -183,10 +183,12 @@ alembic downgrade -1
 - `GET /api/v1/reports/{reportId}` - Get report details
 - `DELETE /api/v1/reports/{reportId}` - Delete report
 
-### Locations
-- `GET /api/v1/locations/states` - Get all states
-- `GET /api/v1/locations/states/{stateId}/cities` - Get cities
-- `GET /api/v1/locations/pincodes/{pinCode}` - Get location by pincode
+### Locations (Updated March 2, 2026 - Numeric Types & pinCode as PK)
+- `GET /api/v1/locations/all` - Get all locations (with filtering by country, state_id, status)
+- `GET /api/v1/locations/pincodes` - Get pinCodes for a city (by city_id or city_name) - **NEW**
+- `POST /api/v1/locations` - Create new location (pinCode, stateId, cityId now numeric)
+- `PUT /api/v1/locations/{pin_code}` - Update location by pinCode (was {id})
+- **REMOVED**: `DELETE /api/v1/locations/{id}` - Use status field instead
 
 ## Testing
 
@@ -330,6 +332,6 @@ MIT License - See LICENSE file for details
 
 ---
 
-**Last Updated**: 2026-02-28
-**Status**: Development
-**Version**: 0.1.0
+**Last Updated**: 2026-03-02
+**Status**: Development (Phase 3 - Documentation Updates in Progress)
+**Version**: 0.2.0

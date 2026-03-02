@@ -43,30 +43,52 @@ CREATE TABLE User_Role_Master (
 
 #### 2.2 Table: `State_City_PinCode_Master`
 *   **Description**: Master table for geographic data (State, City, Pin Code).
-*   **Primary Key**: Composite (`stateId`, `cityId`, `pinCode`) or Surrogate Key.
+*   **Primary Key**: `pinCode` (INTEGER - Unique 5-6 digit postal code)
+*   **Updated**: March 2, 2026 - Changed to INTEGER data types, pinCode as PK for better performance and data integrity
 
 | Column Name | Data Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `stateId` | VARCHAR(10) | Not Null | State Identifier |
+| `pinCode` | INTEGER | PK, Not Null | Postal Code (5-6 digits for India) |
+| `stateId` | INTEGER | Not Null | State Identifier (numeric) |
 | `stateName` | VARCHAR(100) | Not Null | Name of the State |
+| `cityId` | INTEGER | Not Null | City Identifier (numeric) |
 | `cityName` | VARCHAR(100) | Not Null | Name of the City |
-| `cityId` | VARCHAR(10) | Not Null | City Identifier |
-| `pinCode` | VARCHAR(10) | Not Null | Postal Code |
 | `countryName` | VARCHAR(50) | Default 'India' | Country Name |
 | `status` | VARCHAR(20) | Not Null | 'Active', 'Inactive' |
+| `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Record creation timestamp |
+| `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Last update timestamp |
+
+**Indexes:**
+- `idx_state_name` on stateName
+- `idx_city_name` on cityName
+- `idx_state_id` on stateId
+- `idx_city_id` on cityId
+- `idx_state_city` on (stateId, cityId)
+- `idx_status` on status
 
 ```sql
 CREATE TABLE State_City_PinCode_Master (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    stateId VARCHAR(10) NOT NULL,
+    pinCode INTEGER PRIMARY KEY,
+    stateId INTEGER NOT NULL,
     stateName VARCHAR(100) NOT NULL,
+    cityId INTEGER NOT NULL,
     cityName VARCHAR(100) NOT NULL,
-    cityId VARCHAR(10) NOT NULL,
-    pinCode VARCHAR(10) NOT NULL,
-    countryName VARCHAR(50) DEFAULT 'India',
-    status VARCHAR(20) NOT NULL CHECK (status IN ('Active', 'Inactive'))
+    countryName VARCHAR(50) NOT NULL DEFAULT 'India',
+    status VARCHAR(20) NOT NULL CHECK (status IN ('Active', 'Inactive')),
+    createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Create indexes
+CREATE INDEX idx_state_name ON State_City_PinCode_Master(stateName);
+CREATE INDEX idx_city_name ON State_City_PinCode_Master(cityName);
+CREATE INDEX idx_state_id ON State_City_PinCode_Master(stateId);
+CREATE INDEX idx_city_id ON State_City_PinCode_Master(cityId);
+CREATE INDEX idx_state_city ON State_City_PinCode_Master(stateId, cityId);
+CREATE INDEX idx_status ON State_City_PinCode_Master(status);
 ```
+
+**Migration Note:** This table was migrated from using VARCHAR data types and SERIAL id to INTEGER types with pinCode as PRIMARY KEY on March 2, 2026. See `MIGRATION_STRATEGY.md` for details.
 
 #### 2.3 Table: `User_Master`
 *   **Description**: Core user profile data with enhanced numeric userId and validation.

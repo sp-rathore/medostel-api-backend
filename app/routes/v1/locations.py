@@ -1,6 +1,9 @@
 """
-API routes for State_City_PinCode_Master table (APIs 3 & 4)
-SELECT operations (API 3) and CRUD operations (API 4)
+API routes for State_City_PinCode_Master table (APIs 1, 2, & 3)
+API 1: SELECT - Get all locations
+API 2: CRUD - Create and Update locations
+API 3: SELECT - Get pinCodes by city
+Updated: March 2, 2026 - Changed to numeric data types, pinCode as PK
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -14,20 +17,27 @@ from app.constants import HTTPStatus
 router = APIRouter(prefix="/locations", tags=["Locations"])
 
 
-# API 3: SELECT - Get all locations
+# API 1: SELECT - Get all locations
 @router.get("/all", response_model=APIResponse)
 async def get_all_locations(
     db=Depends(get_db),
-    country: str = Query(None),
-    state_id: str = Query(None),
-    status: str = Query(None),
-    limit: int = Query(100, ge=1, le=1000),
-    offset: int = Query(0, ge=0)
+    country: str = Query(None, description="Filter by country name"),
+    state_id: int = Query(None, description="Filter by state ID (numeric)"),
+    status: str = Query(None, description="Filter by status (Active/Inactive)"),
+    limit: int = Query(100, ge=1, le=1000, description="Number of results to return"),
+    offset: int = Query(0, ge=0, description="Number of results to skip")
 ):
     """
-    API 3: SELECT Operation - Retrieve all geographic locations
-    - Returns all locations with optional filtering
-    - Supports pagination with limit and offset
+    API 1: SELECT Operation - Retrieve all geographic locations
+
+    **Parameters:**
+    - country: Filter by country name (optional)
+    - state_id: Filter by state ID (numeric, optional)
+    - status: Filter by status (Active/Inactive, optional)
+    - limit: Number of results (default 100, max 1000)
+    - offset: Skip N results for pagination (default 0)
+
+    **Response:** List of locations with count
     """
     try:
         locations = await LocationService.get_all_locations(
@@ -48,16 +58,25 @@ async def get_all_locations(
         )
 
 
-# API 4: CRUD - Create location
+# API 2: CRUD - Create location
 @router.post("", response_model=APIResponse, status_code=HTTPStatus.CREATED)
 async def create_location(
     location: LocationCreate,
     db=Depends(get_db)
 ):
     """
-    API 4: CRUD Operation - Create new geographic location
-    - Creates a new location with provided data
-    - Returns the created location
+    API 2: CRUD Operation - Create new geographic location
+
+    **Request Body:**
+    - stateId: State identifier (numeric)
+    - stateName: State name
+    - cityId: City identifier (numeric)
+    - cityName: City name
+    - pinCode: Postal code (5-6 digits for India)
+    - countryName: Country name (default: "India")
+    - status: Status (default: "Active", options: "Active"/"Inactive")
+
+    **Response:** Created location object with HTTP 201
     """
     try:
         new_location = await LocationService.create_location(db, location.dict())
@@ -76,29 +95,38 @@ async def create_location(
         )
 
 
-# API 4: CRUD - Update location
-@router.put("/{location_id}", response_model=APIResponse)
+# API 2: CRUD - Update location
+@router.put("/{pin_code}", response_model=APIResponse)
 async def update_location(
-    location_id: int,
+    pin_code: int,
     location: LocationUpdate,
     db=Depends(get_db)
 ):
     """
-    API 4: CRUD Operation - Update geographic location
-    - Updates an existing location
-    - Returns the updated location
+    API 2: CRUD Operation - Update geographic location by pinCode
+
+    **Path Parameters:**
+    - pin_code: Postal code (primary key, 5-6 digits for India)
+
+    **Request Body (all optional):**
+    - status: Updated status ("Active"/"Inactive")
+    - countryName: Updated country name
+
+    **Note:** pinCode is immutable and cannot be updated. Use pinCode to identify the location.
+
+    **Response:** Updated location object with HTTP 200
     """
     try:
         # Check if location exists
-        existing = await LocationService.get_location_by_id(db, location_id)
+        existing = await LocationService.get_location_by_pincode(db, pin_code)
         if not existing:
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND,
-                detail=f"Location {location_id} not found"
+                detail=f"Location with pinCode {pin_code} not found"
             )
 
         updated_location = await LocationService.update_location(
-            db, location_id, location.dict(exclude_unset=True)
+            db, pin_code, location.dict(exclude_unset=True)
         )
 
         return APIResponse(
@@ -117,37 +145,48 @@ async def update_location(
         )
 
 
-# API 4: CRUD - Delete location
-@router.delete("/{location_id}", status_code=HTTPStatus.NO_CONTENT)
-async def delete_location(
-    location_id: int,
-    db=Depends(get_db)
+# API 3: SELECT - Get pinCodes by city
+@router.get("/pincodes", response_model=APIResponse)
+async def get_pincodes_by_city(
+    db=Depends(get_db),
+    city_id: int = Query(None, description="Filter by city ID (numeric)"),
+    city_name: str = Query(None, description="Filter by city name")
 ):
     """
-    API 4: CRUD Operation - Delete geographic location
-    - Deletes a location by ID
-    - Returns 204 No Content on success
+    API 3: SELECT Operation - Retrieve pinCodes for a specific city
+
+    **Query Parameters (provide at least one):**
+    - city_id: City identifier (numeric, optional)
+    - city_name: City name (string, optional)
+
+    **Response:** List of distinct pinCodes for the specified city
+
+    **Example:**
+    - GET /api/v1/locations/pincodes?city_id=102
+    - GET /api/v1/locations/pincodes?city_name=Mumbai
     """
     try:
-        # Check if location exists
-        existing = await LocationService.get_location_by_id(db, location_id)
-        if not existing:
+        if not city_id and not city_name:
             raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=f"Location {location_id} not found"
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail="At least one of city_id or city_name must be provided"
             )
 
-        success = await LocationService.delete_location(db, location_id)
+        pincodes = await LocationService.get_pincodes_by_city(
+            db, city_id, city_name
+        )
 
-        if not success:
-            raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail="Failed to delete location"
-            )
+        return APIResponse(
+            status="success",
+            code=HTTPStatus.OK,
+            message="PinCodes retrieved successfully for the city",
+            data={"pincodes": pincodes, "count": len(pincodes)},
+            timestamp=datetime.now()
+        )
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail=str(e)
         )

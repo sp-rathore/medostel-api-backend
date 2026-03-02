@@ -2,7 +2,49 @@
 
 ---
 
-## ⭐ Latest Enhancements (March 1, 2026)
+## ⭐ Latest Enhancements
+
+### Phase 1: Location APIs - Schema Refactoring (March 2, 2026) 🆕
+
+**State_City_PinCode_Master (API 3 & 4) - Numeric Data Types & pinCode as Primary Key**
+
+Major refactoring completed to improve data integrity and API design:
+
+#### **Changes Made**:
+✅ **Data Type Improvements**:
+- stateId: VARCHAR(10) → INTEGER (numeric state identifiers)
+- cityId: VARCHAR(10) → INTEGER (numeric city identifiers)
+- pinCode: VARCHAR(10) → INTEGER (5-6 digit postal codes)
+
+✅ **Primary Key Restructuring**:
+- Removed: Surrogate key `id` (SERIAL)
+- Added: Natural key `pinCode` (INTEGER PRIMARY KEY)
+- Benefits: Better data integrity, direct pinCode identification
+
+✅ **API Endpoint Changes**:
+- PUT endpoint: `/api/v1/locations/{id}` → `/api/v1/locations/{pin_code}`
+- DELETE endpoint: **REMOVED** (status field used instead)
+- NEW endpoint: `GET /api/v1/locations/pincodes` for city-based lookups
+
+✅ **Query Parameter Updates**:
+- state_id: Now accepts INTEGER (numeric) instead of string
+
+✅ **New Endpoint - API 3.1**:
+```
+GET /api/v1/locations/pincodes?city_id=102
+GET /api/v1/locations/pincodes?city_name=Mumbai
+```
+- Fetch all pinCodes for a specific city
+- Supports both city_id (numeric) and city_name (string) parameters
+
+#### **Migration Details**:
+- Database: See `DevOps Development/DBA/MIGRATION_STRATEGY.md` for comprehensive migration guide
+- Migration Script: `DevOps Development/DBA/migration_step1.sql` (ready for execution)
+- Pre/post-migration validation included
+
+---
+
+### Phase 2: Earlier Enhancements (March 1, 2026)
 
 ### Dual API Enhancement: User_Role_Master (API 1 & 2) + User_Master (API 5 & 6)
 

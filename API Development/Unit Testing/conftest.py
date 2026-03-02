@@ -95,15 +95,16 @@ async def patient_role(client):
 
 
 # ===== Location Fixtures =====
+# Note: Updated March 2, 2026 - All numeric types, pinCode as PK
 @pytest.fixture
 async def sample_location(client):
-    """Create and return a sample location"""
+    """Create and return a sample location with numeric types"""
     location_data = {
-        "stateId": f"ST{fake.numerify('##')}",
+        "stateId": fake.random_int(min=1, max=36),  # India has 36 states/UTs
         "stateName": fake.state()[:50],
-        "cityId": fake.word().upper()[:10],
+        "cityId": fake.random_int(min=1, max=1000),
         "cityName": fake.city()[:50],
-        "pinCode": fake.numerify("######"),
+        "pinCode": fake.random_int(min=100000, max=999999),  # 5-6 digits
         "countryName": "India",
         "status": "Active"
     }
@@ -114,20 +115,58 @@ async def sample_location(client):
 
 
 @pytest.fixture
-async def sample_location_id(sample_location):
-    """Return sample location ID"""
-    return sample_location["id"] if sample_location else None
+async def sample_location_pincode(sample_location):
+    """Return sample location's pinCode (primary key)"""
+    return sample_location["pinCode"] if sample_location else None
 
 
 @pytest.fixture
 async def mumbai_location(client):
-    """Get or create Mumbai location"""
+    """Get or create Mumbai location with numeric types"""
     location_data = {
-        "stateId": "MH",
+        "stateId": 27,  # Maharashtra
         "stateName": "Maharashtra",
-        "cityId": "MUM",
+        "cityId": 102,  # Mumbai
         "cityName": "Mumbai",
-        "pinCode": "400001",
+        "pinCode": 400001,
+        "countryName": "India",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/locations", json=location_data)
+    if response.status_code in [201, 409]:
+        if response.status_code == 201:
+            return response.json()["data"]["location"]
+    return location_data
+
+
+@pytest.fixture
+async def delhi_location(client):
+    """Get or create Delhi location with numeric types"""
+    location_data = {
+        "stateId": 7,  # Delhi
+        "stateName": "Delhi",
+        "cityId": 45,  # New Delhi
+        "cityName": "New Delhi",
+        "pinCode": 110001,
+        "countryName": "India",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/locations", json=location_data)
+    if response.status_code in [201, 409]:
+        if response.status_code == 201:
+            return response.json()["data"]["location"]
+    return location_data
+
+
+@pytest.fixture
+async def bangalore_location(client):
+    """Get or create Bangalore location with numeric types"""
+    location_data = {
+        "stateId": 8,  # Karnataka
+        "stateName": "Karnataka",
+        "cityId": 85,  # Bangalore
+        "cityName": "Bangalore",
+        "pinCode": 560001,
         "countryName": "India",
         "status": "Active"
     }

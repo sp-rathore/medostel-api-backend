@@ -1,6 +1,7 @@
 """
-Service layer for State_City_PinCode_Master table (APIs 3 & 4)
+Service layer for State_City_PinCode_Master table (APIs 1, 2, & 3)
 Business logic for geographic location management
+Updated: March 2, 2026 - Changed to numeric data types, pinCode as PK
 """
 
 import logging
@@ -16,7 +17,7 @@ class LocationService:
     async def get_all_locations(
         db,
         country: Optional[str] = None,
-        state_id: Optional[str] = None,
+        state_id: Optional[int] = None,
         status: Optional[str] = None,
         limit: int = 100,
         offset: int = 0
@@ -58,22 +59,22 @@ class LocationService:
         try:
             query = """
                 INSERT INTO state_city_pincode_master
-                (stateId, stateName, cityId, cityName, pinCode, countryName, status, createdDate, updatedDate)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                (pinCode, stateId, stateName, cityId, cityName, countryName, status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING *
             """
             cursor.execute(query, (
+                location_data['pinCode'],
                 location_data['stateId'],
                 location_data['stateName'],
                 location_data['cityId'],
                 location_data['cityName'],
-                location_data['pinCode'],
                 location_data.get('countryName', 'India'),
                 location_data.get('status', 'Active')
             ))
             db.commit()
             result = cursor.fetchone()
-            logger.info(f"Location created: {location_data['cityName']}, {location_data['stateName']}")
+            logger.info(f"Location created: {location_data['cityName']}, {location_data['stateName']}, {location_data['pinCode']}")
             return result
         except Exception as e:
             db.rollback()
@@ -83,8 +84,8 @@ class LocationService:
             cursor.close()
 
     @staticmethod
-    async def update_location(db, location_id: int, location_data: dict) -> Any:
-        """Update existing location"""
+    async def update_location(db, pin_code: int, location_data: dict) -> Any:
+        """Update existing location by pinCode"""
         cursor = db.cursor()
         try:
             updates = []
@@ -99,17 +100,17 @@ class LocationService:
                 params.append(location_data['countryName'])
 
             if not updates:
-                return await LocationService.get_location_by_id(db, location_id)
+                return await LocationService.get_location_by_pincode(db, pin_code)
 
             query = "UPDATE state_city_pincode_master SET "
             query += ", ".join(updates) + ", updatedDate = CURRENT_TIMESTAMP"
-            query += " WHERE id = %s RETURNING *"
-            params.append(location_id)
+            query += " WHERE pinCode = %s RETURNING *"
+            params.append(pin_code)
 
             cursor.execute(query, params)
             db.commit()
             result = cursor.fetchone()
-            logger.info(f"Location updated: {location_id}")
+            logger.info(f"Location updated: PinCode {pin_code}")
             return result
         except Exception as e:
             db.rollback()
@@ -119,31 +120,45 @@ class LocationService:
             cursor.close()
 
     @staticmethod
-    async def delete_location(db, location_id: int) -> bool:
-        """Delete location"""
+    async def get_location_by_pincode(db, pin_code: int) -> Any:
+        """Get location by pinCode (primary key)"""
         cursor = db.cursor()
         try:
-            query = "DELETE FROM state_city_pincode_master WHERE id = %s"
-            cursor.execute(query, (location_id,))
-            db.commit()
-            deleted = cursor.rowcount > 0
-            if deleted:
-                logger.info(f"Location deleted: {location_id}")
-            return deleted
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Error deleting location: {e}")
-            raise
+            query = "SELECT * FROM state_city_pincode_master WHERE pinCode = %s"
+            cursor.execute(query, (pin_code,))
+            return cursor.fetchone()
         finally:
             cursor.close()
 
     @staticmethod
-    async def get_location_by_id(db, location_id: int) -> Any:
-        """Get location by ID"""
+    async def get_pincodes_by_city(
+        db,
+        city_id: Optional[int] = None,
+        city_name: Optional[str] = None
+    ) -> List[Any]:
+        """Get all pinCodes for a specific city (by ID or name)"""
         cursor = db.cursor()
         try:
-            query = "SELECT * FROM state_city_pincode_master WHERE id = %s"
-            cursor.execute(query, (location_id,))
-            return cursor.fetchone()
+            if not city_id and not city_name:
+                raise ValueError("Either city_id or city_name must be provided")
+
+            query = "SELECT DISTINCT pinCode FROM state_city_pincode_master WHERE 1=1"
+            params = []
+
+            if city_id:
+                query += " AND cityId = %s"
+                params.append(city_id)
+
+            if city_name:
+                query += " AND cityName = %s"
+                params.append(city_name)
+
+            query += " ORDER BY pinCode"
+            cursor.execute(query, params)
+            pincodes = cursor.fetchall()
+            return pincodes or []
+        except Exception as e:
+            logger.error(f"Error retrieving pinCodes for city: {e}")
+            raise
         finally:
             cursor.close()

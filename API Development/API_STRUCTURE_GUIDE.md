@@ -121,11 +121,12 @@ medostel-api-backend/
 ├───┼────────────────────────┼──────────────────┼────────────────────────┤
 │ 3 │ State_City_PinCode     │ routes/v1/       │ GET  /api/v1/           │
 │   │ _Master                │ locations.py     │      locations/all      │
-│ 4 │                        │                  │ POST /api/v1/locations │
+│   │ (Updated Mar 2, 2026)  │                  │ GET  /api/v1/locations/ │
+│ 4 │                        │                  │      pincodes (NEW)     │
+│   │                        │                  │ POST /api/v1/locations │
 │   │                        │                  │ PUT  /api/v1/           │
-│   │                        │                  │      locations/{id}    │
-│   │                        │                  │ DEL  /api/v1/           │
-│   │                        │                  │      locations/{id}    │
+│   │                        │                  │      locations/{pin}    │
+│   │                        │                  │      (was {id})         │
 ├───┼────────────────────────┼──────────────────┼────────────────────────┤
 │ 5 │ User_Master            │ routes/v1/users. │ GET  /api/v1/users/all │
 │ 6 │                        │                  │ POST /api/v1/users     │
