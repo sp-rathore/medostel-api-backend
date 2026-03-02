@@ -1,7 +1,8 @@
 """
-Service layer for State_City_PinCode_Master table (APIs 1, 2, & 3)
-Business logic for geographic location management
+Service layer for State_City_PinCode_Master table (APIs 1-5)
+Business logic for geographic location management with hierarchical district support
 Updated: March 2, 2026 - Changed to numeric data types, pinCode as PK
+Updated: March 3, 2026 - Added district-based query methods
 """
 
 import logging
@@ -18,11 +19,12 @@ class LocationService:
         db,
         country: Optional[str] = None,
         state_id: Optional[int] = None,
+        district_id: Optional[int] = None,
         status: Optional[str] = None,
         limit: int = 100,
         offset: int = 0
     ) -> List[Any]:
-        """Retrieve all geographic locations with filtering"""
+        """Retrieve all geographic locations with filtering by state, district, or status"""
         cursor = db.cursor()
         try:
             query = "SELECT * FROM state_city_pincode_master WHERE 1=1"
@@ -36,15 +38,20 @@ class LocationService:
                 query += " AND stateId = %s"
                 params.append(state_id)
 
+            if district_id:
+                query += " AND districtId = %s"
+                params.append(district_id)
+
             if status:
                 query += " AND status = %s"
                 params.append(status)
 
-            query += " ORDER BY stateName, cityName LIMIT %s OFFSET %s"
+            query += " ORDER BY stateId, districtId, cityId, pinCode LIMIT %s OFFSET %s"
             params.extend([limit, offset])
 
             cursor.execute(query, params)
             locations = cursor.fetchall()
+            logger.info(f"Retrieved {len(locations)} locations with filters: state_id={state_id}, district_id={district_id}, status={status}")
             return locations or []
         except Exception as e:
             logger.error(f"Error retrieving locations: {e}")
@@ -54,19 +61,21 @@ class LocationService:
 
     @staticmethod
     async def create_location(db, location_data: dict) -> Any:
-        """Create new geographic location"""
+        """Create new geographic location with district hierarchy"""
         cursor = db.cursor()
         try:
             query = """
                 INSERT INTO state_city_pincode_master
-                (pinCode, stateId, stateName, cityId, cityName, countryName, status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                (pinCode, stateId, stateName, districtId, districtName, cityId, cityName, countryName, status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING *
             """
             cursor.execute(query, (
                 location_data['pinCode'],
                 location_data['stateId'],
                 location_data['stateName'],
+                location_data['districtId'],
+                location_data['districtName'],
                 location_data['cityId'],
                 location_data['cityName'],
                 location_data.get('countryName', 'India'),
@@ -74,7 +83,7 @@ class LocationService:
             ))
             db.commit()
             result = cursor.fetchone()
-            logger.info(f"Location created: {location_data['cityName']}, {location_data['stateName']}, {location_data['pinCode']}")
+            logger.info(f"Location created: {location_data['cityName']}, {location_data['districtName']}, {location_data['stateName']}, PinCode {location_data['pinCode']}")
             return result
         except Exception as e:
             db.rollback()
@@ -156,9 +165,73 @@ class LocationService:
             query += " ORDER BY pinCode"
             cursor.execute(query, params)
             pincodes = cursor.fetchall()
+            logger.info(f"Retrieved {len(pincodes)} pincodes for city: city_id={city_id}, city_name={city_name}")
             return pincodes or []
         except Exception as e:
             logger.error(f"Error retrieving pinCodes for city: {e}")
+            raise
+        finally:
+            cursor.close()
+
+    @staticmethod
+    async def get_districts_by_state(db, state_id: int) -> List[Any]:
+        """Get all districts in a specific state"""
+        cursor = db.cursor()
+        try:
+            query = """
+                SELECT DISTINCT districtId, districtName, stateName
+                FROM state_city_pincode_master
+                WHERE stateId = %s
+                ORDER BY districtId
+            """
+            cursor.execute(query, (state_id,))
+            districts = cursor.fetchall()
+            logger.info(f"Retrieved {len(districts)} districts for state_id={state_id}")
+            return districts or []
+        except Exception as e:
+            logger.error(f"Error retrieving districts for state: {e}")
+            raise
+        finally:
+            cursor.close()
+
+    @staticmethod
+    async def get_cities_by_district(db, district_id: int) -> List[Any]:
+        """Get all cities in a specific district"""
+        cursor = db.cursor()
+        try:
+            query = """
+                SELECT DISTINCT cityId, cityName, districtName, stateName
+                FROM state_city_pincode_master
+                WHERE districtId = %s
+                ORDER BY cityId
+            """
+            cursor.execute(query, (district_id,))
+            cities = cursor.fetchall()
+            logger.info(f"Retrieved {len(cities)} cities for district_id={district_id}")
+            return cities or []
+        except Exception as e:
+            logger.error(f"Error retrieving cities for district: {e}")
+            raise
+        finally:
+            cursor.close()
+
+    @staticmethod
+    async def get_pincodes_by_district(db, district_id: int) -> List[Any]:
+        """Get all pinCodes in a specific district"""
+        cursor = db.cursor()
+        try:
+            query = """
+                SELECT pinCode, cityName, cityId
+                FROM state_city_pincode_master
+                WHERE districtId = %s
+                ORDER BY cityId, pinCode
+            """
+            cursor.execute(query, (district_id,))
+            pincodes = cursor.fetchall()
+            logger.info(f"Retrieved {len(pincodes)} pincodes for district_id={district_id}")
+            return pincodes or []
+        except Exception as e:
+            logger.error(f"Error retrieving pinCodes for district: {e}")
             raise
         finally:
             cursor.close()

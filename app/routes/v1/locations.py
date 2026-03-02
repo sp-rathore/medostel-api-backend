@@ -1,9 +1,12 @@
 """
-API routes for State_City_PinCode_Master table (APIs 1, 2, & 3)
-API 1: SELECT - Get all locations
-API 2: CRUD - Create and Update locations
+API routes for State_City_PinCode_Master table (APIs 1-5)
+API 1: SELECT - Get all locations with district filtering
+API 2: CRUD - Create and Update locations with district hierarchy
 API 3: SELECT - Get pinCodes by city
+API 4: SELECT - Get districts by state
+API 5: SELECT - Get cities/pincodes by district
 Updated: March 2, 2026 - Changed to numeric data types, pinCode as PK
+Updated: March 3, 2026 - Added district hierarchy and new endpoints
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -22,26 +25,33 @@ router = APIRouter(prefix="/locations", tags=["Locations"])
 async def get_all_locations(
     db=Depends(get_db),
     country: str = Query(None, description="Filter by country name"),
-    state_id: int = Query(None, description="Filter by state ID (numeric)"),
+    state_id: int = Query(None, description="Filter by state ID (numeric, 0001-0035)"),
+    district_id: int = Query(None, description="Filter by district ID (numeric, 0001-N per state)"),
     status: str = Query(None, description="Filter by status (Active/Inactive)"),
-    limit: int = Query(100, ge=1, le=1000, description="Number of results to return"),
-    offset: int = Query(0, ge=0, description="Number of results to skip")
+    limit: int = Query(100, ge=1, le=1000, description="Number of results to return (max 1000)"),
+    offset: int = Query(0, ge=0, description="Number of results to skip for pagination")
 ):
     """
-    API 1: SELECT Operation - Retrieve all geographic locations
+    API 1: SELECT Operation - Retrieve all geographic locations with hierarchical filtering
 
-    **Parameters:**
-    - country: Filter by country name (optional)
-    - state_id: Filter by state ID (numeric, optional)
-    - status: Filter by status (Active/Inactive, optional)
-    - limit: Number of results (default 100, max 1000)
+    **Query Parameters (all optional):**
+    - country: Filter by country name (e.g., "India")
+    - state_id: Filter by state ID (numeric, 0001-0035)
+    - district_id: Filter by district ID (numeric, 0001-N per state)
+    - status: Filter by status ("Active" or "Inactive")
+    - limit: Number of results to return (default 100, max 1000)
     - offset: Skip N results for pagination (default 0)
 
-    **Response:** List of locations with count
+    **Response:** List of locations with geographic hierarchy (state, district, city) and count
+
+    **Examples:**
+    - GET /api/v1/locations/all?state_id=1 - Get all locations in state 1 (Maharashtra)
+    - GET /api/v1/locations/all?district_id=5 - Get all locations in district 5
+    - GET /api/v1/locations/all?state_id=1&district_id=1 - Get locations in state 1, district 1
     """
     try:
         locations = await LocationService.get_all_locations(
-            db, country, state_id, status, limit, offset
+            db, country, state_id, district_id, status, limit, offset
         )
 
         return APIResponse(
@@ -65,18 +75,35 @@ async def create_location(
     db=Depends(get_db)
 ):
     """
-    API 2: CRUD Operation - Create new geographic location
+    API 2: CRUD Operation - Create new geographic location with district hierarchy
 
-    **Request Body:**
-    - stateId: State identifier (numeric)
-    - stateName: State name
-    - cityId: City identifier (numeric)
-    - cityName: City name
-    - pinCode: Postal code (5-6 digits for India)
-    - countryName: Country name (default: "India")
-    - status: Status (default: "Active", options: "Active"/"Inactive")
+    **Request Body (all required):**
+    - stateId: State identifier (numeric, 0001-0035)
+    - stateName: State/UT name (e.g., "Maharashtra")
+    - districtId: District identifier (numeric, 0001-N per state)
+    - districtName: District name (e.g., "Mumbai")
+    - cityId: City identifier (numeric, 0001-N per district)
+    - cityName: City name - proper city name, not post office name (e.g., "Mumbai")
+    - pinCode: Postal code (5-6 digits for India, PRIMARY KEY, e.g., 400001)
+    - countryName: Country name (optional, default: "India")
+    - status: Status (optional, default: "Active", options: "Active"/"Inactive")
 
-    **Response:** Created location object with HTTP 201
+    **Response:** Created location object with HTTP 201 status
+
+    **Example Request:**
+    ```json
+    {
+      "stateId": 1,
+      "stateName": "Maharashtra",
+      "districtId": 1,
+      "districtName": "Mumbai",
+      "cityId": 1,
+      "cityName": "Mumbai",
+      "pinCode": 400001,
+      "countryName": "India",
+      "status": "Active"
+    }
+    ```
     """
     try:
         new_location = await LocationService.create_location(db, location.dict())
@@ -106,15 +133,32 @@ async def update_location(
     API 2: CRUD Operation - Update geographic location by pinCode
 
     **Path Parameters:**
-    - pin_code: Postal code (primary key, 5-6 digits for India)
+    - pin_code: Postal code (primary key, 5-6 digits for India, e.g., 400001)
 
     **Request Body (all optional):**
-    - status: Updated status ("Active"/"Inactive")
+    - status: Updated status ("Active" or "Inactive")
     - countryName: Updated country name
 
-    **Note:** pinCode is immutable and cannot be updated. Use pinCode to identify the location.
+    **Immutable Fields (cannot be updated):**
+    - pinCode: Primary key, uniquely identifies the location
+    - stateId: Geographic hierarchy (use new pinCode for different state)
+    - stateName: Geographic hierarchy
+    - districtId: Geographic hierarchy
+    - districtName: Geographic hierarchy
+    - cityId: Geographic hierarchy
+    - cityName: Geographic hierarchy
+
+    **Note:** To move a location to a different state/district/city, create a new record with the new pinCode.
 
     **Response:** Updated location object with HTTP 200
+
+    **Example Request:**
+    ```json
+    {
+      "status": "Active",
+      "countryName": "India"
+    }
+    ```
     """
     try:
         # Check if location exists
@@ -149,21 +193,22 @@ async def update_location(
 @router.get("/pincodes", response_model=APIResponse)
 async def get_pincodes_by_city(
     db=Depends(get_db),
-    city_id: int = Query(None, description="Filter by city ID (numeric)"),
-    city_name: str = Query(None, description="Filter by city name")
+    city_id: int = Query(None, description="Filter by city ID (numeric, 0001-N per district)"),
+    city_name: str = Query(None, description="Filter by city name (e.g., 'Mumbai')")
 ):
     """
     API 3: SELECT Operation - Retrieve pinCodes for a specific city
 
     **Query Parameters (provide at least one):**
-    - city_id: City identifier (numeric, optional)
-    - city_name: City name (string, optional)
+    - city_id: City identifier (numeric, 0001-N per district)
+    - city_name: City name (string)
 
-    **Response:** List of distinct pinCodes for the specified city
+    **Response:** List of distinct pinCodes for the specified city with count
 
-    **Example:**
-    - GET /api/v1/locations/pincodes?city_id=102
-    - GET /api/v1/locations/pincodes?city_name=Mumbai
+    **Examples:**
+    - GET /api/v1/locations/pincodes?city_id=1 - Get all pincodes in city 1
+    - GET /api/v1/locations/pincodes?city_name=Mumbai - Get all pincodes in Mumbai
+    - GET /api/v1/locations/pincodes?city_id=1&city_name=Mumbai - Both parameters
     """
     try:
         if not city_id and not city_name:
@@ -185,6 +230,111 @@ async def get_pincodes_by_city(
         )
     except HTTPException:
         raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
+# API 4: SELECT - Get all districts in a state
+@router.get("/districts/{state_id}", response_model=APIResponse)
+async def get_districts_by_state(
+    state_id: int,
+    db=Depends(get_db)
+):
+    """
+    API 4: SELECT Operation - Retrieve all districts in a specific state
+
+    **Path Parameters:**
+    - state_id: State identifier (numeric, 0001-0035)
+
+    **Response:** List of all districts in the specified state with names
+
+    **Examples:**
+    - GET /api/v1/locations/districts/1 - Get all districts in state 1 (Maharashtra)
+    - GET /api/v1/locations/districts/27 - Get all districts in state 27
+    """
+    try:
+        districts = await LocationService.get_districts_by_state(db, state_id)
+
+        return APIResponse(
+            status="success",
+            code=HTTPStatus.OK,
+            message=f"Districts retrieved successfully for state {state_id}",
+            data={"districts": districts, "count": len(districts)},
+            timestamp=datetime.now()
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
+# API 5: SELECT - Get cities and pincodes by district
+@router.get("/cities/{district_id}", response_model=APIResponse)
+async def get_cities_by_district(
+    district_id: int,
+    db=Depends(get_db)
+):
+    """
+    API 5: SELECT Operation - Retrieve all cities in a specific district
+
+    **Path Parameters:**
+    - district_id: District identifier (numeric, 0001-N per state)
+
+    **Response:** List of all cities in the specified district with names and state/district info
+
+    **Examples:**
+    - GET /api/v1/locations/cities/1 - Get all cities in district 1
+    - GET /api/v1/locations/cities/10 - Get all cities in district 10
+    """
+    try:
+        cities = await LocationService.get_cities_by_district(db, district_id)
+
+        return APIResponse(
+            status="success",
+            code=HTTPStatus.OK,
+            message=f"Cities retrieved successfully for district {district_id}",
+            data={"cities": cities, "count": len(cities)},
+            timestamp=datetime.now()
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
+# API 5 Alternative: GET - Get all pincodes by district
+@router.get("/by-district/{district_id}", response_model=APIResponse)
+async def get_pincodes_by_district(
+    district_id: int,
+    db=Depends(get_db)
+):
+    """
+    API 5 Alternative: SELECT Operation - Retrieve all pinCodes in a specific district
+
+    **Path Parameters:**
+    - district_id: District identifier (numeric, 0001-N per state)
+
+    **Response:** List of all pinCodes in the specified district organized by city
+
+    **Examples:**
+    - GET /api/v1/locations/by-district/1 - Get all pincodes in district 1
+    - GET /api/v1/locations/by-district/5 - Get all pincodes in district 5
+    """
+    try:
+        pincodes = await LocationService.get_pincodes_by_district(db, district_id)
+
+        return APIResponse(
+            status="success",
+            code=HTTPStatus.OK,
+            message=f"PinCodes retrieved successfully for district {district_id}",
+            data={"pincodes": pincodes, "count": len(pincodes)},
+            timestamp=datetime.now()
+        )
     except Exception as e:
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
