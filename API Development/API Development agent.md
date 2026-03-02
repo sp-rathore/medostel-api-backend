@@ -176,8 +176,9 @@ GET /api/v1/locations/pincodes/{pinCode}
 |---|-------|----------|--------|----------|---------|
 | 1 | User_Role_Master | SELECT | GET | `/api/v1/roles/all` | Retrieve all user roles |
 | 2 | User_Role_Master | CRUD | POST/PUT/DELETE | `/api/v1/roles` | Create, update, delete roles |
-| 3 | State_City_PinCode_Master | SELECT | GET | `/api/v1/locations/all` | Retrieve all geographic data |
-| 4 | State_City_PinCode_Master | CRUD | POST/PUT/DELETE | `/api/v1/locations` | Manage geographic data |
+| 3 | State_City_PinCode_Master | SELECT | GET | `/api/v1/locations/all` | Retrieve all geographic locations (numeric types - Updated Mar 2) |
+| 3.1 | State_City_PinCode_Master | SELECT | GET | `/api/v1/locations/pincodes` | Get pinCodes for a city (NEW - March 2, 2026) |
+| 4 | State_City_PinCode_Master | CRUD | POST/PUT | `/api/v1/locations` | Create and update locations (DELETE removed, pinCode as PK) |
 | 5 | User_Master | SELECT | GET | `/api/v1/users/all` | Retrieve all user profiles |
 | 6 | User_Master | CRUD | POST/PUT/DELETE | `/api/v1/users` | Manage user profiles |
 | 7 | User_Login | SELECT | GET | `/api/v1/auth/users` | Retrieve user login records |
@@ -637,43 +638,54 @@ The `/api/v1/roles` endpoint does **NOT** support DELETE operations. Roles can o
 
 ### API 3: State_City_PinCode_Master - SELECT Operations
 
+**Updated**: March 2, 2026 - Changed to numeric data types, pinCode as Primary Key
+
 **Endpoint**: `GET /api/v1/locations/all`
-**Purpose**: Retrieve geographic data (read-only)
+**Purpose**: Retrieve all geographic locations with filtering
 **Authentication**: Not required (Public)
 **Rate Limit**: 200 requests/minute
 
 #### Request
 ```bash
-curl -X GET "http://localhost:8000/api/v1/locations/all?country=India&status=Active" \
+curl -X GET "http://localhost:8000/api/v1/locations/all?country=India&state_id=27&status=Active" \
   -H "Accept: application/json"
 ```
 
 #### Query Parameters
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `country` | string | No | Filter by country (default: India) |
-| `status` | string | No | Filter by status: Active, Inactive |
-| `stateId` | string | No | Filter by state ID |
-| `limit` | integer | No | Limit results (default: 100) |
-| `offset` | integer | No | Pagination offset |
+| `country` | string | No | Filter by country name (e.g., "India") |
+| `state_id` | integer | No | Filter by state ID (numeric) |
+| `status` | string | No | Filter by status: "Active" or "Inactive" |
+| `limit` | integer | No | Limit results (default: 100, max: 1000) |
+| `offset` | integer | No | Pagination offset (default: 0) |
 
 #### Response (200 - Success)
 ```json
 {
   "status": "success",
   "code": 200,
-  "message": "Geographic data retrieved successfully",
+  "message": "Geographic locations retrieved successfully",
   "data": {
-    "total": 125,
-    "count": 50,
+    "count": 2,
     "locations": [
       {
-        "id": 1,
-        "stateId": "MH",
+        "pinCode": 400001,
+        "stateId": 27,
         "stateName": "Maharashtra",
-        "cityId": "MUM",
+        "cityId": 102,
         "cityName": "Mumbai",
-        "pinCode": "400001",
+        "countryName": "India",
+        "status": "Active",
+        "createdDate": "2026-02-28T10:00:00Z",
+        "updatedDate": "2026-02-28T10:00:00Z"
+      },
+      {
+        "pinCode": 400002,
+        "stateId": 27,
+        "stateName": "Maharashtra",
+        "cityId": 102,
+        "cityName": "Mumbai",
         "countryName": "India",
         "status": "Active",
         "createdDate": "2026-02-28T10:00:00Z",
@@ -681,7 +693,59 @@ curl -X GET "http://localhost:8000/api/v1/locations/all?country=India&status=Act
       }
     ]
   },
-  "timestamp": "2026-02-28T16:00:00Z"
+  "timestamp": "2026-03-02T12:00:00Z"
+}
+```
+
+---
+
+### API 3.1: State_City_PinCode_Master - GET PinCodes by City (NEW)
+
+**Added**: March 2, 2026
+
+**Endpoint**: `GET /api/v1/locations/pincodes`
+**Purpose**: Retrieve all pinCodes for a specific city
+**Authentication**: Not required (Public)
+**Rate Limit**: 200 requests/minute
+
+#### Request
+```bash
+# By city ID
+curl -X GET "http://localhost:8000/api/v1/locations/pincodes?city_id=102" \
+  -H "Accept: application/json"
+
+# By city name
+curl -X GET "http://localhost:8000/api/v1/locations/pincodes?city_name=Mumbai" \
+  -H "Accept: application/json"
+```
+
+#### Query Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `city_id` | integer | Conditional | Filter by city ID (numeric). Provide this OR city_name |
+| `city_name` | string | Conditional | Filter by city name. Provide this OR city_id |
+
+#### Response (200 - Success)
+```json
+{
+  "status": "success",
+  "code": 200,
+  "message": "PinCodes retrieved successfully for the city",
+  "data": {
+    "count": 15,
+    "pincodes": [400001, 400002, 400003, 400004, 400005, 400006, 400007, 400008, 400009, 400010, 400011, 400012, 400013, 400014, 400015]
+  },
+  "timestamp": "2026-03-02T12:00:00Z"
+}
+```
+
+#### Response (400 - Bad Request)
+```json
+{
+  "status": "error",
+  "code": 400,
+  "message": "At least one of city_id or city_name must be provided",
+  "timestamp": "2026-03-02T12:00:00Z"
 }
 ```
 
@@ -689,7 +753,9 @@ curl -X GET "http://localhost:8000/api/v1/locations/all?country=India&status=Act
 
 ### API 4: State_City_PinCode_Master - CRUD Operations
 
-**Purpose**: Create, Update, Delete geographic data
+**Updated**: March 2, 2026 - Changed to numeric data types, pinCode as Primary Key, DELETE removed
+
+**Purpose**: Create and Update geographic locations (DELETE operation removed)
 
 #### A. Create Location
 **Endpoint**: `POST /api/v1/locations`
@@ -698,15 +764,26 @@ curl -X GET "http://localhost:8000/api/v1/locations/all?country=India&status=Act
 ##### Request Body
 ```json
 {
-  "stateId": "UP",
+  "stateId": 22,
   "stateName": "Uttar Pradesh",
-  "cityId": "LKH",
+  "cityId": 85,
   "cityName": "Lucknow",
-  "pinCode": "226001",
+  "pinCode": 226001,
   "countryName": "India",
   "status": "Active"
 }
 ```
+
+##### Request Field Details
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| stateId | integer | Yes | State ID (numeric) |
+| stateName | string | Yes | State name |
+| cityId | integer | Yes | City ID (numeric) |
+| cityName | string | Yes | City name |
+| pinCode | integer | Yes | Postal code (5-6 digits for India: 100000-999999) |
+| countryName | string | No | Country name (default: "India") |
+| status | string | No | Status (default: "Active", options: "Active"/"Inactive") |
 
 ##### Response (201 - Created)
 ```json
@@ -715,34 +792,90 @@ curl -X GET "http://localhost:8000/api/v1/locations/all?country=India&status=Act
   "code": 201,
   "message": "Location created successfully",
   "data": {
-    "id": 126,
-    "stateId": "UP",
-    "stateName": "Uttar Pradesh",
-    "cityId": "LKH",
-    "cityName": "Lucknow",
-    "pinCode": "226001",
-    "countryName": "India",
-    "status": "Active",
-    "createdDate": "2026-02-28T16:00:00Z"
+    "location": {
+      "pinCode": 226001,
+      "stateId": 22,
+      "stateName": "Uttar Pradesh",
+      "cityId": 85,
+      "cityName": "Lucknow",
+      "countryName": "India",
+      "status": "Active",
+      "createdDate": "2026-03-02T12:30:00Z",
+      "updatedDate": "2026-03-02T12:30:00Z"
+    }
   },
-  "timestamp": "2026-02-28T16:00:00Z"
+  "timestamp": "2026-03-02T12:30:00Z"
+}
+```
+
+##### Response (400 - Bad Request - Invalid pinCode)
+```json
+{
+  "status": "error",
+  "code": 400,
+  "message": "Invalid pinCode. Must be 5-6 digits (100000-999999)",
+  "timestamp": "2026-03-02T12:30:00Z"
 }
 ```
 
 #### B. Update Location
-**Endpoint**: `PUT /api/v1/locations/{id}`
+**Endpoint**: `PUT /api/v1/locations/{pin_code}`
 **Authentication**: Required (Admin only)
+**Note**: pinCode is immutable and used as the primary key. Only status and countryName can be updated.
 
-##### Request
+##### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| pin_code | integer | Postal code (5-6 digits, e.g., 400001) |
+
+##### Request Body
 ```json
 {
-  "status": "Inactive"
+  "status": "Inactive",
+  "countryName": "India"
 }
 ```
 
-#### C. Delete Location
-**Endpoint**: `DELETE /api/v1/locations/{id}`
-**Authentication**: Required (Admin only)
+##### Request Field Details (all optional)
+| Field | Type | Description |
+|-------|------|-------------|
+| status | string | Updated status ("Active" or "Inactive") |
+| countryName | string | Updated country name |
+
+##### Response (200 - Success)
+```json
+{
+  "status": "success",
+  "code": 200,
+  "message": "Location updated successfully",
+  "data": {
+    "location": {
+      "pinCode": 226001,
+      "stateId": 22,
+      "stateName": "Uttar Pradesh",
+      "cityId": 85,
+      "cityName": "Lucknow",
+      "countryName": "India",
+      "status": "Inactive",
+      "createdDate": "2026-03-02T12:30:00Z",
+      "updatedDate": "2026-03-02T12:35:00Z"
+    }
+  },
+  "timestamp": "2026-03-02T12:35:00Z"
+}
+```
+
+##### Response (404 - Not Found)
+```json
+{
+  "status": "error",
+  "code": 404,
+  "message": "Location with pinCode 226001 not found",
+  "timestamp": "2026-03-02T12:35:00Z"
+}
+```
+
+**Note**: DELETE operation is no longer available. Locations are managed through status field (Active/Inactive).
 
 ---
 
