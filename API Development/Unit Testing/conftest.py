@@ -95,13 +95,15 @@ async def patient_role(client):
 
 
 # ===== Location Fixtures =====
-# Note: Updated March 2, 2026 - All numeric types, pinCode as PK
+# Note: Updated March 3, 2026 - District hierarchy support added
 @pytest.fixture
 async def sample_location(client):
-    """Create and return a sample location with numeric types"""
+    """Create and return a sample location with numeric types and district hierarchy"""
     location_data = {
         "stateId": fake.random_int(min=1, max=36),  # India has 36 states/UTs
         "stateName": fake.state()[:50],
+        "districtId": fake.random_int(min=1, max=20),  # 1-20 per state
+        "districtName": f"{fake.city()} District"[:100],
         "cityId": fake.random_int(min=1, max=1000),
         "cityName": fake.city()[:50],
         "pinCode": fake.random_int(min=100000, max=999999),  # 5-6 digits
@@ -121,11 +123,76 @@ async def sample_location_pincode(sample_location):
 
 
 @pytest.fixture
-async def mumbai_location(client):
-    """Get or create Mumbai location with numeric types"""
+async def pune_location(client):
+    """Get or create Pune location (different district in Maharashtra)"""
     location_data = {
         "stateId": 27,  # Maharashtra
         "stateName": "Maharashtra",
+        "districtId": 2,  # Pune District
+        "districtName": "Pune",
+        "cityId": 103,  # Pune
+        "cityName": "Pune",
+        "pinCode": 411001,
+        "countryName": "India",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/locations", json=location_data)
+    if response.status_code in [201, 409]:
+        if response.status_code == 201:
+            return response.json()["data"]["location"]
+    return location_data
+
+
+@pytest.fixture
+async def nagpur_location(client):
+    """Get or create Nagpur location (another district in Maharashtra)"""
+    location_data = {
+        "stateId": 27,  # Maharashtra
+        "stateName": "Maharashtra",
+        "districtId": 3,  # Nagpur District
+        "districtName": "Nagpur",
+        "cityId": 104,  # Nagpur
+        "cityName": "Nagpur",
+        "pinCode": 440001,
+        "countryName": "India",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/locations", json=location_data)
+    if response.status_code in [201, 409]:
+        if response.status_code == 201:
+            return response.json()["data"]["location"]
+    return location_data
+
+
+@pytest.fixture
+async def navi_mumbai_location(client):
+    """Get or create Navi Mumbai location (another city in Mumbai district)"""
+    location_data = {
+        "stateId": 27,  # Maharashtra
+        "stateName": "Maharashtra",
+        "districtId": 1,  # Mumbai District
+        "districtName": "Mumbai",
+        "cityId": 105,  # Navi Mumbai
+        "cityName": "Navi Mumbai",
+        "pinCode": 400703,
+        "countryName": "India",
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/locations", json=location_data)
+    if response.status_code in [201, 409]:
+        if response.status_code == 201:
+            return response.json()["data"]["location"]
+    return location_data
+
+
+@pytest.fixture
+async def mumbai_location(client):
+    """Get or create Mumbai location with numeric types and district hierarchy"""
+    location_data = {
+        "stateId": 27,  # Maharashtra
+        "stateName": "Maharashtra",
+        "districtId": 1,  # Mumbai District
+        "districtName": "Mumbai",
         "cityId": 102,  # Mumbai
         "cityName": "Mumbai",
         "pinCode": 400001,
@@ -141,10 +208,12 @@ async def mumbai_location(client):
 
 @pytest.fixture
 async def delhi_location(client):
-    """Get or create Delhi location with numeric types"""
+    """Get or create Delhi location with numeric types and district hierarchy"""
     location_data = {
         "stateId": 7,  # Delhi
         "stateName": "Delhi",
+        "districtId": 1,  # Central Delhi District
+        "districtName": "Central Delhi",
         "cityId": 45,  # New Delhi
         "cityName": "New Delhi",
         "pinCode": 110001,
@@ -160,10 +229,12 @@ async def delhi_location(client):
 
 @pytest.fixture
 async def bangalore_location(client):
-    """Get or create Bangalore location with numeric types"""
+    """Get or create Bangalore location with numeric types and district hierarchy"""
     location_data = {
         "stateId": 8,  # Karnataka
         "stateName": "Karnataka",
+        "districtId": 1,  # Bangalore Urban District
+        "districtName": "Bangalore Urban",
         "cityId": 85,  # Bangalore
         "cityName": "Bangalore",
         "pinCode": 560001,

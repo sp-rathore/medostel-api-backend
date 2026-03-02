@@ -207,6 +207,24 @@ class TestAPIOne_GetAllLocations:
         assert data["count"] == 0
         assert data["locations"] == []
 
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_locations_filter_by_district_id(self, client: AsyncClient, mumbai_location):
+        """Test Case 1.15: Filter locations by numeric district_id"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/all?state_id=27&district_id=1")
+
+        assert response.status_code == 200
+        data = response.json()["data"]["locations"]
+
+        # All locations should be from stateId 27, districtId 1
+        for location in data:
+            assert location["stateId"] == 27
+            assert location["districtId"] == 1
+            assert "districtName" in location
+
 
 class TestAPITwo_CreateAndUpdateLocations:
     """Test cases for API 2: POST/PUT /api/v1/locations"""
@@ -635,3 +653,386 @@ class TestAPIThree_GetPinCodesByCity:
 
         assert response.status_code == 200
         assert (end - start) < 0.1, "Response time should be < 100ms"
+
+
+class TestAPIThreePointTwo_GetDistrictsByState:
+    """Test cases for API 3.2: GET /api/v1/locations/districts/{state_id}"""
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_districts_by_state_success(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.2.1: Retrieve all districts in a state successfully"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/districts/27")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "success"
+        assert "districts" in data["data"]
+        assert "count" in data["data"]
+        assert isinstance(data["data"]["districts"], list)
+        assert data["data"]["count"] > 0
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_districts_response_structure(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.2.2: Verify district response has correct fields"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/districts/27")
+
+        assert response.status_code == 200
+        data = response.json()["data"]["districts"]
+
+        if len(data) > 0:
+            first_district = data[0]
+            assert "districtId" in first_district
+            assert "districtName" in first_district
+            assert "stateName" in first_district
+            assert isinstance(first_district["districtId"], int)
+            assert isinstance(first_district["districtName"], str)
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_districts_numeric_state_id(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.2.3: Verify state_id is numeric (0001-0035)"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/districts/27")
+
+        assert response.status_code == 200
+        data = response.json()["data"]["districts"]
+
+        for district in data:
+            assert district["stateName"] == "Maharashtra"
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_districts_ordered_by_id(self, client: AsyncClient, pune_location, nagpur_location):
+        """Test Case 3.2.4: Verify districts are ordered by districtId"""
+        response = await client.get("/api/v1/locations/districts/27")
+
+        assert response.status_code == 200
+        data = response.json()["data"]["districts"]
+
+        if len(data) > 1:
+            for i in range(len(data) - 1):
+                assert data[i]["districtId"] <= data[i + 1]["districtId"]
+
+    @pytest.mark.unit
+    async def test_get_districts_nonexistent_state(self, client: AsyncClient):
+        """Test Case 3.2.5: Handle nonexistent state gracefully"""
+        response = await client.get("/api/v1/locations/districts/999")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["data"]["count"] == 0
+        assert data["data"]["districts"] == []
+
+    @pytest.mark.unit
+    async def test_get_districts_response_format(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.2.6: Verify APIResponse format is correct"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/districts/27")
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "status" in data
+        assert "code" in data
+        assert "message" in data
+        assert "data" in data
+        assert "timestamp" in data
+        assert data["status"] == "success"
+        assert data["code"] == 200
+
+    @pytest.mark.performance
+    async def test_get_districts_response_time(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.2.7: Response time < 100ms"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        import time
+        start = time.time()
+        response = await client.get("/api/v1/locations/districts/27")
+        end = time.time()
+
+        assert response.status_code == 200
+        assert (end - start) < 0.1, "Response time should be < 100ms"
+
+    @pytest.mark.unit
+    async def test_get_districts_distinct_values(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.2.8: Verify each districtId appears only once"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/districts/27")
+
+        assert response.status_code == 200
+        data = response.json()["data"]["districts"]
+
+        district_ids = [d["districtId"] for d in data]
+        assert len(district_ids) == len(set(district_ids)), "Duplicate districtIds found"
+
+
+class TestAPIThreePointThree_GetCitiesByDistrict:
+    """Test cases for API 3.3: GET /api/v1/locations/cities/{district_id}"""
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_cities_by_district_success(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.3.1: Retrieve all cities in a district successfully"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/cities/1")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "success"
+        assert "cities" in data["data"]
+        assert "count" in data["data"]
+        assert isinstance(data["data"]["cities"], list)
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_cities_response_structure(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.3.2: Verify city response has correct fields"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/cities/1")
+
+        assert response.status_code == 200
+        data = response.json()["data"]["cities"]
+
+        if len(data) > 0:
+            first_city = data[0]
+            assert "cityId" in first_city
+            assert "cityName" in first_city
+            assert "districtName" in first_city
+            assert "stateName" in first_city
+            assert isinstance(first_city["cityId"], int)
+            assert isinstance(first_city["cityName"], str)
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_cities_multiple_cities(self, client: AsyncClient, mumbai_location, navi_mumbai_location):
+        """Test Case 3.3.3: Retrieve multiple cities in same district"""
+        if not mumbai_location or not navi_mumbai_location:
+            pytest.skip("Could not create Mumbai/Navi Mumbai locations")
+
+        response = await client.get("/api/v1/locations/cities/1")
+
+        assert response.status_code == 200
+        data = response.json()["data"]
+        assert data["count"] >= 2
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_cities_ordered_by_id(self, client: AsyncClient, mumbai_location, navi_mumbai_location):
+        """Test Case 3.3.4: Verify cities are ordered by cityId"""
+        if not mumbai_location or not navi_mumbai_location:
+            pytest.skip("Could not create Mumbai/Navi Mumbai locations")
+
+        response = await client.get("/api/v1/locations/cities/1")
+
+        assert response.status_code == 200
+        data = response.json()["data"]["cities"]
+
+        if len(data) > 1:
+            for i in range(len(data) - 1):
+                assert data[i]["cityId"] <= data[i + 1]["cityId"]
+
+    @pytest.mark.unit
+    async def test_get_cities_nonexistent_district(self, client: AsyncClient):
+        """Test Case 3.3.5: Handle nonexistent district gracefully"""
+        response = await client.get("/api/v1/locations/cities/9999")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["data"]["count"] == 0
+        assert data["data"]["cities"] == []
+
+    @pytest.mark.unit
+    async def test_get_cities_response_format(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.3.6: Verify APIResponse format is correct"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/cities/1")
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "status" in data
+        assert "code" in data
+        assert "message" in data
+        assert "data" in data
+        assert "timestamp" in data
+
+    @pytest.mark.performance
+    async def test_get_cities_response_time(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.3.7: Response time < 100ms"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        import time
+        start = time.time()
+        response = await client.get("/api/v1/locations/cities/1")
+        end = time.time()
+
+        assert response.status_code == 200
+        assert (end - start) < 0.1, "Response time should be < 100ms"
+
+    @pytest.mark.unit
+    async def test_get_cities_distinct_values(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.3.8: Verify each cityId appears only once"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/cities/1")
+
+        assert response.status_code == 200
+        data = response.json()["data"]["cities"]
+
+        city_ids = [c["cityId"] for c in data]
+        assert len(city_ids) == len(set(city_ids)), "Duplicate cityIds found"
+
+
+class TestAPIThreePointFour_GetPinCodesByDistrict:
+    """Test cases for API 3.4: GET /api/v1/locations/by-district/{district_id}"""
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_pincodes_by_district_success(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.4.1: Retrieve all pincodes in a district successfully"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/by-district/1")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "success"
+        assert "pincodes" in data["data"]
+        assert "count" in data["data"]
+        assert isinstance(data["data"]["pincodes"], list)
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_pincodes_district_response_structure(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.4.2: Verify pincode response has correct fields"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/by-district/1")
+
+        assert response.status_code == 200
+        data = response.json()["data"]["pincodes"]
+
+        if len(data) > 0:
+            first_pincode = data[0]
+            assert "pinCode" in first_pincode
+            assert "cityName" in first_pincode
+            assert "cityId" in first_pincode
+            assert isinstance(first_pincode["pinCode"], int)
+            assert isinstance(first_pincode["cityName"], str)
+            assert isinstance(first_pincode["cityId"], int)
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_pincodes_by_district_multiple(self, client: AsyncClient, mumbai_location, navi_mumbai_location):
+        """Test Case 3.4.3: Retrieve multiple pincodes organized by city"""
+        if not mumbai_location or not navi_mumbai_location:
+            pytest.skip("Could not create Mumbai/Navi Mumbai locations")
+
+        response = await client.get("/api/v1/locations/by-district/1")
+
+        assert response.status_code == 200
+        data = response.json()["data"]
+        assert data["count"] >= 2
+
+    @pytest.mark.unit
+    @pytest.mark.functional
+    async def test_get_pincodes_district_organized_by_city(self, client: AsyncClient, mumbai_location, navi_mumbai_location):
+        """Test Case 3.4.4: Verify pincodes are organized by city and ordered"""
+        if not mumbai_location or not navi_mumbai_location:
+            pytest.skip("Could not create Mumbai/Navi Mumbai locations")
+
+        response = await client.get("/api/v1/locations/by-district/1")
+
+        assert response.status_code == 200
+        data = response.json()["data"]["pincodes"]
+
+        if len(data) > 1:
+            # Verify ordering by cityId, then pinCode
+            for i in range(len(data) - 1):
+                current = data[i]
+                next_item = data[i + 1]
+                assert current["cityId"] <= next_item["cityId"]
+                if current["cityId"] == next_item["cityId"]:
+                    assert current["pinCode"] <= next_item["pinCode"]
+
+    @pytest.mark.unit
+    async def test_get_pincodes_by_district_nonexistent(self, client: AsyncClient):
+        """Test Case 3.4.5: Handle nonexistent district gracefully"""
+        response = await client.get("/api/v1/locations/by-district/9999")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["data"]["count"] == 0
+        assert data["data"]["pincodes"] == []
+
+    @pytest.mark.unit
+    async def test_get_pincodes_district_response_format(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.4.6: Verify APIResponse format is correct"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/by-district/1")
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "status" in data
+        assert "code" in data
+        assert "message" in data
+        assert "data" in data
+        assert "timestamp" in data
+        assert data["status"] == "success"
+
+    @pytest.mark.performance
+    async def test_get_pincodes_by_district_response_time(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.4.7: Response time < 100ms"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        import time
+        start = time.time()
+        response = await client.get("/api/v1/locations/by-district/1")
+        end = time.time()
+
+        assert response.status_code == 200
+        assert (end - start) < 0.1, "Response time should be < 100ms"
+
+    @pytest.mark.unit
+    async def test_get_pincodes_by_district_return_type(self, client: AsyncClient, mumbai_location):
+        """Test Case 3.4.8: Verify pincodes are returned as integers"""
+        if not mumbai_location:
+            pytest.skip("Could not create Mumbai location")
+
+        response = await client.get("/api/v1/locations/by-district/1")
+
+        assert response.status_code == 200
+        data = response.json()["data"]["pincodes"]
+
+        for pincode_obj in data:
+            assert isinstance(pincode_obj["pinCode"], int)
+            assert 100000 <= pincode_obj["pinCode"] <= 999999
