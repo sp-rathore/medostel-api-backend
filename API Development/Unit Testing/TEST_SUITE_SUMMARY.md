@@ -1,10 +1,11 @@
 # Medostel API - Test Suite Summary
 
-**Version:** 1.1
-**Updated:** March 2, 2026 - Added Location API tests
+**Version:** 1.2
+**Updated:** March 3, 2026 - Added District Hierarchy Tests
 **Framework:** pytest + FastAPI TestClient
-**Total Test Cases:** 140+ (50 Roles + 40 Locations + 50 Others)
+**Total Test Cases:** 165+ (50 Roles + 65 Locations + 50 Others)
 **Coverage Target:** 80%+
+**Location API Tests:** 65 (APIs 1-3.4 with district hierarchy endpoints)
 
 ---
 
@@ -23,7 +24,15 @@
    - AsyncClient fixture for HTTP testing
    - Sample data generators (Faker)
    - Role fixtures (sample_role, doctor_role, patient_role)
-   - Location fixtures (sample_location, sample_location_pincode, mumbai_location, delhi_location, bangalore_location) - Updated with numeric types
+   - Location fixtures (8 total) - Updated March 3, 2026:
+     * sample_location (with district hierarchy)
+     * sample_location_pincode
+     * mumbai_location (district 1)
+     * delhi_location (district 1)
+     * bangalore_location (district 1)
+     * pune_location (district 2 in Maharashtra) - NEW
+     * nagpur_location (district 3 in Maharashtra) - NEW
+     * navi_mumbai_location (different city, district 1) - NEW
    - User fixtures (sample_user, doctor_user, patient_user)
    - Login fixtures (sample_login)
    - Registration request fixtures (sample_request, pending_request)
@@ -58,14 +67,17 @@
    - Coverage tools
    - Optional reporting tools
 
-6. **test_locations_api.py** (APIs 1, 2 & 3) ✅ Created March 2, 2026
-   - Complete test implementation for Location APIs (NUMERIC TYPES)
-   - 40 test cases covering:
-     - GET /api/v1/locations/all (API 1 - 14 tests)
-     - POST /api/v1/locations (API 2 - Create - 4 tests)
-     - PUT /api/v1/locations/{pin_code} (API 2 - Update - 10 tests)
-     - GET /api/v1/locations/pincodes (API 3 - NEW - 8 tests)
-   - Updated fixtures with numeric types (stateId, cityId, pinCode)
+6. **test_locations_api.py** (APIs 1-3.4) ✅ Updated March 3, 2026
+   - Complete test implementation for Location APIs with District Hierarchy
+   - 65 test cases covering:
+     - GET /api/v1/locations/all (API 1 - 15 tests, including district_id filter)
+     - POST/PUT /api/v1/locations (API 2 - 18 tests for Create/Update)
+     - GET /api/v1/locations/pincodes (API 3.1 - 8 tests, Get by City)
+     - GET /api/v1/locations/districts/{state_id} (API 3.2 - 8 tests) - NEW
+     - GET /api/v1/locations/cities/{district_id} (API 3.3 - 8 tests) - NEW
+     - GET /api/v1/locations/by-district/{district_id} (API 3.4 - 8 tests) - NEW
+   - Updated fixtures with district hierarchy (districtId, districtName)
+   - 4 new fixtures for multi-district/multi-city testing
 
 7. **test_users_api.py** (APIs 5 & 6)
    - *To be created* following test_roles_api.py pattern
@@ -396,9 +408,10 @@ client                              # AsyncClient for API testing
 sample_role, sample_role_id
 doctor_role, patient_role
 
-# Locations
-sample_location, sample_location_id
-mumbai_location
+# Locations (Updated March 3, 2026)
+sample_location, sample_location_pincode
+mumbai_location, delhi_location, bangalore_location
+pune_location, nagpur_location, navi_mumbai_location  # NEW: For district hierarchy tests
 
 # Users
 sample_user, sample_user_id
