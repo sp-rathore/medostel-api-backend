@@ -105,12 +105,12 @@ medostel-api-backend/
 
 ---
 
-## 12 APIs Implementation Map
+## 15 APIs Implementation Map
 
 ### Summary Table
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         12 APIs IMPLEMENTATION MAP                       │
+│                         15 APIs IMPLEMENTATION MAP                       │
 ├───┬────────────────────────┬──────────────────┬────────────────────────┤
 │ # │ Table                  │ Route File       │ API Endpoints          │
 ├───┼────────────────────────┼──────────────────┼────────────────────────┤
@@ -121,12 +121,17 @@ medostel-api-backend/
 ├───┼────────────────────────┼──────────────────┼────────────────────────┤
 │ 3 │ State_City_PinCode     │ routes/v1/       │ GET  /api/v1/           │
 │   │ _Master                │ locations.py     │      locations/all      │
-│   │ (Updated Mar 2, 2026)  │                  │ GET  /api/v1/locations/ │
-│ 4 │                        │                  │      pincodes (NEW)     │
+│ 3.1│ (Updated Mar 3, 2026)  │ (6 endpoints)    │ GET  /api/v1/locations/ │
+│ 3.2│ + District hierarchy   │                  │      pincodes           │
+│ 3.3│ + 3 new endpoints      │                  │ GET  /api/v1/locations/ │
+│ 3.4│ for hierarchical query │                  │      districts/{state}  │
+│ 4  │                        │                  │ GET  /api/v1/locations/ │
+│   │                        │                  │      cities/{district}  │
+│   │                        │                  │ GET  /api/v1/locations/ │
+│   │                        │                  │      by-district/{dist} │
 │   │                        │                  │ POST /api/v1/locations │
 │   │                        │                  │ PUT  /api/v1/           │
 │   │                        │                  │      locations/{pin}    │
-│   │                        │                  │      (was {id})         │
 ├───┼────────────────────────┼──────────────────┼────────────────────────┤
 │ 5 │ User_Master            │ routes/v1/users. │ GET  /api/v1/users/all │
 │ 6 │                        │                  │ POST /api/v1/users     │
@@ -552,8 +557,14 @@ Tables:
 
 ---
 
-**Last Updated**: 2026-02-28
-**Status**: Structure & Guide Complete - Ready for Implementation
-**Total APIs**: 12 (6 tables × 2 APIs each)
+**Last Updated**: 2026-03-03
+**Status**: Structure & Guide Complete - 15 APIs with Hierarchical District Support
+**Total APIs**: 15 (6 tables: 2+2+6+2+2+1 APIs)
+  - User_Role_Master: 2 APIs
+  - State_City_PinCode_Master: 6 APIs (with 3 new district endpoints)
+  - User_Master: 2 APIs
+  - User_Login: 2 APIs
+  - New_User_Request: 2 APIs
+  - Report_History: 1 API
 **Framework**: FastAPI + PostgreSQL + Python 3.11+
 **Deployment**: Google Cloud Run on GKE

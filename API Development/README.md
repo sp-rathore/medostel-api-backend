@@ -183,12 +183,28 @@ alembic downgrade -1
 - `GET /api/v1/reports/{reportId}` - Get report details
 - `DELETE /api/v1/reports/{reportId}` - Delete report
 
-### Locations (Updated March 2, 2026 - Numeric Types & pinCode as PK)
-- `GET /api/v1/locations/all` - Get all locations (with filtering by country, state_id, status)
-- `GET /api/v1/locations/pincodes` - Get pinCodes for a city (by city_id or city_name) - **NEW**
-- `POST /api/v1/locations` - Create new location (pinCode, stateId, cityId now numeric)
-- `PUT /api/v1/locations/{pin_code}` - Update location by pinCode (was {id})
-- **REMOVED**: `DELETE /api/v1/locations/{id}` - Use status field instead
+### Locations (Updated March 3, 2026 - District Hierarchy & Hierarchical Queries)
+**Base Changes:**
+- pinCode is now PRIMARY KEY (5-6 digits, numeric)
+- Added districtId (0001-N per state) and districtName fields
+- Hierarchical structure: Country → State → District → City → PinCode
+- stateId, cityId are now numeric (INTEGER)
+- DELETE operation removed; use status field (Active/Inactive) instead
+
+**SELECT Endpoints:**
+- `GET /api/v1/locations/all` - Get all locations with filters (country, state_id, **district_id**, status)
+- `GET /api/v1/locations/pincodes` - Get pinCodes for a city (by city_id or city_name)
+
+**Hierarchy Navigation Endpoints (NEW - March 3, 2026):**
+- `GET /api/v1/locations/districts/{state_id}` - Get all districts in a state
+- `GET /api/v1/locations/cities/{district_id}` - Get all cities in a district
+- `GET /api/v1/locations/by-district/{district_id}` - Get all pinCodes organized by city in a district
+
+**CRUD Endpoints:**
+- `POST /api/v1/locations` - Create location (requires districtId, districtName)
+- `PUT /api/v1/locations/{pin_code}` - Update location (districtId, districtName are immutable)
+
+**Total Location Endpoints:** 6 (3 SELECT + 3 Hierarchy Navigation)
 
 ## Testing
 

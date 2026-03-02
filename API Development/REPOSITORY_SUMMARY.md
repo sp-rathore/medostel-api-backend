@@ -151,7 +151,7 @@ tests/
 
 ---
 
-## 🚀 12 APIs Breakdown
+## 🚀 15 APIs Breakdown
 
 ### API Implementation Checklist
 
@@ -163,15 +163,34 @@ tests/
   - `PUT /api/v1/roles/{roleId}` - Update role
   - `DELETE /api/v1/roles/{roleId}` - Delete role
 
-#### APIs 3-4: State_City_PinCode_Master (Location Management) ⭐ Updated Mar 2, 2026
+#### APIs 3-3.4: State_City_PinCode_Master (Location Management) ⭐ Updated Mar 3, 2026
 - **File**: `routes/v1/locations.py` + `services/location_service.py`
-- **API 3 (SELECT)**: `GET /api/v1/locations/all` - Retrieve all locations (numeric stateId filter)
+- **API 3 (SELECT)**: `GET /api/v1/locations/all` - Retrieve all locations with district hierarchy
+  - Supports filters: country, state_id, district_id, status, limit, offset
+  - Returns: pinCode, stateId, stateName, districtId, districtName, cityId, cityName
 - **API 3.1 (SELECT - NEW)**: `GET /api/v1/locations/pincodes` - Get pinCodes by city_id or city_name
+  - Query params: city_id OR city_name (conditional)
+  - Returns: List of distinct pinCodes
+- **API 3.2 (SELECT - NEW)**: `GET /api/v1/locations/districts/{state_id}` - Get all districts in a state
+  - Path param: state_id (0001-0035)
+  - Returns: districtId, districtName, stateName (ordered by districtId)
+- **API 3.3 (SELECT - NEW)**: `GET /api/v1/locations/cities/{district_id}` - Get all cities in a district
+  - Path param: district_id (0001-N per state)
+  - Returns: cityId, cityName, districtName, stateName (ordered by cityId)
+- **API 3.4 (SELECT - NEW)**: `GET /api/v1/locations/by-district/{district_id}` - Get all pinCodes by district
+  - Path param: district_id (0001-N per state)
+  - Returns: pinCode, cityName, cityId (organized by city, ordered)
 - **API 4 (CRUD)**:
-  - `POST /api/v1/locations` - Create location (pinCode, stateId, cityId now INTEGER)
-  - `PUT /api/v1/locations/{pin_code}` - Update location (changed from {id} to {pin_code})
+  - `POST /api/v1/locations` - Create location (requires districtId, districtName)
+  - `PUT /api/v1/locations/{pin_code}` - Update location (districtId, districtName immutable)
   - `DELETE /api/v1/locations/{id}` - ❌ REMOVED (use status field instead)
-- **Changes**: pinCode is now PRIMARY KEY, numeric data types, DELETE removed
+- **Changes**:
+  - pinCode is now PRIMARY KEY (5-6 digits, numeric)
+  - Added districtId (0001-N per state) and districtName columns
+  - stateId, cityId now INTEGER (numeric)
+  - Hierarchical geographic structure: Country→State→District→City→PinCode
+  - DELETE removed, manage via status field (Active/Inactive)
+  - 6 total endpoints (3 SELECT + 1 pinCode SELECT + 2 new SELECT for hierarchy)
 
 #### APIs 5-6: User_Master (User Management)
 - **File**: `routes/v1/users.py` + `services/user_service.py`
@@ -303,14 +322,14 @@ postgresql://medostel_api_user:Iag2bMi@0@6aD@35.244.27.232:5432/medostel
 7. Implement: config.py, constants.py, database/connection.py
 ```
 
-### Week 2: APIs 1-4
+### Week 2: APIs 1-4 (Extended for 6 Location Endpoints)
 ```
 1. Create user_role schemas & service
 2. Implement APIs 1 & 2 (roles.py)
 3. Write unit tests for APIs 1 & 2
-4. Create location schemas & service
-5. Implement APIs 3 & 4 (locations.py)
-6. Write unit tests for APIs 3 & 4
+4. Create location schemas & service (with district fields)
+5. Implement APIs 3-3.4 (locations.py) - 6 endpoints with district hierarchy
+6. Write unit tests for APIs 3-3.4
 ```
 
 ### Week 3: APIs 5-8
@@ -386,11 +405,11 @@ python -m uvicorn app.main:app --reload
 - [ ] API 1: Get all roles
 
 ### Should-Have (Phase 2-4)
-- [ ] All 12 APIs
+- [ ] All 15 APIs (with 6 location endpoints for district hierarchy)
 - [ ] Authentication & authorization
-- [ ] Input validation
-- [ ] Error responses
-- [ ] Unit tests
+- [ ] Input validation with hierarchical district support
+- [ ] Error responses with field-level validation
+- [ ] Unit tests (40+ tests for location APIs)
 
 ### Nice-to-Have (Phase 5)
 - [ ] Caching layer
@@ -405,15 +424,16 @@ python -m uvicorn app.main:app --reload
 
 | Metric | Value |
 |--------|-------|
-| **Total APIs** | 12 |
+| **Total APIs** | 15 (2+6+2+2+2+1) |
 | **Total Route Files** | 6 |
 | **Total Service Files** | 6 |
 | **Total Schema Files** | 7 |
 | **Database Tables** | 6 |
-| **Database Indexes** | 35 |
+| **Database Indexes** | 41 (added 6 for district hierarchy) |
 | **Python Version** | 3.11+ |
-| **Lines of Code (estimated)** | 3000-4000 |
+| **Lines of Code (estimated)** | 3500-4500 |
 | **Test Coverage (target)** | 80%+ |
+| **District Hierarchy Levels** | 5 (Country→State→District→City→PinCode) |
 
 ---
 
@@ -453,14 +473,15 @@ python -m uvicorn app.main:app --reload
 
 ## ✅ Implementation Ready
 
-This repository is **structured and documented** and ready for implementation following the API Development agent specifications. All documentation files are in place to guide development of the 12 APIs covering all 6 database tables.
+This repository is **structured and documented** and ready for implementation following the API Development agent specifications. All documentation files are in place to guide development of the 15 APIs (with 6 location endpoints featuring hierarchical district support) covering all 6 database tables.
 
-**Next Step**: Follow `APISETUP.md` for step-by-step implementation.
+**Next Step**: Follow `APISETUP.md` for step-by-step implementation. For location APIs, review the district hierarchy specifications in the `API development agent.md` file.
 
 ---
 
-**Last Updated**: 2026-02-28
-**Status**: 📋 Structure Complete - Ready for Implementation
+**Last Updated**: 2026-03-03
+**Status**: 📋 Structure Complete - Ready for Implementation (15 APIs with District Hierarchy)
 **Total Files to Create**: ~50 Python files
-**Estimated Lines of Code**: 3000-4000
-**Development Timeline**: 5 weeks
+**Estimated Lines of Code**: 3500-4500
+**Development Timeline**: 5-6 weeks (includes district hierarchy implementation)
+**District Hierarchy Levels**: 5 (Country → State → District → City → PinCode)
