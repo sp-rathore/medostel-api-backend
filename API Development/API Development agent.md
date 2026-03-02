@@ -170,15 +170,18 @@ GET /api/v1/locations/pincodes/{pinCode}
 
 ## Complete API Specifications for All Tables
 
-### Summary Table: All 12 APIs
+### Summary Table: All 15 APIs
 
 | # | Table | API Type | Method | Endpoint | Purpose |
 |---|-------|----------|--------|----------|---------|
 | 1 | User_Role_Master | SELECT | GET | `/api/v1/roles/all` | Retrieve all user roles |
 | 2 | User_Role_Master | CRUD | POST/PUT/DELETE | `/api/v1/roles` | Create, update, delete roles |
-| 3 | State_City_PinCode_Master | SELECT | GET | `/api/v1/locations/all` | Retrieve all geographic locations (numeric types - Updated Mar 2) |
-| 3.1 | State_City_PinCode_Master | SELECT | GET | `/api/v1/locations/pincodes` | Get pinCodes for a city (NEW - March 2, 2026) |
-| 4 | State_City_PinCode_Master | CRUD | POST/PUT | `/api/v1/locations` | Create and update locations (DELETE removed, pinCode as PK) |
+| 3 | State_City_PinCode_Master | SELECT | GET | `/api/v1/locations/all` | Retrieve all geographic locations with state/district filtering (numeric types, pinCode as PK) |
+| 3.1 | State_City_PinCode_Master | SELECT | GET | `/api/v1/locations/pincodes` | Get pinCodes for a city by city_id or city_name |
+| 3.2 | State_City_PinCode_Master | SELECT | GET | `/api/v1/locations/districts/{state_id}` | Get all districts in a state (NEW - March 3, 2026) |
+| 3.3 | State_City_PinCode_Master | SELECT | GET | `/api/v1/locations/cities/{district_id}` | Get all cities in a district (NEW - March 3, 2026) |
+| 3.4 | State_City_PinCode_Master | SELECT | GET | `/api/v1/locations/by-district/{district_id}` | Get all pinCodes organized by city in a district (NEW - March 3, 2026) |
+| 4 | State_City_PinCode_Master | CRUD | POST/PUT | `/api/v1/locations` | Create and update locations with district hierarchy (district fields immutable) |
 | 5 | User_Master | SELECT | GET | `/api/v1/users/all` | Retrieve all user profiles |
 | 6 | User_Master | CRUD | POST/PUT/DELETE | `/api/v1/users` | Manage user profiles |
 | 7 | User_Login | SELECT | GET | `/api/v1/auth/users` | Retrieve user login records |
@@ -647,7 +650,12 @@ The `/api/v1/roles` endpoint does **NOT** support DELETE operations. Roles can o
 
 #### Request
 ```bash
-curl -X GET "http://localhost:8000/api/v1/locations/all?country=India&state_id=27&status=Active" \
+# Get all locations in a state
+curl -X GET "http://localhost:8000/api/v1/locations/all?state_id=1&status=Active" \
+  -H "Accept: application/json"
+
+# Get all locations in a specific district
+curl -X GET "http://localhost:8000/api/v1/locations/all?state_id=1&district_id=1" \
   -H "Accept: application/json"
 ```
 
@@ -655,7 +663,8 @@ curl -X GET "http://localhost:8000/api/v1/locations/all?country=India&state_id=2
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `country` | string | No | Filter by country name (e.g., "India") |
-| `state_id` | integer | No | Filter by state ID (numeric) |
+| `state_id` | integer | No | Filter by state ID (numeric, 0001-0035) |
+| `district_id` | integer | No | Filter by district ID (numeric, 0001-N per state) |
 | `status` | string | No | Filter by status: "Active" or "Inactive" |
 | `limit` | integer | No | Limit results (default: 100, max: 1000) |
 | `offset` | integer | No | Pagination offset (default: 0) |
@@ -673,6 +682,8 @@ curl -X GET "http://localhost:8000/api/v1/locations/all?country=India&state_id=2
         "pinCode": 400001,
         "stateId": 27,
         "stateName": "Maharashtra",
+        "districtId": 1,
+        "districtName": "Mumbai",
         "cityId": 102,
         "cityName": "Mumbai",
         "countryName": "India",
@@ -684,6 +695,8 @@ curl -X GET "http://localhost:8000/api/v1/locations/all?country=India&state_id=2
         "pinCode": 400002,
         "stateId": 27,
         "stateName": "Maharashtra",
+        "districtId": 1,
+        "districtName": "Mumbai",
         "cityId": 102,
         "cityName": "Mumbai",
         "countryName": "India",
@@ -693,7 +706,7 @@ curl -X GET "http://localhost:8000/api/v1/locations/all?country=India&state_id=2
       }
     ]
   },
-  "timestamp": "2026-03-02T12:00:00Z"
+  "timestamp": "2026-03-03T12:00:00Z"
 }
 ```
 
@@ -751,6 +764,199 @@ curl -X GET "http://localhost:8000/api/v1/locations/pincodes?city_name=Mumbai" \
 
 ---
 
+### API 3.2: State_City_PinCode_Master - GET Districts by State (NEW)
+
+**Added**: March 3, 2026
+
+**Endpoint**: `GET /api/v1/locations/districts/{state_id}`
+**Purpose**: Retrieve all districts in a specific state
+**Authentication**: Not required (Public)
+**Rate Limit**: 200 requests/minute
+
+#### Request
+```bash
+# Get all districts in Maharashtra (state_id=27)
+curl -X GET "http://localhost:8000/api/v1/locations/districts/27" \
+  -H "Accept: application/json"
+
+# Get all districts in Uttar Pradesh (state_id=22)
+curl -X GET "http://localhost:8000/api/v1/locations/districts/22" \
+  -H "Accept: application/json"
+```
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `state_id` | integer | Yes | State ID (numeric, 0001-0035) |
+
+#### Response (200 - Success)
+```json
+{
+  "status": "success",
+  "code": 200,
+  "message": "Districts retrieved successfully for state 27",
+  "data": {
+    "count": 3,
+    "districts": [
+      {
+        "districtId": 1,
+        "districtName": "Mumbai",
+        "stateName": "Maharashtra"
+      },
+      {
+        "districtId": 2,
+        "districtName": "Pune",
+        "stateName": "Maharashtra"
+      },
+      {
+        "districtId": 3,
+        "districtName": "Nagpur",
+        "stateName": "Maharashtra"
+      }
+    ]
+  },
+  "timestamp": "2026-03-03T10:00:00Z"
+}
+```
+
+---
+
+### API 3.3: State_City_PinCode_Master - GET Cities by District (NEW)
+
+**Added**: March 3, 2026
+
+**Endpoint**: `GET /api/v1/locations/cities/{district_id}`
+**Purpose**: Retrieve all cities in a specific district
+**Authentication**: Not required (Public)
+**Rate Limit**: 200 requests/minute
+
+#### Request
+```bash
+# Get all cities in Mumbai district (district_id=1)
+curl -X GET "http://localhost:8000/api/v1/locations/cities/1" \
+  -H "Accept: application/json"
+
+# Get all cities in another district
+curl -X GET "http://localhost:8000/api/v1/locations/cities/5" \
+  -H "Accept: application/json"
+```
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `district_id` | integer | Yes | District ID (numeric, 0001-N per state) |
+
+#### Response (200 - Success)
+```json
+{
+  "status": "success",
+  "code": 200,
+  "message": "Cities retrieved successfully for district 1",
+  "data": {
+    "count": 2,
+    "cities": [
+      {
+        "cityId": 101,
+        "cityName": "Mumbai",
+        "districtName": "Mumbai",
+        "stateName": "Maharashtra"
+      },
+      {
+        "cityId": 102,
+        "cityName": "Navi Mumbai",
+        "districtName": "Mumbai",
+        "stateName": "Maharashtra"
+      }
+    ]
+  },
+  "timestamp": "2026-03-03T10:00:00Z"
+}
+```
+
+---
+
+### API 3.4: State_City_PinCode_Master - GET PinCodes by District (NEW)
+
+**Added**: March 3, 2026
+
+**Endpoint**: `GET /api/v1/locations/by-district/{district_id}`
+**Purpose**: Retrieve all pinCodes in a specific district, organized by city
+**Authentication**: Not required (Public)
+**Rate Limit**: 200 requests/minute
+
+#### Request
+```bash
+# Get all pincodes in Mumbai district (district_id=1)
+curl -X GET "http://localhost:8000/api/v1/locations/by-district/1" \
+  -H "Accept: application/json"
+
+# Get all pincodes in another district
+curl -X GET "http://localhost:8000/api/v1/locations/by-district/10" \
+  -H "Accept: application/json"
+```
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `district_id` | integer | Yes | District ID (numeric, 0001-N per state) |
+
+#### Response (200 - Success)
+```json
+{
+  "status": "success",
+  "code": 200,
+  "message": "PinCodes retrieved successfully for district 1",
+  "data": {
+    "count": 8,
+    "pincodes": [
+      {
+        "pinCode": 400001,
+        "cityName": "Mumbai",
+        "cityId": 101
+      },
+      {
+        "pinCode": 400002,
+        "cityName": "Mumbai",
+        "cityId": 101
+      },
+      {
+        "pinCode": 400003,
+        "cityName": "Navi Mumbai",
+        "cityId": 102
+      },
+      {
+        "pinCode": 400004,
+        "cityName": "Navi Mumbai",
+        "cityId": 102
+      },
+      {
+        "pinCode": 400005,
+        "cityName": "Mumbai",
+        "cityId": 101
+      },
+      {
+        "pinCode": 400006,
+        "cityName": "Mumbai",
+        "cityId": 101
+      },
+      {
+        "pinCode": 400007,
+        "cityName": "Navi Mumbai",
+        "cityId": 102
+      },
+      {
+        "pinCode": 400008,
+        "cityName": "Navi Mumbai",
+        "cityId": 102
+      }
+    ]
+  },
+  "timestamp": "2026-03-03T10:00:00Z"
+}
+```
+
+---
+
 ### API 4: State_City_PinCode_Master - CRUD Operations
 
 **Updated**: March 2, 2026 - Changed to numeric data types, pinCode as Primary Key, DELETE removed
@@ -766,6 +972,8 @@ curl -X GET "http://localhost:8000/api/v1/locations/pincodes?city_name=Mumbai" \
 {
   "stateId": 22,
   "stateName": "Uttar Pradesh",
+  "districtId": 1,
+  "districtName": "Lucknow District",
   "cityId": 85,
   "cityName": "Lucknow",
   "pinCode": 226001,
@@ -777,11 +985,13 @@ curl -X GET "http://localhost:8000/api/v1/locations/pincodes?city_name=Mumbai" \
 ##### Request Field Details
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| stateId | integer | Yes | State ID (numeric) |
-| stateName | string | Yes | State name |
-| cityId | integer | Yes | City ID (numeric) |
-| cityName | string | Yes | City name |
-| pinCode | integer | Yes | Postal code (5-6 digits for India: 100000-999999) |
+| stateId | integer | Yes | State ID (numeric, 0001-0035) |
+| stateName | string | Yes | State/UT name |
+| districtId | integer | Yes | District ID (numeric, 0001-N per state) |
+| districtName | string | Yes | District name |
+| cityId | integer | Yes | City ID (numeric, 0001-N per district) |
+| cityName | string | Yes | City name (proper city name, not post office name) |
+| pinCode | integer | Yes | Postal code (5-6 digits for India: 100000-999999, PRIMARY KEY) |
 | countryName | string | No | Country name (default: "India") |
 | status | string | No | Status (default: "Active", options: "Active"/"Inactive") |
 
@@ -796,15 +1006,17 @@ curl -X GET "http://localhost:8000/api/v1/locations/pincodes?city_name=Mumbai" \
       "pinCode": 226001,
       "stateId": 22,
       "stateName": "Uttar Pradesh",
+      "districtId": 1,
+      "districtName": "Lucknow District",
       "cityId": 85,
       "cityName": "Lucknow",
       "countryName": "India",
       "status": "Active",
-      "createdDate": "2026-03-02T12:30:00Z",
-      "updatedDate": "2026-03-02T12:30:00Z"
+      "createdDate": "2026-03-03T12:30:00Z",
+      "updatedDate": "2026-03-03T12:30:00Z"
     }
   },
-  "timestamp": "2026-03-02T12:30:00Z"
+  "timestamp": "2026-03-03T12:30:00Z"
 }
 ```
 
@@ -821,7 +1033,7 @@ curl -X GET "http://localhost:8000/api/v1/locations/pincodes?city_name=Mumbai" \
 #### B. Update Location
 **Endpoint**: `PUT /api/v1/locations/{pin_code}`
 **Authentication**: Required (Admin only)
-**Note**: pinCode is immutable and used as the primary key. Only status and countryName can be updated.
+**Note**: pinCode, stateId, stateName, districtId, districtName, cityId, and cityName are immutable (primary key and hierarchical geographic data). Only status and countryName can be updated. To move a location to a different state/district/city, delete the current record and create a new one.
 
 ##### Path Parameters
 | Parameter | Type | Description |
@@ -853,15 +1065,17 @@ curl -X GET "http://localhost:8000/api/v1/locations/pincodes?city_name=Mumbai" \
       "pinCode": 226001,
       "stateId": 22,
       "stateName": "Uttar Pradesh",
+      "districtId": 1,
+      "districtName": "Lucknow District",
       "cityId": 85,
       "cityName": "Lucknow",
       "countryName": "India",
       "status": "Inactive",
       "createdDate": "2026-03-02T12:30:00Z",
-      "updatedDate": "2026-03-02T12:35:00Z"
+      "updatedDate": "2026-03-03T12:35:00Z"
     }
   },
-  "timestamp": "2026-03-02T12:35:00Z"
+  "timestamp": "2026-03-03T12:35:00Z"
 }
 ```
 
