@@ -21,6 +21,14 @@
 
 ---
 
+## Google Cloud Proxy string:
+Prompt: Initiate Google Cloud SQL proxy using admin user credentials from Credentials.md file in DevOps folder. Use asia-south1 as the region
+
+use the below string to set the connection:
+cloud-sql-proxy gen-lang-client-0064186167:asia-south1:medostel-ai-assistant-pgdev-instance --port=5432              
+
+   Start Cloud SQL Proxy connection to medostel-ai-assistant-pgdev-instance
+
 ## Admin User Credentials
 
 ```

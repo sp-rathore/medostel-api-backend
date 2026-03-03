@@ -155,6 +155,81 @@ def invalid_roles():
     return ["CEO", "MANAGER", "STUDENT", "INVALID", "USER", "SUPPORT"]
 
 
+@pytest.fixture(scope="session")
+def user_login_fixtures():
+    """User_Login test data fixtures"""
+    return {
+        "valid_email": "user@example.com",
+        "valid_mobile": "9876543210",
+        "valid_password": "SecurePassword123",
+        "default_password": "Medostel@AI2026",
+        "valid_emails": [
+            "john@example.com",
+            "jane.doe@company.co.uk",
+            "user+label@test.com",
+            "a@b.co",
+            "test123@example.com"
+        ],
+        "invalid_emails": [
+            "notanemail",
+            "@example.com",
+            "user@",
+            "user@.com",
+            "user@example",
+            "plaintext",
+            "user @example.com",
+            "user..name@example.com"
+        ],
+        "valid_mobiles": [
+            "1000000000",  # Min
+            "9999999999",  # Max
+            "9876543210",  # Standard
+            "5555555555",  # Mid-range
+            "1111111111"   # All ones
+        ],
+        "invalid_mobiles": [
+            "123",          # Too short
+            "12345678901",  # Too long
+            "999999999",    # 9 digits (below range)
+            "10000000000",  # 11 digits (above range)
+            "0",            # Zero
+            "abcdefghij",   # Non-numeric
+            "9876543210 ",  # With space
+            ""              # Empty
+        ],
+        "valid_passwords": [
+            "MyPassword123",
+            "SecurePass456",
+            "Test@Password789",
+            "Medostel@AI2026",
+            "LongPasswordFor123"
+        ],
+        "invalid_passwords": [
+            "short",        # Too short
+            "1234567",      # 7 chars
+            "",             # Empty
+            "pass",         # Very short
+            "abc"           # 3 chars
+        ],
+        "valid_statuses": ["Y", "N"],
+        "invalid_statuses": ["y", "n", "YES", "NO", "True", "False", "", "X"]
+    }
+
+
+@pytest.fixture(scope="session")
+def sample_login_record():
+    """Sample login record for testing"""
+    return {
+        "email_id": "user@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuvwxyz",  # Bcrypt hash
+        "mobile_number": 9876543210,
+        "is_active": "Y",
+        "last_login": None,
+        "created_date": "2026-03-03T10:30:00",
+        "updated_date": "2026-03-03T10:30:00"
+    }
+
+
 # Pytest markers for organizing tests
 def pytest_configure(config):
     """Register custom markers"""
@@ -172,4 +247,10 @@ def pytest_configure(config):
     )
     config.addinivalue_line(
         "markers", "api: Tests for API endpoints"
+    )
+    config.addinivalue_line(
+        "markers", "password: Tests for password utilities"
+    )
+    config.addinivalue_line(
+        "markers", "schema: Tests for Pydantic schemas"
     )

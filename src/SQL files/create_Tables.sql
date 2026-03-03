@@ -98,31 +98,36 @@ CREATE INDEX idx_user_updated ON user_master(updatedDate);
 -- ============================================================================
 -- Table 4: user_login
 -- ============================================================================
--- UPDATED (March 3, 2026):
--- - userId changed from VARCHAR(255) to BIGINT to match user_master
--- - roleId changed from VARCHAR(50) to INTEGER to match user_role_master
+-- COMPLETELY REDESIGNED (March 3, 2026):
+-- - email_id VARCHAR(255) PRIMARY KEY (FK to user_master.emailId)
+-- - password VARCHAR(255) - bcrypt hashed, never stored in plain text
+-- - mobile_number NUMERIC(10) - must match user_master.mobileNumber for same email
+-- - is_active CHAR(1) - 'Y' or 'N' (synced with user_master.status)
+-- - last_login TIMESTAMP - updated on successful authentication
+-- - created_date TIMESTAMP - immutable, set at record creation
+-- - updated_date TIMESTAMP - updated on password change or status change
+-- - Removed: username (not in requirements)
+-- - Removed: loginAttempts (not in requirements)
+-- - Removed: role_id (not in requirements)
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS user_login (
-    userId BIGINT PRIMARY KEY,
-    username VARCHAR(100) NOT NULL UNIQUE,
+    email_id VARCHAR(255) PRIMARY KEY,
     password VARCHAR(255) NOT NULL,
-    roleId INTEGER NOT NULL,
-    isActive BOOLEAN DEFAULT TRUE,
-    lastLoginTime TIMESTAMP,
-    loginAttempts INTEGER DEFAULT 0,
-    createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (userId) REFERENCES user_master(userId),
-    FOREIGN KEY (roleId) REFERENCES user_role_master(roleId) ON UPDATE CASCADE ON DELETE RESTRICT
+    mobile_number NUMERIC(10) NOT NULL
+        CHECK (mobile_number >= 1000000000 AND mobile_number <= 9999999999),
+    is_active CHAR(1) NOT NULL DEFAULT 'Y'
+        CHECK (is_active IN ('Y', 'N')),
+    last_login TIMESTAMP,
+    created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (email_id) REFERENCES user_master(emailId) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX pk_user_login ON user_login(userId);
-CREATE INDEX idx_login_username ON user_login(username);
-CREATE INDEX idx_login_active ON user_login(isActive);
-CREATE INDEX idx_login_role ON user_login(roleId);
-CREATE INDEX idx_login_attempts ON user_login(loginAttempts);
-CREATE INDEX idx_login_lastlogin ON user_login(lastLoginTime);
-CREATE INDEX idx_login_updated ON user_login(updatedDate);
+CREATE UNIQUE INDEX pk_user_login ON user_login(email_id);
+CREATE INDEX idx_login_mobile ON user_login(mobile_number);
+CREATE INDEX idx_login_is_active ON user_login(is_active);
+CREATE INDEX idx_login_last_login ON user_login(last_login);
+CREATE INDEX idx_login_updated_date ON user_login(updated_date);
 
 -- ============================================================================
 -- Table 5: new_user_request
