@@ -1,239 +1,351 @@
 """
-API routes for User_Master table (APIs 5 & 6)
-SELECT operations (API 5) and CRUD operations (API 6)
-Enhanced with geographic hierarchy integration (Step 1.2)
+API routes for user_master table
+Phase 2.3: API Endpoints Development
+Date: 2026-03-03
+
+Endpoints:
+1. GET /api/v1/users/search - Search by email or mobile (returns existsFlag)
+2. POST /api/v1/users - Create new user (auto-generates userId)
+3. PUT /api/v1/users/{userId} - Update user (requires commentLog)
+
+Note: No DELETE endpoint per specification
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime
-from app.database import get_db
-from app.services.user_service import UserService
-from app.schemas.user import UserCreate, UserUpdate, UserResponse
-from app.schemas.common import APIResponse
-from app.constants import HTTPStatus
+from typing import Optional
+from sqlalchemy.orm import Session
 
-router = APIRouter(prefix="/users", tags=["Users"])
+from src.schemas.user import (
+    UserCreate, UserUpdate, UserResponse, UserSearchResponse,
+    UserCreateResponse, UserUpdateResponse
+)
+from src.db.user_master_utils import user_master_db
+from src.database import get_db
+
+router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 
 
-# API 5: SELECT - Get all users
-@router.get("/all", response_model=APIResponse)
-async def get_all_users(
-    db=Depends(get_db),
-    status: str = Query(None, description="Filter by user status (Active/Inactive)"),
-    current_role: str = Query(None, description="Filter by user role"),
-    limit: int = Query(100, ge=1, le=1000, description="Number of results per page"),
-    offset: int = Query(0, ge=0, description="Pagination offset")
+# ============================================================================
+# GET /api/v1/users/search - Search by email or mobile
+# ============================================================================
+
+@router.get("/search", response_model=UserSearchResponse)
+async def search_user(
+    emailId: Optional[str] = Query(None, description="Email address to search for"),
+    mobileNumber: Optional[int] = Query(None, description="10-digit mobile number to search for"),
+    db: Session = Depends(get_db)
 ):
     """
-    API 5: SELECT Operation - Retrieve all user profiles with geographic hierarchy
+    Search for user by email or mobile number
 
-    Returns all users with optional filtering and pagination support.
+    Returns user details if found, with existsFlag indicating whether user exists.
 
     **Query Parameters**:
-    - `status`: Filter by status (Active/Inactive)
-    - `current_role`: Filter by user role
-    - `limit`: Number of results (1-1000, default 100)
-    - `offset`: Pagination offset (default 0)
+    - `emailId`: Email address (optional)
+    - `mobileNumber`: 10-digit mobile number (optional)
+    - At least one parameter must be provided
 
-    **Response Fields Include**:
-    - Geographic references: `stateId`, `districtId`, `cityId`, `pinCode`
-    - Display fields: `stateName`, `cityName`
-    - Addresses: `address1`, `address2`
-
-    **Example**: `/api/v1/users/all?status=Active&limit=50&offset=0`
-    """
-    try:
-        users = await UserService.get_all_users(db, status, current_role, limit, offset)
-
-        return APIResponse(
-            status="success",
-            code=HTTPStatus.OK,
-            message="Users retrieved successfully",
-            data={"users": users, "count": len(users)},
-            timestamp=datetime.now()
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail=str(e)
-        )
-
-
-# API 6: CRUD - Create user
-@router.post("", response_model=APIResponse, status_code=HTTPStatus.CREATED)
-async def create_user(
-    user: UserCreate,
-    db=Depends(get_db)
-):
-    """
-    API 6: CRUD Operation - Create new user profile with geographic hierarchy
-
-    Creates a new user with provided data including optional geographic references.
-
-    **Geographic Fields** (Optional):
-    - `stateId` (int): State ID from State_City_PinCode_Master
-    - `districtId` (int): District ID from State_City_PinCode_Master
-    - `cityId` (int): City ID from State_City_PinCode_Master
-    - `pinCode` (int): Postal code (5-6 digits) from State_City_PinCode_Master
-
-    **Example Request**:
+    **Returns**:
     ```json
     {
-        "userId": "user@example.com",
-        "firstName": "John",
-        "lastName": "Doe",
-        "currentRole": "Doctor",
-        "emailId": "john@example.com",
-        "mobileNumber": "9876543210",
-        "organisation": "Hospital XYZ",
-        "address1": "123 Medical St",
-        "address2": "Apt 101",
-        "stateId": 1,
-        "stateName": "Maharashtra",
-        "districtId": 1,
-        "cityId": 1,
-        "cityName": "Mumbai",
-        "pinCode": 400001
+        "data": {
+            "userId": "USER_001",
+            "firstName": "John",
+            "lastName": "Doe",
+            "currentRole": "ADMIN",
+            "emailId": "john@example.com",
+            "mobileNumber": 9876543210,
+            "status": "active",
+            ...all other fields...
+        },
+        "existsFlag": true
     }
     ```
 
-    **Returns**: Created user profile with all fields
+    **Or if not found**:
+    ```json
+    {
+        "data": null,
+        "existsFlag": false
+    }
+    ```
+
+    **Status Codes**:
+    - 200: Success (user found or not found)
+    - 400: Validation error (no search criteria, invalid format)
     """
     try:
-        # Check if user already exists
-        existing = await UserService.get_user_by_id(db, user.userId)
-        if existing:
+        # Validate: at least one search parameter
+        if not emailId and not mobileNumber:
             raise HTTPException(
-                status_code=HTTPStatus.CONFLICT,
-                detail=f"User {user.userId} already exists"
+                status_code=400,
+                detail="At least one of emailId or mobileNumber must be provided"
             )
 
-        new_user = await UserService.create_user(db, user.dict(exclude_unset=True))
+        user_data = None
 
-        return APIResponse(
-            status="success",
-            code=HTTPStatus.CREATED,
-            message="User created successfully",
-            data={"user": new_user},
-            timestamp=datetime.now()
-        )
-    except ValueError as e:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=f"Invalid geographic reference: {str(e)}"
-        )
+        # Search by email
+        if emailId:
+            user_data = user_master_db.get_user_by_email(db, emailId)
+
+        # Search by mobile (if email not found)
+        elif mobileNumber:
+            user_data = user_master_db.get_user_by_mobile(db, mobileNumber)
+
+        # Return response with existsFlag
+        if user_data:
+            return UserSearchResponse(
+                data=UserResponse.from_orm(user_data),
+                existsFlag=True
+            )
+        else:
+            return UserSearchResponse(
+                data=None,
+                existsFlag=False
+            )
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=str(e)
+            status_code=500,
+            detail=f"Error searching for user: {str(e)}"
         )
 
 
-# API 6: CRUD - Update user
-@router.put("/{userId}", response_model=APIResponse)
+# ============================================================================
+# POST /api/v1/users - Create new user
+# ============================================================================
+
+@router.post("", response_model=UserCreateResponse, status_code=201)
+async def create_user(
+    user: UserCreate,
+    db: Session = Depends(get_db)
+):
+    """
+    Create a new user
+
+    Creates a new user with auto-generated userId (max + 1).
+    Timestamps (createdDate, updatedDate) are auto-set by the system.
+
+    **Request Body**:
+    ```json
+    {
+        "firstName": "John",
+        "lastName": "Doe",
+        "currentRole": "ADMIN",
+        "emailId": "john@example.com",
+        "mobileNumber": 9876543210,
+        "organisation": "Hospital XYZ",
+        "address1": "123 Medical St",
+        "address2": "Apt 101",
+        "stateId": "MH",
+        "stateName": "Maharashtra",
+        "districtId": "DIST_01",
+        "cityId": "CITY_01",
+        "cityName": "Mumbai",
+        "pinCode": "400001",
+        "status": "active"
+    }
+    ```
+
+    **Auto-Generated Fields**:
+    - `userId`: Generated as max(userId) + 1
+    - `createdDate`: Set to CURRENT_TIMESTAMP
+    - `updatedDate`: Set to CURRENT_TIMESTAMP
+
+    **Validation Rules**:
+    - Email: Must match regex pattern and be unique
+    - Mobile: 10 digits, unique
+    - Combination of (email, mobile) must be unique
+    - Status: Must be one of: active, pending, deceased, inactive
+    - Role: Must be one of: ADMIN, DOCTOR, HOSPITAL, NURSE, PARTNER, PATIENT, RECEPTION, TECHNICIAN
+
+    **Returns**:
+    ```json
+    {
+        "message": "User created successfully",
+        "data": {
+            "userId": "USER_001",
+            "firstName": "John",
+            ...all fields including createdDate, updatedDate...
+        }
+    }
+    ```
+
+    **Status Codes**:
+    - 201: User created successfully
+    - 400: Validation error (invalid email, mobile, role, status, etc.)
+    - 409: Conflict (email or mobile already exists, or duplicate combination)
+    - 500: Server error
+    """
+    try:
+        # Check if email already exists
+        if user_master_db.email_exists(db, user.emailId):
+            raise HTTPException(
+                status_code=409,
+                detail=f"Email already exists: {user.emailId}"
+            )
+
+        # Check if mobile already exists
+        if user_master_db.mobile_exists(db, user.mobileNumber):
+            raise HTTPException(
+                status_code=409,
+                detail=f"Mobile number already exists: {user.mobileNumber}"
+            )
+
+        # Check composite uniqueness (email + mobile)
+        if user_master_db.email_mobile_combination_exists(db, user.emailId, user.mobileNumber):
+            raise HTTPException(
+                status_code=409,
+                detail="Email and mobile number combination already exists"
+            )
+
+        # Create user (userId auto-generated)
+        user_dict = user.model_dump(exclude_unset=True)
+        created_user = user_master_db.create_user(db, user_dict)
+
+        return UserCreateResponse(
+            message="User created successfully",
+            data=UserResponse.from_orm(created_user)
+        )
+
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Validation error: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error creating user: {str(e)}"
+        )
+
+
+# ============================================================================
+# PUT /api/v1/users/{userId} - Update user
+# ============================================================================
+
+@router.put("/{userId}", response_model=UserUpdateResponse)
 async def update_user(
     userId: str,
     user: UserUpdate,
-    db=Depends(get_db)
+    db: Session = Depends(get_db)
 ):
     """
-    API 6: CRUD Operation - Update user profile (pinCode is immutable)
+    Update an existing user
 
-    Updates an existing user with partial or full data.
+    Updates user fields partially or fully. At least one field must be provided along with commentLog.
 
-    **Immutable Fields**:
-    - `pinCode`: Cannot be updated after creation. Set this during user creation.
+    **Path Parameter**:
+    - `userId`: User ID to update
 
-    **Updatable Geographic Fields**:
-    - `stateId` (int): State ID from State_City_PinCode_Master
-    - `districtId` (int): District ID from State_City_PinCode_Master
-    - `cityId` (int): City ID from State_City_PinCode_Master
-
-    **Example Request**:
+    **Request Body**:
     ```json
     {
         "firstName": "Jonathan",
         "organisation": "New Hospital",
-        "stateId": 2,
-        "stateName": "Karnataka",
-        "districtId": 2,
-        "cityId": 2,
-        "cityName": "Bangalore"
+        "status": "pending",
+        "commentLog": "Updated status from active to pending due to contract renewal"
     }
     ```
 
-    **Note**: Only provided fields will be updated. Omitted fields retain their current values.
+    **Immutable Fields** (ignored if provided):
+    - `userId`: Cannot change
+    - `createdDate`: Cannot change
+
+    **Auto-Updated Fields**:
+    - `updatedDate`: Always set to current timestamp
+
+    **Required Field**:
+    - `commentLog`: REQUIRED for all updates (provides audit trail)
+
+    **Validation Rules**:
+    - Email: Must match regex pattern if provided (must be unique unless unchanged)
+    - Mobile: 10 digits if provided (must be unique unless unchanged)
+    - Status: Must be one of: active, pending, deceased, inactive
+    - Role: Must be one of the valid roles if provided
+
+    **Returns**:
+    ```json
+    {
+        "message": "User updated successfully",
+        "data": {
+            "userId": "USER_001",
+            "firstName": "Jonathan",
+            "updatedDate": "2026-03-03T13:35:00",
+            ...updated fields...
+        }
+    }
+    ```
+
+    **Status Codes**:
+    - 200: User updated successfully
+    - 400: Validation error (no update fields, invalid values)
+    - 404: User not found
+    - 409: Conflict (email/mobile already in use)
+    - 500: Server error
     """
     try:
         # Check if user exists
-        existing = await UserService.get_user_by_id(db, userId)
-        if not existing:
+        existing_user = user_master_db.get_user_by_id(db, userId)
+        if not existing_user:
             raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=f"User {userId} not found"
+                status_code=404,
+                detail=f"User not found: {userId}"
             )
 
-        updated_user = await UserService.update_user(db, userId, user.dict(exclude_unset=True))
+        # Get update data
+        update_dict = user.model_dump(exclude_unset=True, exclude_none=True)
 
-        return APIResponse(
-            status="success",
-            code=HTTPStatus.OK,
+        # Validate email uniqueness if being updated
+        if 'emailId' in update_dict:
+            new_email = update_dict['emailId']
+            # Check if different from current and already exists
+            if new_email.lower() != existing_user.emailId.lower():
+                if user_master_db.email_exists(db, new_email):
+                    raise HTTPException(
+                        status_code=409,
+                        detail=f"Email already exists: {new_email}"
+                    )
+
+        # Validate mobile uniqueness if being updated
+        if 'mobileNumber' in update_dict:
+            new_mobile = update_dict['mobileNumber']
+            # Check if different from current and already exists
+            if new_mobile != existing_user.mobileNumber:
+                if user_master_db.mobile_exists(db, new_mobile):
+                    raise HTTPException(
+                        status_code=409,
+                        detail=f"Mobile number already exists: {new_mobile}"
+                    )
+
+        # Update user
+        updated_user = user_master_db.update_user(db, userId, update_dict)
+
+        return UserUpdateResponse(
             message="User updated successfully",
-            data={"user": updated_user},
-            timestamp=datetime.now()
+            data=UserResponse.from_orm(updated_user)
         )
+
+    except HTTPException:
+        raise
     except ValueError as e:
         raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=f"Invalid geographic reference: {str(e)}"
+            status_code=400,
+            detail=f"Validation error: {str(e)}"
         )
-    except HTTPException:
-        raise
     except Exception as e:
         raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=str(e)
+            status_code=500,
+            detail=f"Error updating user: {str(e)}"
         )
 
 
-# API 6: CRUD - Delete user
-@router.delete("/{userId}", status_code=HTTPStatus.NO_CONTENT)
-async def delete_user(
-    userId: str,
-    db=Depends(get_db)
-):
-    """
-    API 6: CRUD Operation - Delete user profile
-
-    Deletes a user by their ID.
-
-    **Note**: Deletion will fail with FOREIGN KEY constraint error if the user has
-    associated records in other tables that reference this user (e.g., Report_History).
-
-    **Returns**: 204 No Content on success
-    """
-    try:
-        # Check if user exists
-        existing = await UserService.get_user_by_id(db, userId)
-        if not existing:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=f"User {userId} not found"
-            )
-
-        success = await UserService.delete_user(db, userId)
-
-        if not success:
-            raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail="Failed to delete user"
-            )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=str(e)
-        )
+# ============================================================================
+# NOTE: No DELETE endpoint per specification
+# The specification states "no Delete operation required"
+# ============================================================================

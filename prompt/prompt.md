@@ -2,100 +2,89 @@
 
 **Date**: 2026-03-03
 
-1. Table name: User_Role_Master:
-    -   change the schema. Roleid should be Integer starting with 1.
-    -   Rest all is fine
-    -   create a sql query script that contains
-        -   create Alter query for user_role_master
-        -   delete the current records, drop the current table and then alter the table
-        -   create load query as below for the user_role_master
-        INSERT INTO user_role_master (roleId, roleName, status, comments) VALUES
-            (1, 'ADMIN', 'Active', 'System Administrator - Full system access and database management'),
-            (2, 'DOCTOR','Active', 'Doctor or Physician - Can view and manage patient records and create medical reports'),
-            (3, 'HOSPITAL','Active', 'Hospital administrator - manages hospital operations and staff'),
-            (4, 'NURSE', 'Active', 'Can assist with patient records, blood work, and vitals'),
-            (5, 'PARTNER','Active', 'Sales and marketing partner - manages partnerships and revenue'),
-            (6, 'PATIENT', 'Active', 'Can view own medical reports and health history'),
-            (7, 'RECEPTION', 'Active', 'Reception Staff - Can manage appointments, check-in/check-out, and scheduling'),
-            (8, 'TECHNICIAN', 'Active', 'Lab Technician - Can create and upload laboratory test reports and results');
+1. Table name: User_master. Current schema of the table is below
+
+    Column    │     Type     │ Nullable │      Default      │                                                        
+  ├──────────────┼──────────────┼──────────┼───────────────────┤                                                        
+  │ userid       │ varchar(100) │ NOT NULL │ -                 │                                                        
+  ├──────────────┼──────────────┼──────────┼───────────────────┤                                                        
+  │ firstname    │ varchar(50)  │ NOT NULL │ -                 │
+  ├──────────────┼──────────────┼──────────┼───────────────────┤
+  │ lastname     │ varchar(50)  │ NOT NULL │ -                 │
+  ├──────────────┼──────────────┼──────────┼───────────────────┤
+  │ currentrole  │ integer      │ NOT NULL │ -                 │
+  ├──────────────┼──────────────┼──────────┼───────────────────┤
+  │ organisation │ varchar(100) │ YES      │ -                 │
+  ├──────────────┼──────────────┼──────────┼───────────────────┤
+  │ emailid      │ varchar(100) │ NOT NULL │ -                 │
+  ├──────────────┼──────────────┼──────────┼───────────────────┤
+  │ mobilenumber │ varchar(15)  │ NOT NULL │ -                 │
+  ├──────────────┼──────────────┼──────────┼───────────────────┤
+  │ address1     │ varchar(255) │ YES      │ -                 │
+  ├──────────────┼──────────────┼──────────┼───────────────────┤
+  │ address2     │ varchar(255) │ YES      │ -                 │
+  ├──────────────┼──────────────┼──────────┼───────────────────┤
+  │ statename    │ varchar(100) │ YES      │ -                 │
+  ├──────────────┼──────────────┼──────────┼───────────────────┤
+  │ cityname     │ varchar(100) │ YES      │ -                 │
+  ├──────────────┼──────────────┼──────────┼───────────────────┤
+  │ pincode      │ varchar(10)  │ YES      │ -                 │
+  ├──────────────┼──────────────┼──────────┼───────────────────┤
+  │ status       │ varchar(20)  │ NOT NULL │ 'Active'  
+
+    -   create a sql query script to drop the current table and create a new table of the same name with below query
+        CREATE TABLE IF NOT EXISTS user_master (
+            userId VARCHAR(100) PRIMARY KEY,
+            firstName VARCHAR(50) NOT NULL,
+            lastName VARCHAR(50) NOT NULL,
+            currentRole VARCHAR(50) NOT NULL,
+            emailId VARCHAR(255) NOT NULL UNIQUE CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
+            mobileNumber NUMERIC(10) NOT NULL UNIQUE CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999),
+            organisation VARCHAR(255),
+            address1 VARCHAR(255),
+            address2 VARCHAR(255),
+            stateId INTEGER,
+            stateName VARCHAR(100),
+            districtId INTEGER,
+            cityId INTEGER,
+            cityName VARCHAR(100),
+            pinCode INTEGER,
+            status VARCHAR(50) DEFAULT 'Active',
+            createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (currentRole) REFERENCES user_role_master(roleId),
+            FOREIGN KEY (stateId) REFERENCES state_city_pincode_master(stateId),
+            FOREIGN KEY (districtId) REFERENCES state_city_pincode_master(districtId),
+            FOREIGN KEY (cityId) REFERENCES state_city_pincode_master(cityId),
+            FOREIGN KEY (pinCode) REFERENCES state_city_pincode_master(pinCode)
+            );
+        -   emailid and mobile number combination should be unique for each row. there cannot be duplicate rows in the table having a duplicate combination of email id and mobile number
+        -   add a column for comment log VARCHAR(255) which will mention the most recent change done
+        -  ensure that indexes are created as mentioned for this table in Agents/DB Dev Agent.md
     - APIs will be created for both Select and CRUD operation (no Delete operation required)
         - Select API should be able to fetch data based on following inputs
-            -   Role ID - select specific row for all columns
-            -   Role Name - select specific row for all columns
-            -   Status - select all roles rows for specific status
+           -   email id or mobile phone number. it should fetch the unique row all columns from the table
+           -   for email id or mobile number as input,  it should be able to provide a value already exist flag as ouput
+           -   valud status are 'active' 'pending' 'deceased' 'inactive'
         -   PUT and POST APIs should be able to
-            -   Insert a new Role, all column values need to be mandatorily provided except Roleid. Roleid should be an auto increment - max(roleid) + 1. Both createdDate and updatedDate should be the system date
+            -   Insert a new user row, all column values need to be mandatorily provided except userid. userid should be an auto increment - max(userid) + 1. Both createdDate and updatedDate should be the system date
             -   Update API can be for a 
-                -   status change (valid status are Active, Inactive, Closed)
-                -   comments change
+                -   status change (valid status are 'active' 'pending' 'deceased' 'inactive')
+                -   first name, last name, organization, city, state, pincode, address1, address2, mobile number or email number. request can be to change one value or all values. in all scenarios userid remains the same.
                 -   for any update request createdDate should not be changed and updatedDate should be the system date when the update operation is executed 
+                - for all update requests comment log column should have valid comments
+    
     - Create an overall plan and rewrite the Plan/API Development Plan.md that should comprise of updating
         - Agents/DB Dev Agent.md
         - Agents/API Dev Agent.md
         - Agents/API Unit Testing Agent.md
         - Agents/DBA Agent.md
-        - DevOps /DBA/Databasespecs.md
-        - DevOps /DBA/DEPLOYMENT_GUIDE.md
+        - DevOps/DBA/Databasespecs.md
+        - DevOps/DBA/DEPLOYMENT_GUIDE.md
         - README.md
         - src/SQL files/create_Tables.sql
         - src/schemas/user_role.py
         - src/routes/v1/roles.py
     - Ensure that all respective dependent .md files and code is regenerated for this change.
-
-## Overview
-This document captures all prompts and tracks version changes that percolate to respective code and documents.
-
-## Primary Sections
-
-### 1. Prompt Log
-- **Section**: Document all prompts executed
-- **Purpose**: Track every instruction/request made to the system
-- **Version Control**: Link to corresponding code/document changes
-
-### 2. Code Changes
-- **Section**: Track modifications to source code
-- **Purpose**: Map prompts to code implementations
-- **Impact**: Document how code evolved from prompts
-
-### 3. Document Updates
-- **Section**: Track documentation changes
-- **Purpose**: Ensure docs stay synchronized with code changes
-- **Versioning**: Maintain version history
-
-### 4. Flow Impact Analysis
-- **Section**: Track how changes propagate through the system
-- **Purpose**: Understand dependencies and affected modules
-- **Traceability**: Connect prompts → code → docs → flow
-
-### 5. Version History
-- **Section**: Maintain change history
-- **Purpose**: Rollback capability and audit trail
-- **Schema**: Date | Prompt | Changes | Affected Files
-
----
-
-## Sections to Populate
-
-### Active Prompts
-- [ ] Prompt 1
-- [ ] Prompt 2
-
-### Pending Changes
-- [ ] Change 1
-- [ ] Change 2
-
-### Completed Implementations
-- [ ] Implementation 1
-- [ ] Implementation 2
-
----
-
-## Change Propagation Path
-
-```
-Prompt → Code Changes → Document Updates → Flow Validation
-```
-
----
 
 *Last Updated: 2026-03-03*

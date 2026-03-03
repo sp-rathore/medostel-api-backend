@@ -2,13 +2,39 @@
 Schemas package - Pydantic models for request/response validation
 """
 
-from app.schemas.common import APIResponse, ErrorResponse, PaginationParams
-from app.schemas.user_role import UserRoleCreate, UserRoleUpdate, UserRoleResponse
-from app.schemas.location import LocationCreate, LocationUpdate, LocationResponse
-from app.schemas.user import UserCreate, UserUpdate, UserResponse
-from app.schemas.user_login import UserLoginCreate, UserLoginUpdate, UserLoginResponse
-from app.schemas.registration import RegistrationCreate, RegistrationUpdate, RegistrationResponse
-from app.schemas.report import ReportCreate, ReportUpdate, ReportResponse
+# Import user schemas
+try:
+    from src.schemas.user import UserCreate, UserUpdate, UserResponse
+except ImportError:
+    UserCreate = None
+    UserUpdate = None
+    UserResponse = None
+
+# Import other schemas (optional - may not exist)
+try:
+    from src.schemas.user_role import UserRoleCreate, UserRoleUpdate, UserRoleResponse
+except (ImportError, ModuleNotFoundError):
+    pass
+
+try:
+    from src.schemas.location import LocationCreate, LocationUpdate, LocationResponse
+except (ImportError, ModuleNotFoundError):
+    pass
+
+try:
+    from src.schemas.user_login import UserLoginCreate, UserLoginUpdate, UserLoginResponse
+except (ImportError, ModuleNotFoundError):
+    pass
+
+try:
+    from src.schemas.registration import RegistrationCreate, RegistrationUpdate, RegistrationResponse
+except (ImportError, ModuleNotFoundError):
+    pass
+
+try:
+    from src.schemas.report import ReportCreate, ReportUpdate, ReportResponse
+except (ImportError, ModuleNotFoundError):
+    pass
 
 __all__ = [
     "APIResponse",

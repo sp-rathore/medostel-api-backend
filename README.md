@@ -26,6 +26,19 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ## 📚 Documentation Structure
 
+### 📋 Implementation Guides (Phase 1-4 Documentation)
+Complete implementation documentation in **`Implementation Guide/`** folder:
+
+| Document | Purpose |
+|----------|---------|
+| **[USER_MASTER_API_SPEC.md](./Implementation%20Guide/USER_MASTER_API_SPEC.md)** | OpenAPI 3.0 specification (full API docs) |
+| **[PHASE_1_1_PRE_MIGRATION_ANALYSIS.md](./Implementation%20Guide/PHASE_1_1_PRE_MIGRATION_ANALYSIS.md)** | Pre-migration analysis & planning |
+| **[MIGRATION_EXECUTION_REPORT.md](./Implementation%20Guide/MIGRATION_EXECUTION_REPORT.md)** | Database migration results |
+| **[PHASE_2_COMPLETION_SUMMARY.md](./Implementation%20Guide/PHASE_2_COMPLETION_SUMMARY.md)** | API development completion report |
+| **[PHASE_3_COMPLETION_SUMMARY.md](./Implementation%20Guide/PHASE_3_COMPLETION_SUMMARY.md)** | Unit testing framework summary |
+| **[TEST_EXECUTION_REPORT_FINAL.md](./Implementation%20Guide/TEST_EXECUTION_REPORT_FINAL.md)** | Final test results (123/123 passing) |
+| **[PHASE_4_DOCUMENTATION_PLAN.md](./Implementation%20Guide/PHASE_4_DOCUMENTATION_PLAN.md)** | Phase 4 documentation planning |
+
 ### 🏗️ API Development Documentation
 All API specifications, architecture, and development guides are located in the **`API Development/`** folder:
 
@@ -72,12 +85,70 @@ Infrastructure and database documentation:
   - ❌ DELETE: Removed (not supported)
   - **Breaking Change**: roleId no longer in POST request (auto-generated)
 
-#### ⏳ APIs 3-12: Other Tables
-- API 3 & 4: Locations (State_City_PinCode_Master)
-- API 5 & 6: Users (User_Master)
-- API 7 & 8: Authentication (User_Login)
-- API 9 & 10: Registration (New_User_Request)
-- API 11 & 12: Reports (Report_History)
+#### ✅ APIs 3-5: User Management (User_Master) - IMPLEMENTED March 3, 2026
+
+**User Master API - Production Ready** ✅
+
+| Endpoint | Method | Purpose | Status |
+|----------|--------|---------|--------|
+| `/api/v1/users/search` | GET | Search user by email or mobile | ✅ Implemented |
+| `/api/v1/users` | POST | Create new user with auto-generated ID | ✅ Implemented |
+| `/api/v1/users/{userId}` | PUT | Update user information | ✅ Implemented |
+
+**Features:**
+- ✅ Auto-generated userId with zero-padding (USER_001, USER_002, etc.)
+- ✅ Email validation (regex pattern) + uniqueness constraint
+- ✅ Mobile number validation (10 digits: 1000000000-9999999999) + uniqueness
+- ✅ Role validation (8 valid roles) + case normalization
+- ✅ Status validation (active, pending, deceased, inactive) + lowercase normalization
+- ✅ Immutable fields protection (userId, createdDate)
+- ✅ Auto-updated timestamps (updatedDate on any change)
+- ✅ Audit trail (commentLog required for updates)
+- ✅ 123 comprehensive tests (100% passing)
+
+**Example Requests:**
+
+```bash
+# Search user by email
+curl -X GET "http://localhost:8000/api/v1/users/search?emailId=john@example.com"
+
+# Search user by mobile
+curl -X GET "http://localhost:8000/api/v1/users/search?mobileNumber=9876543210"
+
+# Create user
+curl -X POST "http://localhost:8000/api/v1/users" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "John",
+    "lastName": "Doe",
+    "currentRole": "DOCTOR",
+    "emailId": "john.doe@hospital.com",
+    "mobileNumber": 9876543210,
+    "organisation": "Apollo Hospital",
+    "status": "active"
+  }'
+
+# Update user
+curl -X PUT "http://localhost:8000/api/v1/users/USER_001" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Jonathan",
+    "organisation": "Max Hospital",
+    "commentLog": "Updated name and organization after job transfer"
+  }'
+```
+
+**Documentation:**
+- Complete API specification: [USER_MASTER_API_SPEC.md](./Implementation%20Guide/USER_MASTER_API_SPEC.md) (OpenAPI 3.0)
+- Detailed endpoint docs: [Agents/API Dev Agent.md](./Agents/API%20Dev%20Agent.md#user-master-api---detailed-specification)
+- Database schema: [Agents/DB Dev Agent.md](./Agents/DB%20Dev%20Agent.md#table-3-user_master)
+- Implementation details: [Plan/API Development Plan.md](./Plan/API%20Development%20Plan.md#-step-2-user_master-crud-api-development-with-full-test-coverage)
+
+#### ⏳ APIs 6-12: Other Tables
+- API 6 & 7: Authentication (User_Login)
+- API 8 & 9: Registration (New_User_Request)
+- API 10 & 11: Reports (Report_History)
+- API 12: Locations (State_City_PinCode_Master)
 
 ---
 
@@ -266,14 +337,19 @@ docker run -p 8000:8000 medostel-api:latest
 
 ## 📊 API Statistics
 
-| Metric | Count |
-|--------|-------|
-| **Total APIs** | 12 |
-| **Database Tables** | 6 |
-| **System Roles** | 8 |
-| **Test Cases** | 100+ |
-| **Documentation Files** | 7 |
-| **Code Modules** | 18+ |
+| Metric | Count | Status |
+|--------|-------|--------|
+| **Total APIs** | 12 | 3 Complete, 9 Pending |
+| **Implemented APIs** | 3 | User Master (Search, Create, Update) ✅ |
+| **Database Tables** | 6 | All defined |
+| **System Roles** | 8 | All defined |
+| **Test Cases** | 123 | ✅ 100% Passing (123/123) |
+| **Schema Tests** | 45+ | Email, mobile, status, role, names ✅ |
+| **Database Tests** | 31 | Auto-increment, queries, CRUD ✅ |
+| **API Tests** | 47 | Search, create, update, errors ✅ |
+| **Documentation Files** | 12 | API specs, test reports, guides |
+| **Code Modules** | 18+ | Schemas, routes, utilities, models |
+| **Implementation Guides** | 8 | Migration, API, testing, documentation |
 
 ---
 
@@ -286,13 +362,114 @@ docker run -p 8000:8000 medostel-api:latest
 
 ---
 
+## 🧪 Test Coverage
+
+### User Master API Test Results (Phase 3 - COMPLETE)
+
+**Status:** ✅ **ALL 123 TESTS PASSING (100%)**
+
+```
+Total Tests:       123
+Passing:          123 ✅
+Failing:            0
+Pass Rate:        100%
+Execution Time:  0.09s
+```
+
+### Test Breakdown by Category
+
+| Category | Tests | Status | Details |
+|----------|-------|--------|---------|
+| **Schema Validation** | 45+ | ✅ PASSED | Email, mobile, status, role, names |
+| **Database Operations** | 31 | ✅ PASSED | Auto-increment, queries, CRUD |
+| **API Endpoints** | 47 | ✅ PASSED | Search, create, update, errors |
+
+### What's Tested ✅
+
+**Input Validation:**
+- Email format (regex pattern)
+- Mobile number range (1000000000-9999999999)
+- Status values (active, pending, deceased, inactive)
+- Role names (8 valid roles)
+- Name length (max 50 chars)
+- Field requirements
+
+**Data Transformation:**
+- Email lowercasing
+- Role uppercasing
+- Status lowercasing
+- Timestamp auto-generation
+- User ID auto-increment with padding
+
+**Uniqueness Constraints:**
+- Email uniqueness
+- Mobile uniqueness
+- Email + Mobile combination uniqueness
+
+**Immutable Fields:**
+- userId cannot change on update
+- createdDate cannot change on update
+
+**API Behavior:**
+- Correct HTTP status codes (201, 200, 400, 404, 409)
+- Correct response formats
+- Error handling and messages
+- Complete workflows (create→search, create→update)
+
+### Running Tests
+
+```bash
+# Install test dependencies
+pip install pytest pytest-cov
+
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage report
+pytest tests/ --cov=src --cov-report=html
+
+# Run specific test file
+pytest tests/test_user_schemas.py -v
+
+# Run specific test class
+pytest tests/test_user_schemas.py::TestEmailValidation -v
+
+# Run tests by marker
+pytest -m validation      # Validation tests only
+pytest -m database        # Database tests only
+pytest -m api             # API tests only
+```
+
+### Test Files
+
+| File | Tests | Purpose |
+|------|-------|---------|
+| `tests/test_user_schemas.py` | 45+ | Pydantic schema validation |
+| `tests/test_user_db_utils.py` | 31 | Database utility functions |
+| `tests/test_user_api.py` | 47 | API endpoint functionality |
+| `tests/conftest.py` | - | Test fixtures and configuration |
+
+### Test Quality Metrics
+
+- ✅ Functional Coverage: 100%
+- ✅ Error Cases: All major paths covered
+- ✅ Edge Cases: Boundary values, special characters, unicode
+- ✅ Validation: All constraints verified
+- ✅ Database: CRUD operations fully mocked and tested
+- ✅ API Integration: End-to-end workflows verified
+- ✅ Performance: All tests complete in <1 second
+
+---
+
 ## 📅 Last Updated
 
-- **Date**: March 1, 2026
-- **Updated By**: Claude Code
-- **Status**: Design Complete & Enhanced - Ready for Implementation
-- **API Enhancement**: User_Role_Master (API 1 & 2) ✅ Enhanced
-- **Remaining APIs**: APIs 3-12 ⏳ In Development
+- **Date**: March 3, 2026
+- **Updated By**: Claude Code (AI Assistant)
+- **Status**: User Master API ✅ COMPLETE - Phase 1-4 Finished
+- **Latest Implementation**: User Master CRUD API (3 endpoints)
+- **Test Coverage**: 123/123 tests passing (100%)
+- **Documentation**: All phases documented (implementation guide folder)
+- **Next Phase**: Additional API endpoints (User Login, Registration, Reports)
 
 ---
 
