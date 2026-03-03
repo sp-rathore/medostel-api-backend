@@ -8,10 +8,17 @@ This guide provides step-by-step instructions to create the 6 core tables in the
 **Engine**: PostgreSQL 18.2
 **Instance**: medostel-ai-assistant-pgdev-instance
 **Project**: gen-lang-client-0064186167
-**Schema Version**: 2.0 (Updated March 1, 2026)
+**Schema Version**: 2.1 (Updated March 3, 2026)
 **Status**: Production Ready ✅
 
-### Recent Schema Changes (March 1, 2026)
+### Recent Schema Changes (March 3, 2026 - STEP 1.3)
+- ✅ User_Role_Master.roleId changed from VARCHAR(10) to SERIAL INTEGER (auto-increment 1-8)
+- ✅ User_Master.currentRole changed from VARCHAR(50) to INTEGER (references roleId 1-8)
+- ✅ User_Login.roleId changed from VARCHAR(50) to INTEGER (references roleId 1-8)
+- ✅ Migration script with rollback available: user_role_master_migration.sql
+- ✅ All dependent foreign keys updated with CASCADE rules
+
+### Previous Schema Changes (March 1, 2026)
 - ✅ User_Master.userId changed from VARCHAR(255) to BIGINT (supports up to 1 billion users)
 - ✅ Email validation added using RFC 5322 regex pattern
 - ✅ Mobile number changed to NUMERIC(10) with 10-digit validation (1000000000-9999999999)
@@ -83,6 +90,68 @@ gcloud sql connect medostel-ai-assistant-pgdev-instance \
 ```
 
 **Note**: The `create_Tables.sql` file includes all schema enhancements dated March 1, 2026.
+
+---
+
+## Step 2.5: Execute STEP 1.3 User_Role_Master Migration (IF UPGRADING FROM EXISTING DATABASE)
+
+**⚠️ IMPORTANT**: Only execute this step if you have an existing database with VARCHAR(10) roleId. For fresh installations, the create_Tables.sql already contains the new SERIAL INTEGER schema.
+
+Execute the migration script to convert roleId from VARCHAR(10) to SERIAL INTEGER:
+
+```bash
+cd /Users/shishupals/Documents/Claude/projects/Medostel/repositories/medostel-api-backend/src/SQL\ files
+
+# Start Cloud SQL Proxy
+/opt/homebrew/share/google-cloud-sdk/bin/cloud-sql-proxy \
+  gen-lang-client-0064186167:asia-south1:medostel-ai-assistant-pgdev-instance &
+
+sleep 3
+
+# Create backup first (HIGHLY RECOMMENDED)
+gcloud sql backups create medostel-pre-step1-3 \
+  --instance=medostel-ai-assistant-pgdev-instance \
+  --project=gen-lang-client-0064186167
+
+# Execute migration
+gcloud sql connect medostel-ai-assistant-pgdev-instance \
+  --user=medostel_admin_user \
+  --project=gen-lang-client-0064186167 \
+  --database=Medostel < user_role_master_migration.sql
+```
+
+**Migration Script Details**:
+- Drops dependent foreign keys from user_master and user_login
+- Drops old user_role_master table
+- Creates new user_role_master with SERIAL INTEGER roleId (auto-increment 1-8)
+- Inserts 8 standard roles with auto-generated IDs
+- Updates user_master.currentRole to INTEGER with proper FK constraints
+- Updates user_login.roleId to INTEGER with proper FK constraints
+- Includes rollback script (commented) for manual rollback if needed
+
+**Expected Output**:
+```
+✓ Foreign keys dropped
+✓ Old table dropped
+✓ New table created with SERIAL roleId
+✓ 8 roles inserted (IDs 1-8)
+✓ Foreign key constraints updated
+✓ Migration complete
+```
+
+**Verification After Migration**:
+```bash
+# Connect to database
+gcloud sql connect medostel-ai-assistant-pgdev-instance \
+  --user=medostel_admin_user \
+  --project=gen-lang-client-0064186167 \
+  --database=Medostel
+
+# Run these queries:
+SELECT * FROM user_role_master;  -- Should show roleId as 1-8 (integers)
+SELECT COUNT(*) FROM user_role_master;  -- Should show 8 rows
+SELECT * FROM information_schema.table_constraints WHERE table_name = 'user_master' AND constraint_type = 'FOREIGN KEY';  -- Verify FKs
+```
 
 ---
 

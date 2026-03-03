@@ -1,6 +1,7 @@
 """
 Pydantic schemas for User_Master (APIs 5 & 6)
 Enhanced with geographic hierarchy integration (Step 1.2)
+Updated: March 3, 2026 - currentRole changed from str to INTEGER (FK to user_role_master.roleId)
 """
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
@@ -12,7 +13,7 @@ class UserBase(BaseModel):
     """Base schema for user"""
     firstName: str = Field(..., max_length=50)
     lastName: str = Field(..., max_length=50)
-    currentRole: str = Field(..., max_length=50)
+    currentRole: int = Field(..., ge=1, le=8, description="Role ID (1-8, FK to user_role_master)")
     emailId: EmailStr
     mobileNumber: str = Field(..., max_length=15)
     organisation: Optional[str] = Field(None, max_length=100)

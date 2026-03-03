@@ -102,18 +102,21 @@
 
 ### TABLE 1: User_Role_Master
 **Purpose**: Master table for user roles and permissions
+**Updated**: March 3, 2026 - Changed roleId from VARCHAR(10) to SERIAL INTEGER (auto-increment 1-8)
+**Schema Version**: 2.0
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `roleId` | VARCHAR(10) | PK, Not Null | Unique Role ID |
-| `roleName` | VARCHAR(50) | Not Null, Unique | Role name |
-| `status` | VARCHAR(20) | Default 'Active' | Active/Inactive/Closed |
-| `createdDate` | DATE | Not Null | Creation date |
-| `updatedDate` | DATE | Not Null | Last update date |
-| `comments` | VARCHAR(250) | | Optional notes |
+| `roleId` | SERIAL INTEGER | PK, Auto-Increment | Auto-generated role ID (1-8) |
+| `roleName` | VARCHAR(50) | Not Null, Unique | Role name (ADMIN, DOCTOR, HOSPITAL, NURSE, PARTNER, PATIENT, RECEPTION, TECHNICIAN) |
+| `status` | VARCHAR(20) | Default 'Active' | Active/Inactive/Closed/Pending |
+| `createdDate` | DATE | Default CURRENT_DATE | Creation date |
+| `updatedDate` | DATE | Default CURRENT_DATE | Last update date |
+| `comments` | VARCHAR(250) | | Optional role description |
 
-**Indexes**: `idx_user_role_name`, `idx_user_role_status`
+**Indexes**: `idx_role_status`, `idx_role_name`, `idx_role_updated`
 **Size**: 32 kB | **Owner**: medostel_admin_user
+**Migration**: See user_role_master_migration.sql for migration from VARCHAR(10) to SERIAL INTEGER
 
 ---
 
@@ -140,10 +143,10 @@
 
 ### TABLE 3: User_Master
 **Purpose**: Core user profile and demographic data with geographic hierarchy integration (ENHANCED - March 4, 2026)
-**Primary Key**: `userId` (VARCHAR(100) - Email address)
-**Schema Version**: 3.0 (Added geographic FK columns: stateId, districtId, cityId; Changed pinCode from VARCHAR to INTEGER)
+**Primary Key**: `userId` (BIGINT - Auto-generated)
+**Schema Version**: 3.1 (March 3, 2026: Updated currentRole from VARCHAR(50) to INTEGER, references roleId 1-8)
 **Foreign Keys**:
-- `currentRole` → User_Role_Master(roleName)
+- `currentRole` → User_Role_Master(roleId) - INTEGER (1-8)
 - `stateId` → State_City_PinCode_Master(stateId)
 - `districtId` → State_City_PinCode_Master(districtId)
 - `cityId` → State_City_PinCode_Master(cityId)
@@ -151,22 +154,21 @@
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `userId` | VARCHAR(100) | PK, Not Null | Email address (unique user identifier) |
-| `firstName` | VARCHAR(50) | Not Null | First name |
-| `lastName` | VARCHAR(50) | Not Null | Last name |
-| `currentRole` | VARCHAR(50) | FK, Not Null | References User_Role_Master(roleName) |
-| `organisation` | VARCHAR(100) | | Organization name |
-| `emailId` | VARCHAR(100) | Not Null, Unique | Email address (RFC 5322 validation) |
-| `mobileNumber` | VARCHAR(15) | Not Null, Unique | Mobile number |
-| `address1` | VARCHAR(255) | | Address line 1 |
-| `address2` | VARCHAR(255) | | Address line 2 |
+| `userId` | BIGINT | PK, Not Null | User ID (auto-generated numeric ID) |
+| `firstName` | VARCHAR(100) | Not Null | First name |
+| `lastName` | VARCHAR(100) | Not Null | Last name |
+| `currentRole` | INTEGER | FK, Not Null | Role ID (1-8, references User_Role_Master.roleId) |
+| `emailId` | VARCHAR(255) | Not Null, Unique | Email address (RFC 5322 validation) |
+| `mobileNumber` | NUMERIC(10) | Not Null, Unique | 10-digit mobile number |
+| `organisation` | VARCHAR(255) | | Organization name |
+| `address` | TEXT | | User address |
 | `stateId` | INTEGER | FK | State ID (references State_City_PinCode_Master) |
 | `stateName` | VARCHAR(100) | | State name (for display) |
 | `districtId` | INTEGER | FK | District ID (references State_City_PinCode_Master) |
 | `cityId` | INTEGER | FK | City ID (references State_City_PinCode_Master) |
 | `cityName` | VARCHAR(100) | | City name (for display) |
 | `pinCode` | INTEGER | FK | Postal code (references State_City_PinCode_Master) |
-| `status` | VARCHAR(20) | Default 'Active' | Active/Inactive |
+| `status` | VARCHAR(50) | Default 'Active' | Active/Inactive/Suspended |
 | `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Creation timestamp |
 | `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Update timestamp |
 
@@ -183,16 +185,17 @@
 ---
 
 ### TABLE 4: User_Login
-**Purpose**: Authentication and login credentials (UPDATED - March 1, 2026)
+**Purpose**: Authentication and login credentials (UPDATED - March 3, 2026)
 **Primary Key**: `userId`
-**Foreign Keys**: `userId` → User_Master(userId - BIGINT), `roleId` → User_Role_Master(roleId)
+**Schema Version**: 2.1 (March 3, 2026: Updated roleId from VARCHAR(50) to INTEGER)
+**Foreign Keys**: `userId` → User_Master(userId - BIGINT), `roleId` → User_Role_Master(roleId - INTEGER 1-8)
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `userId` | BIGINT | PK, FK, Not Null | User ID (numeric, references User_Master) |
 | `username` | VARCHAR(100) | Not Null, Unique | Login username |
 | `password` | VARCHAR(255) | Not Null | Hashed password |
-| `roleId` | VARCHAR(50) | FK, Not Null | Role ID (references User_Role_Master) |
+| `roleId` | INTEGER | FK, Not Null | Role ID (1-8, references User_Role_Master.roleId) |
 | `isActive` | BOOLEAN | Default TRUE | Account active status |
 | `lastLoginTime` | TIMESTAMP | | Last login timestamp |
 | `loginAttempts` | INTEGER | Default 0 | Failed login attempts counter |

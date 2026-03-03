@@ -19,10 +19,17 @@ As part of User Management we will have:
   - 6 location APIs implemented with district support
   - 65 comprehensive unit tests created
   - Complete Phase 6 execution infrastructure ready for user execution
-- ⏳ Step 1.2: User_Master Schema Enhancement with Geographic Hierarchy (EXECUTION PLAN - AWAITING APPROVAL)
+- ✅ Step 1.2: User_Master Schema Enhancement with Geographic Hierarchy (COMPLETE - March 4, 2026)
   - Add cityId, stateId, pinCode as foreign keys from State_City_PinCode_Master
   - Enhance address fields with Address1 and Address2
   - Update all dependent APIs and documentation
+  - 40 comprehensive user API tests created
+- 🚀 Step 1.3: User_Role_Master Schema Refactoring (IN PROGRESS - March 3, 2026)
+  - Change roleId from VARCHAR(10) to SERIAL INTEGER (1-8)
+  - Update all dependent APIs (GET, POST, PUT for roles)
+  - Update user_master.currentRole and user_login.roleId FK constraints
+  - Phases 1-4 Complete: SQL, Schemas, API Routes, Service Layer
+  - Phase 5 In Progress: Documentation updates
 - ⏳ Step 2: User_Management module implementation (Pending)
 
 ## Development Phases
@@ -1298,6 +1305,194 @@ Production Deployment
 5. ⏳ Production database migration execution - PENDING
 6. ⏳ Production API deployment - PENDING
 7. ⏳ Step 2: User_Management module implementation - NEXT
+
+---
+
+## 🚀 STEP 1.3: User_Role_Master Schema Refactoring (roleId VARCHAR → SERIAL INTEGER)
+
+**Status:** IN PROGRESS
+**Date Started:** March 3, 2026
+**Estimated Completion:** March 3, 2026 (same day)
+**Total Files Affected:** 12 code files + 10 documentation files
+
+### Executive Summary
+
+Refactor the `user_role_master` table primary key from VARCHAR(10) to SERIAL INTEGER (auto-increment 1-8) for improved database performance, better scalability, and cleaner API design. This is a breaking change requiring cascading updates across all dependent tables and APIs.
+
+### Changes Overview
+
+**Database Impact:**
+- roleId: VARCHAR(10) → SERIAL PRIMARY KEY (auto-increment)
+- Sample Data: Manual codes (ADMIN, DOCTOR, etc.) → Auto-increment IDs (1-8)
+- Foreign Keys: Updated in user_master.currentRole and user_login.roleId
+- Cascade: ON UPDATE CASCADE for data consistency
+
+**API Impact:**
+- Request parameters: roleId as integer (1-8)
+- Response payloads: roleId as integer
+- POST /api/v1/roles: roleId auto-generated (not in request)
+- GET /api/v1/roles/all?roleId=1: Query parameter as integer
+- PUT /api/v1/roles/{roleId}: Path parameter as integer
+
+**Code Changes:**
+- src/SQL files/ : Migration script + updated create_Tables.sql
+- src/schemas/ : user_role.py, user.py, user_login.py updated
+- src/routes/v1/ : roles.py API endpoints refactored
+- src/services/ : user_role_service.py with SERIAL support
+
+### Execution Phases
+
+#### ✅ Phase 1: SQL Migration Scripts (COMPLETE)
+- Created: `user_role_master_migration.sql` with rollback
+- Modified: `create_Tables.sql` with SERIAL INTEGER roleId
+- Migration steps: Drop FKs → Drop old table → Create new table with SERIAL → Insert roles → Recreate FKs
+
+#### ✅ Phase 2: Pydantic Schemas (COMPLETE)
+- Modified: `user_role.py` (roleId: Optional[int] in response only)
+- Modified: `user.py` (currentRole: int with validation ge=1, le=8)
+- Modified: `user_login.py` (roleId: Optional[int] with validation)
+
+#### ✅ Phase 3: API Routes (COMPLETE)
+- Modified: `roles.py` GET/POST/PUT endpoints
+- Updated: Query parameter, path parameter, request body to integer
+- Removed: Uppercase conversion logic
+- Added: Better validation and error messages
+
+#### ✅ Phase 4: Service Layer (COMPLETE)
+- Modified: `user_role_service.py` with all methods
+- Updated: SQL queries for integer roleId
+- Added: `role_exists_by_name()` method for duplicate checking
+- Change: INSERT query uses SERIAL/RETURNING for auto-generated IDs
+
+#### ⏳ Phase 5: Documentation Updates (IN PROGRESS)
+- Plan/API Development Plan.md (this file)
+- Agents/DB Dev Agent.md
+- Agents/API Dev Agent.md
+- Agents/API Unit Testing Agent.md
+- Agents/DBA Agent.md
+- DevOps/DBA/Databasespecs.md
+- DevOps/DBA/DBA.md
+- DevOps/DBA/DEPLOYMENT_GUIDE.md
+- API Development/APISETUP.md
+- README.md
+
+### Role ID Mapping
+
+| roleId | Role Name | Description |
+|--------|-----------|-------------|
+| 1 | ADMIN | System Administrator - Full system access |
+| 2 | DOCTOR | Doctor/Physician - Manage patient records |
+| 3 | HOSPITAL | Hospital Administrator - Hospital functions |
+| 4 | NURSE | Nursing Staff - Nursing operations |
+| 5 | PARTNER | Sales Partner - Sales/marketing partner |
+| 6 | PATIENT | Patient User - View personal records |
+| 7 | RECEPTION | Reception Staff - Patient registration |
+| 8 | TECHNICIAN | Lab Technician - Create lab reports |
+
+### Breaking Changes
+
+⚠️ **These are BREAKING CHANGES - require client updates:**
+
+1. roleId is now integer (1-8) instead of string (ADMIN, DOCTOR, etc.)
+2. POST /api/v1/roles: roleId NO LONGER accepted in request (auto-generated)
+3. GET /api/v1/roles/all?roleId=1 (integer, not ADMIN)
+4. PUT /api/v1/roles/1 (integer path parameter)
+5. Request payloads must use integer roleIds: {"currentRole": 2} not {"currentRole": "DOCTOR"}
+
+### Migration Path
+
+**Database Migration Order:**
+1. Backup current database
+2. Execute migration_step1_3.sql (handles FK drops, schema change, data migration)
+3. Verify with SELECT queries
+4. Rollback available in same script if needed
+
+**API Client Updates Required:**
+1. Change all roleId references from strings to integers
+2. Remove roleId from POST requests
+3. Update query parameters to use integers
+4. Update response handling to expect integer roleIds
+
+### Files Modified (Phase 1-4 Complete)
+
+**Code Files:**
+- ✅ src/SQL files/create_Tables.sql
+- ✅ src/SQL files/user_role_master_migration.sql (NEW)
+- ✅ src/schemas/user_role.py
+- ✅ src/schemas/user.py
+- ✅ src/schemas/user_login.py
+- ✅ src/routes/v1/roles.py
+- ✅ src/services/user_role_service.py
+
+**Documentation Files (Phase 5 - IN PROGRESS):**
+- ⏳ Plan/API Development Plan.md (this file)
+- ⏳ Agents/DB Dev Agent.md
+- ⏳ Agents/API Dev Agent.md
+- ⏳ Agents/API Unit Testing Agent.md
+- ⏳ Agents/DBA Agent.md
+- ⏳ DevOps/DBA/Databasespecs.md
+- ⏳ DevOps/DBA/DBA.md
+- ⏳ DevOps/DBA/DEPLOYMENT_GUIDE.md
+- ⏳ API Development/APISETUP.md
+- ⏳ README.md
+
+### Verification Checklist
+
+**Database:**
+- [ ] SELECT * FROM user_role_master → Shows IDs 1-8
+- [ ] Check constraints on user_master.currentRole (INTEGER FK)
+- [ ] Check constraints on user_login.roleId (INTEGER FK)
+- [ ] Foreign key cascade rules (ON UPDATE CASCADE)
+
+**API:**
+- [ ] GET /api/v1/roles/all → Returns 8 roles with integer roleIds
+- [ ] GET /api/v1/roles/all?roleId=1 → Returns ADMIN role
+- [ ] POST /api/v1/roles (without roleId) → Creates role with auto-ID
+- [ ] PUT /api/v1/roles/1 → Updates role with ID 1
+
+**Integration:**
+- [ ] User creation with integer currentRole works
+- [ ] User login with integer roleId works
+- [ ] All foreign key references intact
+
+### Documentation Status
+
+**Complete Documentation References:**
+- Migration Procedure: See user_role_master_migration.sql (with rollback)
+- Schema Changes: See create_Tables.sql lines 27-39
+- API Endpoints: See roles.py updated routes
+- Service Layer: See user_role_service.py refactored methods
+
+### Implementation Guide Location
+
+`implementation guide/plan_step_1_3_20260303.md` (To be created after approval)
+
+### Deployment Notes
+
+**Execution Requirements:**
+- PostgreSQL 18+ (supports SERIAL)
+- Database backup before migration
+- Read-only mode recommended during migration
+- Estimated downtime: 2-5 minutes
+
+**Rollback Procedure:**
+- Use rollback script in user_role_master_migration.sql
+- Restore from backup if needed
+- Revert code changes from git
+
+### Next Steps
+
+1. ✅ Complete Phase 4 (Service Layer) - DONE
+2. ⏳ Complete Phase 5 (Documentation) - IN PROGRESS
+3. ⏳ Testing & Verification - PENDING
+4. ⏳ Production Migration - PENDING
+5. ⏳ Client Code Updates - PENDING
+
+---
+
+**Status:** STEP 1.3 IN PROGRESS
+**Last Updated:** March 3, 2026
+**Next Milestone:** Complete Phase 5 documentation and run comprehensive tests
 
 ---
 

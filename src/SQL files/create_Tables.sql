@@ -23,9 +23,10 @@ DROP TABLE IF EXISTS user_role_master CASCADE;
 
 -- ============================================================================
 -- Table 1: user_role_master
+-- UPDATED (March 3, 2026): roleId changed from VARCHAR(10) to SERIAL INTEGER
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS user_role_master (
-    roleId VARCHAR(10) PRIMARY KEY,
+    roleId SERIAL PRIMARY KEY,
     roleName VARCHAR(50) NOT NULL UNIQUE,
     status VARCHAR(20) DEFAULT 'Active' CHECK (status IN ('Active', 'Inactive', 'Closed', 'Pending')),
     comments VARCHAR(250),
@@ -33,7 +34,6 @@ CREATE TABLE IF NOT EXISTS user_role_master (
     updatedDate DATE DEFAULT CURRENT_DATE
 );
 
-CREATE UNIQUE INDEX pk_user_role_master ON user_role_master(roleId);
 CREATE INDEX idx_role_status ON user_role_master(status);
 CREATE INDEX idx_role_name ON user_role_master(roleName);
 CREATE INDEX idx_role_updated ON user_role_master(updatedDate);
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS user_master (
     userId BIGINT PRIMARY KEY,
     firstName VARCHAR(100) NOT NULL,
     lastName VARCHAR(100) NOT NULL,
-    currentRole VARCHAR(50) NOT NULL,
+    currentRole INTEGER NOT NULL,
     emailId VARCHAR(255) NOT NULL UNIQUE
         CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
     mobileNumber NUMERIC(10) NOT NULL UNIQUE
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS user_master (
     status VARCHAR(50) DEFAULT 'Active' CHECK (status IN ('Active', 'Inactive', 'Suspended')),
     createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (currentRole) REFERENCES user_role_master(roleId)
+    FOREIGN KEY (currentRole) REFERENCES user_role_master(roleId) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE UNIQUE INDEX pk_user_master ON user_master(userId);
@@ -98,21 +98,22 @@ CREATE INDEX idx_user_updated ON user_master(updatedDate);
 -- ============================================================================
 -- Table 4: user_login
 -- ============================================================================
--- UPDATED (March 1, 2026):
+-- UPDATED (March 3, 2026):
 -- - userId changed from VARCHAR(255) to BIGINT to match user_master
+-- - roleId changed from VARCHAR(50) to INTEGER to match user_role_master
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS user_login (
     userId BIGINT PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    roleId VARCHAR(50) NOT NULL,
+    roleId INTEGER NOT NULL,
     isActive BOOLEAN DEFAULT TRUE,
     lastLoginTime TIMESTAMP,
     loginAttempts INTEGER DEFAULT 0,
     createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userId) REFERENCES user_master(userId),
-    FOREIGN KEY (roleId) REFERENCES user_role_master(roleId)
+    FOREIGN KEY (roleId) REFERENCES user_role_master(roleId) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE UNIQUE INDEX pk_user_login ON user_login(userId);
@@ -187,24 +188,24 @@ CREATE INDEX idx_report_updated ON report_history(updatedDate);
 -- Sample Data Insertion
 -- ============================================================================
 
--- Insert system roles
-INSERT INTO user_role_master (roleId, roleName, status, comments) VALUES
-('ADMIN', 'Administrator', 'Active', 'System administrator with full access'),
-('DOCTOR', 'Doctor', 'Active', 'Medical professional'),
-('HOSPITAL', 'Hospital', 'Active', 'Hospital administrator'),
-('NURSE', 'Nurse', 'Active', 'Nursing staff'),
-('PARTNER', 'Sales Partner', 'Active', 'Sales and marketing partner'),
-('PATIENT', 'Patient', 'Active', 'Patient user'),
-('RECEPTION', 'Reception', 'Active', 'Reception staff'),
-('TECHNICIAN', 'Technician', 'Active', 'Lab technician');
+-- Insert system roles (roleId is auto-generated via SERIAL)
+INSERT INTO user_role_master (roleName, status, comments) VALUES
+('ADMIN', 'Active', 'System Administrator - Full system access and database management'),
+('DOCTOR', 'Active', 'Doctor or Physician - Can view and manage patient records and create medical reports'),
+('HOSPITAL', 'Active', 'Hospital Administrator - Hospital-level administrative functions'),
+('NURSE', 'Active', 'Nursing Staff - Can update patient information and create nursing reports'),
+('PARTNER', 'Active', 'Sales Partner - Sales and marketing partner functions'),
+('PATIENT', 'Active', 'Patient User - Can view personal medical records and report history'),
+('RECEPTION', 'Active', 'Reception Staff - Can register new patients and manage appointments'),
+('TECHNICIAN', 'Active', 'Lab Technician - Can create and upload laboratory test reports and results');
 
--- Insert sample users
+-- Insert sample users (using integer roleIds from user_role_master)
 INSERT INTO user_master (userId, firstName, lastName, currentRole, emailId, mobileNumber, organisation, address, status) VALUES
-(1001, 'Dr. Rajesh', 'Kumar', 'DOCTOR', 'rajesh.kumar@medostel.com', 9876543210, 'Apollo Hospital', 'Mumbai', 'Active'),
-(1002, 'Amit', 'Singh', 'PATIENT', 'amit.singh@medostel.com', 9123456789, 'Self', 'Delhi', 'Active'),
-(1003, 'Dr. Priya', 'Sharma', 'DOCTOR', 'priya.sharma@medostel.com', 8765432109, 'Max Hospital', 'Bangalore', 'Active'),
-(1004, 'Neha', 'Patel', 'NURSE', 'neha.patel@medostel.com', 9876543211, 'Apollo Hospital', 'Mumbai', 'Active'),
-(1005, 'Admin', 'User', 'ADMIN', 'admin@medostel.com', 9000000000, 'Medostel HQ', 'Mumbai', 'Active');
+(1001, 'Dr. Rajesh', 'Kumar', 2, 'rajesh.kumar@medostel.com', 9876543210, 'Apollo Hospital', 'Mumbai', 'Active'),
+(1002, 'Amit', 'Singh', 6, 'amit.singh@medostel.com', 9123456789, 'Self', 'Delhi', 'Active'),
+(1003, 'Dr. Priya', 'Sharma', 2, 'priya.sharma@medostel.com', 8765432109, 'Max Hospital', 'Bangalore', 'Active'),
+(1004, 'Neha', 'Patel', 4, 'neha.patel@medostel.com', 9876543211, 'Apollo Hospital', 'Mumbai', 'Active'),
+(1005, 'Admin', 'User', 1, 'admin@medostel.com', 9000000000, 'Medostel HQ', 'Mumbai', 'Active');
 
 -- ============================================================================
 -- Verification Queries

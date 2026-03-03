@@ -1,5 +1,6 @@
 """
 Pydantic schemas for User_Login (APIs 7 & 8)
+Updated: March 3, 2026 - roleId changed from str to INTEGER (FK to user_role_master.roleId)
 """
 
 from pydantic import BaseModel, Field
@@ -10,7 +11,7 @@ from datetime import datetime
 class UserLoginBase(BaseModel):
     """Base schema for user login"""
     username: str = Field(..., max_length=100)
-    roleId: Optional[str] = Field(None, max_length=10)
+    roleId: Optional[int] = Field(None, ge=1, le=8, description="Role ID (1-8, FK to user_role_master)")
     isActive: bool = Field(default=True)
 
 
@@ -25,7 +26,7 @@ class UserLoginUpdate(BaseModel):
     """Schema for updating user login credentials"""
     password: Optional[str] = Field(None, min_length=8)
     isActive: Optional[bool] = None
-    roleId: Optional[str] = None
+    roleId: Optional[int] = Field(None, ge=1, le=8, description="Role ID (1-8, FK to user_role_master)")
 
 
 class UserLoginResponse(UserLoginBase):

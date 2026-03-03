@@ -1,13 +1,13 @@
 # Medostel Database Development Agent
 
-**Version:** 3.0 (Updated: March 4, 2026)
-**Last Updated:** March 4, 2026
+**Version:** 3.1 (Updated: March 3, 2026)
+**Last Updated:** March 3, 2026
 **Database:** PostgreSQL 18.2
 **Host:** 35.244.27.232:5432
 **Port:** 5432
 **Status:** ✅ Production Ready
-**Changes**: Step 1.1 (Geographic Hierarchy) ✅ COMPLETE, Step 1.2 (User Geographic Integration) ✅ COMPLETE
-**Data Status**: 9,805 records loaded (36 states, 98 districts)
+**Changes**: Step 1.1 (Geographic Hierarchy) ✅ COMPLETE, Step 1.2 (User Geographic Integration) ✅ COMPLETE, Step 1.3 (User Role Master Refactoring) ✅ COMPLETE
+**Data Status**: 9,805 records loaded (36 states, 98 districts), roleId auto-increment (1-8)
 
 ---
 
@@ -99,10 +99,12 @@ Capabilities:      Application API access with limited permissions
 ### Purpose
 Stores user role definitions for the Medostel Healthcare system. Roles define access permissions and user types.
 
-### Table Structure
+### Table Structure (UPDATED - Step 1.3 Complete)
+**Schema Version:** 2.0 | **Status:** Auto-increment roleId (1-8) ✅
+
 ```sql
 CREATE TABLE IF NOT EXISTS user_role_master (
-    roleId VARCHAR(10) PRIMARY KEY,
+    roleId SERIAL PRIMARY KEY,
     roleName VARCHAR(50) NOT NULL UNIQUE,
     status VARCHAR(20) DEFAULT 'Active',
     comments VARCHAR(250),
@@ -113,37 +115,36 @@ CREATE TABLE IF NOT EXISTS user_role_master (
 
 ### Column Details
 
-| Column | Type | Constraints | Max Length | Purpose |
-|--------|------|-------------|-----------|---------|
-| **roleId** | VARCHAR | PK, NOT NULL | 10 | Unique role identifier (e.g., ADMIN, DOCTOR, HOSPITAL) |
+| Column | Type | Constraints | Range/Length | Purpose |
+|--------|------|-------------|-------------|---------|
+| **roleId** | SERIAL | PK, AUTO-INCREMENT | 1-8 | Unique role identifier (auto-generated 1-8) |
 | **roleName** | VARCHAR | UNIQUE, NOT NULL | 50 | Human-readable role name (e.g., "System Administrator") |
-| **status** | VARCHAR | DEFAULT 'Active' | 20 | Current status: Active, Inactive, Pending |
+| **status** | VARCHAR | DEFAULT 'Active' | 20 | Current status: Active, Inactive, Closed, Pending |
 | **comments** | VARCHAR | NULLABLE | 250 | Additional description or notes about the role |
 | **createdDate** | DATE | DEFAULT CURRENT_DATE | - | Date when role was created |
 | **updatedDate** | DATE | DEFAULT CURRENT_DATE | - | Date of last modification |
 
 ### Indexes
 ```sql
--- Primary Key Index
-CREATE UNIQUE INDEX pk_user_role_master ON user_role_master(roleId);
-
+-- Primary Key Index (implicit with SERIAL)
 -- Secondary Indexes
 CREATE INDEX idx_role_status ON user_role_master(status);
 CREATE INDEX idx_role_name ON user_role_master(roleName);
 CREATE INDEX idx_role_updated ON user_role_master(updatedDate);
 ```
 
-### Sample Data (Production - 8 Active Roles)
+### Sample Data (Production - 8 Active Roles with Auto-Increment IDs)
 ```sql
-INSERT INTO user_role_master (roleId, roleName, status, comments) VALUES
-('ADMIN', 'System Administrator', 'Active', 'Full system access and database management'),
-('DOCTOR', 'Doctor/Physician', 'Active', 'Can view and manage patient records and create medical reports'),
-('HOSPITAL', 'Hospital', 'Active', 'Hospital administrator - manages hospital operations and staff'),
-('NURSE', 'Nurse', 'Active', 'Can assist with patient records, blood work, and vitals'),
-('PARTNER', 'Sales Partner', 'Active', 'Sales and marketing partner - manages partnerships and revenue'),
-('PATIENT', 'Patient', 'Active', 'Can view own medical reports and health history'),
-('RECEPTION', 'Reception Staff', 'Active', 'Can manage appointments, check-in/check-out, and scheduling'),
-('TECHNICIAN', 'Lab Technician', 'Active', 'Can create and upload laboratory test reports and results');
+-- roleId is auto-generated via SERIAL (1-8)
+INSERT INTO user_role_master (roleName, status, comments) VALUES
+('ADMIN', 'Active', 'System Administrator - Full system access and database management'),
+('DOCTOR', 'Active', 'Doctor or Physician - Can view and manage patient records and create medical reports'),
+('HOSPITAL', 'Active', 'Hospital Administrator - Hospital-level administrative functions'),
+('NURSE', 'Active', 'Nursing Staff - Can update patient information and create nursing reports'),
+('PARTNER', 'Active', 'Sales Partner - Sales and marketing partner functions'),
+('PATIENT', 'Active', 'Patient User - Can view personal medical records and report history'),
+('RECEPTION', 'Active', 'Reception Staff - Can register new patients and manage appointments'),
+('TECHNICIAN', 'Active', 'Lab Technician - Can create and upload laboratory test reports and results');
 ```
 
 ### API Endpoints
@@ -153,25 +154,25 @@ INSERT INTO user_role_master (roleId, roleName, status, comments) VALUES
 - **API 2:** DELETE `/api/v1/roles/{roleId}` - Delete role
 
 ### Data Validation Rules
-- roleId: Must be unique, uppercase alphanumeric, max 10 chars (PRIMARY KEY)
+- roleId: Auto-generated SERIAL INTEGER (1-8), unique, PRIMARY KEY
 - roleName: Required, must be unique, max 50 chars
-- status: Must be one of: Active, Inactive, Pending, default is 'Active'
+- status: Must be one of: Active, Inactive, Closed, Pending, default is 'Active'
 - comments: Optional, max 250 chars
 - createdDate: Auto-populated with CURRENT_DATE on insert
 - updatedDate: Auto-populated with CURRENT_DATE on insert, updates on modification
 
-### All System Roles (8 Total)
+### All System Roles (8 Total - Auto-Increment IDs 1-8)
 
-| # | Role ID | Role Name | Status | Description |
-|---|---------|-----------|--------|-------------|
-| 1 | ADMIN | System Administrator | Active | Full system access and database management |
-| 2 | DOCTOR | Doctor/Physician | Active | Can view and manage patient records and create medical reports |
-| 3 | HOSPITAL | Hospital | Active | Hospital administrator - manages hospital operations and staff |
-| 4 | NURSE | Nurse | Active | Can assist with patient records, blood work, and vitals |
-| 5 | PARTNER | Sales Partner | Active | Sales and marketing partner - manages partnerships and revenue |
-| 6 | PATIENT | Patient | Active | Can view own medical reports and health history |
-| 7 | RECEPTION | Reception Staff | Active | Can manage appointments, check-in/check-out, and scheduling |
-| 8 | TECHNICIAN | Lab Technician | Active | Can create and upload laboratory test reports and results |
+| ID | Role Name | Status | Description |
+|----|-----------|--------|-------------|
+| 1 | ADMIN | Active | System Administrator - Full system access and database management |
+| 2 | DOCTOR | Active | Doctor or Physician - Can view and manage patient records and create medical reports |
+| 3 | HOSPITAL | Active | Hospital Administrator - Hospital-level administrative functions |
+| 4 | NURSE | Active | Nursing Staff - Can update patient information and create nursing reports |
+| 5 | PARTNER | Active | Sales Partner - Sales and marketing partner functions |
+| 6 | PATIENT | Active | Patient User - Can view personal medical records and report history |
+| 7 | RECEPTION | Active | Reception Staff - Can register new patients and manage appointments |
+| 8 | TECHNICIAN | Active | Lab Technician - Can create and upload laboratory test reports and results |
 
 ### Relationships
 - **Referenced by:** User_Master (currentRole), User_Login (roleId)

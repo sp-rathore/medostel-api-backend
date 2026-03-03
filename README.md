@@ -61,14 +61,16 @@ Infrastructure and database documentation:
 
 ### Implemented APIs (12 Total)
 
-#### ✅ API 1 & 2: User Roles (User_Role_Master)
+#### ✅ API 1 & 2: User Roles (User_Role_Master) - UPDATED March 3, 2026
 - **API 1**: GET `/api/v1/roles/all` - Retrieve roles with flexible filtering
-  - 3 request scenarios: by ID, by status, fetch all
-  - Case-insensitive role ID handling
+  - 3 request scenarios: by integer ID (1-8), by status, fetch all
+  - Query parameter: `roleId` as INTEGER (not string)
+  - Example: `?roleId=1` returns ADMIN role, `?roleId=2` returns DOCTOR role
 - **API 2**: POST/PUT `/api/v1/roles` - Role management
-  - POST: Create roles with auto-timestamp population
-  - PUT: Status-only updates with protected fields
+  - POST: Create roles with auto-generated integer roleId (SERIAL)
+  - PUT: Update status/comments, protected fields (roleId, roleName)
   - ❌ DELETE: Removed (not supported)
+  - **Breaking Change**: roleId no longer in POST request (auto-generated)
 
 #### ⏳ APIs 3-12: Other Tables
 - API 3 & 4: Locations (State_City_PinCode_Master)

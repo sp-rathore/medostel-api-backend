@@ -1,6 +1,7 @@
 """
 Service layer for User_Role_Master table (APIs 1 & 2)
 Business logic for role management operations
+Updated: March 3, 2026 - roleId changed from VARCHAR(10) to SERIAL INTEGER
 """
 
 import logging
@@ -43,24 +44,23 @@ class UserRoleService:
 
     @staticmethod
     async def create_role(db, role_data: dict) -> Any:
-        """Create new user role"""
+        """Create new user role (roleId is auto-generated via SERIAL)"""
         cursor = db.cursor()
         try:
             query = """
                 INSERT INTO user_role_master
-                (roleId, roleName, status, createdDate, updatedDate, comments)
-                VALUES (%s, %s, %s, CURRENT_DATE, CURRENT_DATE, %s)
+                (roleName, status, createdDate, updatedDate, comments)
+                VALUES (%s, %s, CURRENT_DATE, CURRENT_DATE, %s)
                 RETURNING *
             """
             cursor.execute(query, (
-                role_data['roleId'],
                 role_data['roleName'],
                 role_data.get('status', 'Active'),
                 role_data.get('comments')
             ))
             db.commit()
             result = cursor.fetchone()
-            logger.info(f"Role created: {role_data['roleId']}")
+            logger.info(f"Role created: {result[0]}")  # result[0] is the auto-generated roleId
             return result
         except Exception as e:
             db.rollback()
@@ -70,7 +70,7 @@ class UserRoleService:
             cursor.close()
 
     @staticmethod
-    async def update_role(db, role_id: str, role_data: dict) -> Any:
+    async def update_role(db, role_id: int, role_data: dict) -> Any:
         """Update existing user role"""
         cursor = db.cursor()
         try:
@@ -107,7 +107,7 @@ class UserRoleService:
             cursor.close()
 
     @staticmethod
-    async def delete_role(db, role_id: str) -> bool:
+    async def delete_role(db, role_id: int) -> bool:
         """Delete user role"""
         cursor = db.cursor()
         try:
@@ -126,7 +126,7 @@ class UserRoleService:
             cursor.close()
 
     @staticmethod
-    async def get_role_by_id(db, role_id: str) -> Any:
+    async def get_role_by_id(db, role_id: int) -> Any:
         """Get role by ID"""
         cursor = db.cursor()
         try:
@@ -137,7 +137,18 @@ class UserRoleService:
             cursor.close()
 
     @staticmethod
-    async def role_exists(db, role_id: str) -> bool:
+    async def role_exists(db, role_id: int) -> bool:
         """Check if role exists"""
         role = await UserRoleService.get_role_by_id(db, role_id)
         return role is not None
+
+    @staticmethod
+    async def role_exists_by_name(db, role_name: str) -> bool:
+        """Check if role with given name exists"""
+        cursor = db.cursor()
+        try:
+            query = "SELECT 1 FROM user_role_master WHERE roleName = %s LIMIT 1"
+            cursor.execute(query, (role_name,))
+            return cursor.fetchone() is not None
+        finally:
+            cursor.close()

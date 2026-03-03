@@ -18,27 +18,46 @@ The database consists of the following core tables:
 ### 2. Table Definitions & Creation Queries
 
 #### 2.1 Table: `User_Role_Master`
-*   **Description**: Master table for user roles.
-*   **Primary Key**: `roleId`
+*   **Description**: Master table for user roles with auto-increment roleId.
+*   **Primary Key**: `roleId` (SERIAL INTEGER, auto-increment 1-8)
+*   **Updated**: March 3, 2026 - Changed from VARCHAR(10) to SERIAL INTEGER with auto-increment
 
 | Column Name | Data Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `roleId` | VARCHAR(10) | PK, Not Null | Unique Role ID (e.g., DOC01) |
-| `roleName` | VARCHAR(50) | Not Null, Unique | Name of the role (e.g., Doctor) |
-| `status` | VARCHAR(20) | Not Null | 'Active', 'Inactive', 'Closed' |
+| `roleId` | SERIAL INTEGER | PK, Auto-increment | Unique Role ID (1-8, auto-generated) |
+| `roleName` | VARCHAR(50) | Not Null, Unique | Name of the role (e.g., ADMIN, DOCTOR) |
+| `status` | VARCHAR(20) | Not Null | 'Active', 'Inactive', 'Closed', 'Pending' |
 | `createdDate` | DATE | Not Null | Date of creation |
 | `updatedDate` | DATE | Not Null | Date of last update |
-| `comments` | VARCHAR(50) | | Optional comments |
+| `comments` | VARCHAR(250) | | Optional comments |
 
 ```sql
 CREATE TABLE User_Role_Master (
-    roleId VARCHAR(10) PRIMARY KEY,
+    roleId SERIAL PRIMARY KEY,
     roleName VARCHAR(50) NOT NULL UNIQUE,
-    status VARCHAR(20) NOT NULL CHECK (status IN ('Active', 'Inactive', 'Closed')),
-    createdDate DATE NOT NULL,
-    updatedDate DATE NOT NULL,
-    comments VARCHAR(50)
+    status VARCHAR(20) NOT NULL CHECK (status IN ('Active', 'Inactive', 'Closed', 'Pending')),
+    createdDate DATE DEFAULT CURRENT_DATE,
+    updatedDate DATE DEFAULT CURRENT_DATE,
+    comments VARCHAR(250)
 );
+
+-- Secondary Indexes
+CREATE INDEX idx_role_status ON User_Role_Master(status);
+CREATE INDEX idx_role_name ON User_Role_Master(roleName);
+CREATE INDEX idx_role_updated ON User_Role_Master(updatedDate);
+```
+
+**Sample Data (8 Roles with Auto-Increment IDs):**
+```sql
+INSERT INTO User_Role_Master (roleName, status, comments) VALUES
+(1, 'ADMIN', 'Active', 'System Administrator - Full system access and database management'),
+(2, 'DOCTOR', 'Active', 'Doctor or Physician - Can view and manage patient records and create medical reports'),
+(3, 'HOSPITAL', 'Active', 'Hospital Administrator - Hospital-level administrative functions'),
+(4, 'NURSE', 'Active', 'Nursing Staff - Can update patient information and create nursing reports'),
+(5, 'PARTNER', 'Active', 'Sales Partner - Sales and marketing partner functions'),
+(6, 'PATIENT', 'Active', 'Patient User - Can view personal medical records and report history'),
+(7, 'RECEPTION', 'Active', 'Reception Staff - Can register new patients and manage appointments'),
+(8, 'TECHNICIAN', 'Active', 'Lab Technician - Can create and upload laboratory test reports and results');
 ```
 
 #### 2.2 Table: `State_City_PinCode_Master`
@@ -112,24 +131,25 @@ CREATE INDEX idx_district_status ON State_City_PinCode_Master(districtId, status
 
 #### 2.3 Table: `User_Master`
 *   **Description**: Core user profile data with geographic hierarchy integration
-*   **Primary Key**: `userId` (VARCHAR(100) - Email address)
+*   **Primary Key**: `userId` (BIGINT - Auto-increment user identifier)
 *   **Foreign Keys**:
-    - `currentRole` -> `User_Role_Master(roleName)`
+    - `currentRole` -> `User_Role_Master(roleId)` [INTEGER 1-8]
     - `stateId` -> `State_City_PinCode_Master(stateId)`
     - `districtId` -> `State_City_PinCode_Master(districtId)`
     - `cityId` -> `State_City_PinCode_Master(cityId)`
     - `pinCode` -> `State_City_PinCode_Master(pinCode)`
 *   **Updated**: March 4, 2026 - Added geographic FK columns (stateId, districtId, cityId, pinCode)
+*   **Updated**: March 3, 2026 - currentRole changed from VARCHAR(50) to INTEGER (references roleId 1-8)
 
 | Column Name | Data Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `userId` | VARCHAR(100) | PK, Not Null | User ID (Email) |
+| `userId` | BIGINT | PK, Not Null | User ID (Email as identifier) |
 | `firstName` | VARCHAR(50) | Not Null | First Name |
 | `lastName` | VARCHAR(50) | Not Null | Last Name |
-| `currentRole` | VARCHAR(50) | FK, Not Null | Role Name (references User_Role_Master.roleName) |
+| `currentRole` | INTEGER | FK, Not Null | Role ID (1-8, references User_Role_Master.roleId) |
 | `organisation` | VARCHAR(100) | | Organization Name |
 | `emailId` | VARCHAR(100) | Unique, Not Null | Email Address |
-| `mobileNumber` | VARCHAR(15) | Unique, Not Null | Mobile Number |
+| `mobileNumber` | NUMERIC(10) | Unique, Not Null | 10-digit Mobile Number |
 | `address1` | VARCHAR(255) | | Address Line 1 |
 | `address2` | VARCHAR(255) | | Address Line 2 |
 | `stateId` | INTEGER | FK | State ID (references State_City_PinCode_Master.stateId) |
@@ -138,36 +158,26 @@ CREATE INDEX idx_district_status ON State_City_PinCode_Master(districtId, status
 | `cityId` | INTEGER | FK | City ID (references State_City_PinCode_Master.cityId) |
 | `cityName` | VARCHAR(100) | | City Name (for display) |
 | `pinCode` | INTEGER | FK | Pin Code (references State_City_PinCode_Master.pinCode) |
-| `status` | VARCHAR(20) | Not Null | 'Active' or 'Inactive' |
+| `status` | VARCHAR(20) | Not Null | 'Active', 'Inactive', 'Suspended' |
 | `createdDate` | TIMESTAMP | | Auto-populated at creation |
 | `updatedDate` | TIMESTAMP | | Auto-populated at update |
 
 ```sql
 CREATE TABLE User_Master (
-    userId VARCHAR(100) PRIMARY KEY,
-    firstName VARCHAR(50) NOT NULL,
-    lastName VARCHAR(50) NOT NULL,
-    currentRole VARCHAR(50) NOT NULL,
-    organisation VARCHAR(100),
-    emailId VARCHAR(100) NOT NULL UNIQUE,
-    mobileNumber VARCHAR(15) NOT NULL UNIQUE,
-    address1 VARCHAR(255),
-    address2 VARCHAR(255),
-    stateId INTEGER,
-    stateName VARCHAR(100),
-    districtId INTEGER,
-    cityId INTEGER,
-    cityName VARCHAR(100),
-    pinCode INTEGER,
-    status VARCHAR(20) NOT NULL DEFAULT 'Active'
-        CHECK (status IN ('Active', 'Inactive')),
+    userId BIGINT PRIMARY KEY,
+    firstName VARCHAR(100) NOT NULL,
+    lastName VARCHAR(100) NOT NULL,
+    currentRole INTEGER NOT NULL,
+    emailId VARCHAR(255) NOT NULL UNIQUE
+        CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
+    mobileNumber NUMERIC(10) NOT NULL UNIQUE
+        CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999),
+    organisation VARCHAR(255),
+    address TEXT,
+    status VARCHAR(50) DEFAULT 'Active' CHECK (status IN ('Active', 'Inactive', 'Suspended')),
     createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (currentRole) REFERENCES User_Role_Master(roleName) ON DELETE RESTRICT,
-    FOREIGN KEY (stateId) REFERENCES State_City_PinCode_Master(stateId) ON DELETE RESTRICT,
-    FOREIGN KEY (districtId) REFERENCES State_City_PinCode_Master(districtId) ON DELETE RESTRICT,
-    FOREIGN KEY (cityId) REFERENCES State_City_PinCode_Master(cityId) ON DELETE RESTRICT,
-    FOREIGN KEY (pinCode) REFERENCES State_City_PinCode_Master(pinCode) ON DELETE RESTRICT
+    FOREIGN KEY (currentRole) REFERENCES User_Role_Master(roleId) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 ```
 

@@ -228,34 +228,35 @@ These are the user roles available in the system. Use the **Role ID** when makin
 **Purpose**: Retrieve user roles with flexible filtering options
 **Authentication**: Required (Admin/Doctor)
 **Rate Limit**: 100 requests/minute
+**Updated**: March 3, 2026 - roleId changed from STRING to INTEGER (1-8)
 
 #### Overview
 This endpoint supports **three different request scenarios**:
 
-1. **Fetch by Role ID**: Get a specific role by ID (case-insensitive)
+1. **Fetch by Role ID**: Get a specific role by ID (integer 1-8)
 2. **Fetch by Status**: Get all roles with a specific status
 3. **Fetch All**: Get all roles from the table irrespective of status
 
 #### Query Parameters
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `roleId` | string | No | Fetch specific role by ID (automatically converted to UPPERCASE) |
-| `status` | string | No | Filter by status: Active, Inactive, Pending |
+| `roleId` | integer | No | Fetch specific role by ID (1-8: ADMIN=1, DOCTOR=2, ..., TECHNICIAN=8) |
+| `status` | string | No | Filter by status: Active, Inactive, Closed, Pending |
 | `limit` | integer | No | Limit results (default: 100, max: 1000) |
 | `offset` | integer | No | Pagination offset (default: 0) |
 
 ---
 
-#### **Scenario 1: Fetch by Role ID (Case-Insensitive)**
+#### **Scenario 1: Fetch by Role ID (Integer 1-8)**
 
 ##### Request
 ```bash
-# Request with lowercase roleId - will be converted to ADMIN
-curl -X GET "http://localhost:8000/api/v1/roles/all?roleId=admin" \
+# Request roleId=1 (ADMIN)
+curl -X GET "http://localhost:8000/api/v1/roles/all?roleId=1" \
   -H "Authorization: Bearer <jwt_token>"
 
-# Or with mixed case - will be converted to DOCTOR
-curl -X GET "http://localhost:8000/api/v1/roles/all?roleId=DoCtOr" \
+# Request roleId=2 (DOCTOR)
+curl -X GET "http://localhost:8000/api/v1/roles/all?roleId=2" \
   -H "Authorization: Bearer <jwt_token>"
 ```
 
@@ -264,22 +265,22 @@ curl -X GET "http://localhost:8000/api/v1/roles/all?roleId=DoCtOr" \
 {
   "status": "success",
   "code": 200,
-  "message": "Role 'ADMIN' retrieved successfully",
+  "message": "Role ID 1 retrieved successfully",
   "data": {
     "count": 1,
     "scenario": "Fetch by Role ID",
     "roles": [
       {
-        "roleId": "ADMIN",
-        "roleName": "System Administrator",
+        "roleId": 1,
+        "roleName": "ADMIN",
         "status": "Active",
-        "createdDate": "2026-02-28",
-        "updatedDate": "2026-02-28",
-        "comments": "Full system access and database management"
+        "createdDate": "2026-03-03",
+        "updatedDate": "2026-03-03",
+        "comments": "System Administrator - Full system access and database management"
       }
     ]
   },
-  "timestamp": "2026-03-01T16:00:00Z"
+  "timestamp": "2026-03-03T16:00:00Z"
 }
 ```
 
@@ -288,8 +289,8 @@ curl -X GET "http://localhost:8000/api/v1/roles/all?roleId=DoCtOr" \
 {
   "status": "error",
   "code": 404,
-  "message": "Role with ID 'INVALID' not found",
-  "timestamp": "2026-03-01T16:00:00Z"
+  "message": "Role with ID 9 not found",
+  "timestamp": "2026-03-03T16:00:00Z"
 }
 ```
 
@@ -319,48 +320,48 @@ curl -X GET "http://localhost:8000/api/v1/roles/all?status=Active&limit=5&offset
     "scenario": "Fetch all roles with status filter",
     "roles": [
       {
-        "roleId": "ADMIN",
-        "roleName": "System Administrator",
+        "roleId": 1,
+        "roleName": "ADMIN",
         "status": "Active",
-        "createdDate": "2026-02-28",
-        "updatedDate": "2026-02-28",
-        "comments": "Full system access and database management"
+        "createdDate": "2026-03-03",
+        "updatedDate": "2026-03-03",
+        "comments": "System Administrator - Full system access and database management"
       },
       {
-        "roleId": "DOCTOR",
-        "roleName": "Doctor/Physician",
+        "roleId": 2,
+        "roleName": "DOCTOR",
         "status": "Active",
-        "createdDate": "2026-02-28",
-        "updatedDate": "2026-02-28",
-        "comments": "Can view and manage patient records and create medical reports"
+        "createdDate": "2026-03-03",
+        "updatedDate": "2026-03-03",
+        "comments": "Doctor or Physician - Can view and manage patient records and create medical reports"
       },
       {
-        "roleId": "HOSPITAL",
-        "roleName": "Hospital",
+        "roleId": 3,
+        "roleName": "HOSPITAL",
         "status": "Active",
-        "createdDate": "2026-02-28",
-        "updatedDate": "2026-02-28",
-        "comments": "Hospital administrator - manages hospital operations and staff"
+        "createdDate": "2026-03-03",
+        "updatedDate": "2026-03-03",
+        "comments": "Hospital Administrator - Hospital-level administrative functions"
       },
       {
-        "roleId": "NURSE",
-        "roleName": "Nurse",
+        "roleId": 4,
+        "roleName": "NURSE",
         "status": "Active",
-        "createdDate": "2026-02-28",
-        "updatedDate": "2026-02-28",
-        "comments": "Can assist with patient records, blood work, and vitals"
+        "createdDate": "2026-03-03",
+        "updatedDate": "2026-03-03",
+        "comments": "Nursing Staff - Can update patient information and create nursing reports"
       },
       {
-        "roleId": "PARTNER",
-        "roleName": "Sales Partner",
+        "roleId": 5,
+        "roleName": "PARTNER",
         "status": "Active",
-        "createdDate": "2026-02-28",
-        "updatedDate": "2026-02-28",
-        "comments": "Sales and marketing partner - manages partnerships and revenue"
+        "createdDate": "2026-03-03",
+        "updatedDate": "2026-03-03",
+        "comments": "Sales Partner - Sales and marketing partner functions"
       }
     ]
   },
-  "timestamp": "2026-03-01T16:00:00Z"
+  "timestamp": "2026-03-03T16:00:00Z"
 }
 ```
 
@@ -465,6 +466,7 @@ curl -X GET "http://localhost:8000/api/v1/roles/all?limit=10&offset=0" \
 
 **Purpose**: Insert and Update user roles (No Delete operation)
 **Authentication**: Required (Admin only)
+**Updated**: March 3, 2026 - roleId auto-generated, no longer in request
 
 ---
 
@@ -473,18 +475,18 @@ curl -X GET "http://localhost:8000/api/v1/roles/all?limit=10&offset=0" \
 **Endpoint**: `POST /api/v1/roles`
 
 ##### Request Description
-Insert a new role into the User_Role_Master table with the following required fields:
+Insert a new role into the User_Role_Master table. **roleId is AUTO-GENERATED** (not in request body).
 
 | Field | Type | Required | Constraints | Notes |
 |-------|------|----------|-------------|-------|
-| `roleId` | string | Yes | Max 10 chars, unique, uppercase | Unique role identifier |
 | `roleName` | string | Yes | Max 50 chars, unique | Human-readable role name |
-| `status` | string | Yes | Active, Inactive, or Closed | Role activation status |
+| `status` | string | Yes | Active, Inactive, Closed, Pending | Role activation status |
 | `comments` | string | No | Max 250 chars | Optional description |
 
 **System-managed fields (AUTO-POPULATED):**
-- `createdDate`: Set to current system timestamp
-- `updatedDate`: Set to current system timestamp
+- `roleId`: Auto-generated SERIAL INTEGER (1-8)
+- `createdDate`: Set to current system date
+- `updatedDate`: Set to current system date
 
 ##### Request Example
 ```bash
@@ -492,10 +494,9 @@ curl -X POST http://localhost:8000/api/v1/roles \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <jwt_token>" \
   -d '{
-    "roleId": "ADMIN",
-    "roleName": "System Administrator",
+    "roleName": "New Specialist Role",
     "status": "Active",
-    "comments": "Full system access and database management"
+    "comments": "Role for medical specialists"
   }'
 ```
 
@@ -507,17 +508,17 @@ curl -X POST http://localhost:8000/api/v1/roles \
   "message": "Role created successfully",
   "data": {
     "scenario": "Insert new role",
-    "info": "createdDate and updatedDate set to current system timestamp",
+    "info": "roleId auto-generated, createdDate and updatedDate set to current date",
     "role": {
-      "roleId": "ADMIN",
-      "roleName": "System Administrator",
+      "roleId": 9,
+      "roleName": "New Specialist Role",
       "status": "Active",
-      "createdDate": "2026-03-01",
-      "updatedDate": "2026-03-01",
-      "comments": "Full system access and database management"
+      "createdDate": "2026-03-03",
+      "updatedDate": "2026-03-03",
+      "comments": "Role for medical specialists"
     }
   },
-  "timestamp": "2026-03-01T16:00:00Z"
+  "timestamp": "2026-03-03T16:00:00Z"
 }
 ```
 
@@ -526,48 +527,57 @@ curl -X POST http://localhost:8000/api/v1/roles \
 {
   "status": "error",
   "code": 400,
-  "message": "Status must be one of: Active, Inactive, Closed",
-  "timestamp": "2026-03-01T16:00:00Z"
+  "message": "Status must be one of: Active, Inactive, Closed, Pending",
+  "timestamp": "2026-03-03T16:00:00Z"
 }
 ```
 
-##### Response (409 - Conflict - Role Already Exists)
+##### Response (409 - Conflict - Role Name Already Exists)
 ```json
 {
   "status": "error",
   "code": 409,
-  "message": "Role 'ADMIN' already exists",
-  "timestamp": "2026-03-01T16:00:00Z"
+  "message": "Role with name 'DOCTOR' already exists",
+  "timestamp": "2026-03-03T16:00:00Z"
 }
 ```
 
 ---
 
-#### **Scenario B: Update Role Status (PUT)**
+#### **Scenario B: Update Role Status/Comments (PUT)**
 
 **Endpoint**: `PUT /api/v1/roles/{roleId}`
 
 ##### Request Description
-Update the status of an existing role. This endpoint **ONLY** updates the status field.
+Update the status and/or comments of an existing role. This endpoint updates status and/or comments fields.
 
 **URL Parameter:**
-- `roleId`: The role ID to update (will be converted to uppercase automatically)
+- `roleId`: The role ID to update (INTEGER 1-8)
 
-**Input Required:**
-- `status`: New status value (must be one of: Active, Inactive, or Closed)
+**Input Required (at least one):**
+- `status`: New status value (must be one of: Active, Inactive, Closed, Pending)
+- `comments`: Updated comments (max 250 chars)
 
 **System-managed fields:**
-- `updatedDate`: Automatically set to current system timestamp
-- Other fields (roleId, roleName, comments): **CANNOT be modified** through this endpoint
+- `updatedDate`: Automatically set to current system date
+- Other fields (roleId, roleName): **CANNOT be modified** through this endpoint
 
 ##### Request Example
 ```bash
-# Update DOCTOR role status from Active to Inactive
-curl -X PUT http://localhost:8000/api/v1/roles/doctor \
+# Update DOCTOR role (roleId=2) status from Active to Inactive
+curl -X PUT http://localhost:8000/api/v1/roles/2 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <jwt_token>" \
   -d '{
     "status": "Inactive"
+  }'
+
+# Or update comments
+curl -X PUT http://localhost:8000/api/v1/roles/2 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <jwt_token>" \
+  -d '{
+    "comments": "Updated role description"
   }'
 ```
 
@@ -576,20 +586,20 @@ curl -X PUT http://localhost:8000/api/v1/roles/doctor \
 {
   "status": "success",
   "code": 200,
-  "message": "Role 'DOCTOR' status updated to 'Inactive' successfully",
+  "message": "Role ID 2 updated successfully",
   "data": {
-    "scenario": "Update role status",
-    "info": "updatedDate set to current system timestamp. Other fields cannot be modified.",
+    "scenario": "Update role status/comments",
+    "info": "updatedDate set to current date. Fields roleId and roleName cannot be modified.",
     "role": {
-      "roleId": "DOCTOR",
-      "roleName": "Doctor/Physician",
+      "roleId": 2,
+      "roleName": "DOCTOR",
       "status": "Inactive",
-      "createdDate": "2026-02-28",
-      "updatedDate": "2026-03-01T16:15:00Z",
-      "comments": "Can view and manage patient records and create medical reports"
+      "createdDate": "2026-03-03",
+      "updatedDate": "2026-03-03",
+      "comments": "Doctor or Physician - Can view and manage patient records and create medical reports"
     }
   },
-  "timestamp": "2026-03-01T16:00:00Z"
+  "timestamp": "2026-03-03T16:00:00Z"
 }
 ```
 
@@ -598,17 +608,17 @@ curl -X PUT http://localhost:8000/api/v1/roles/doctor \
 {
   "status": "error",
   "code": 400,
-  "message": "Status must be one of: Active, Inactive, Closed. Received: 'Invalid'",
-  "timestamp": "2026-03-01T16:00:00Z"
+  "message": "Status must be one of: Active, Inactive, Closed, Pending. Received: 'Invalid'",
+  "timestamp": "2026-03-03T16:00:00Z"
 }
 ```
 
-##### Response (400 - Bad Request - Missing Status Field)
+##### Response (400 - Bad Request - No Fields to Update)
 ```json
 {
   "status": "error",
   "code": 400,
-  "message": "Request body must contain 'status' field",
+  "message": "Request body must contain at least one field: 'status' or 'comments'",
   "timestamp": "2026-03-01T16:00:00Z"
 }
 ```
