@@ -1,0 +1,683 @@
+pinCode,stateId,stateName,districtId,districtName,cityId,cityName,countryName,status,createdDate,updatedDate
+100000,0001,Andhra Pradesh,1,Anantapur,0001,Anantapur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100011,0001,Andhra Pradesh,2,Chittoor,0004,Chittoor,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100012,0001,Andhra Pradesh,2,Chittoor,0005,Kuppam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100013,0001,Andhra Pradesh,2,Chittoor,0005,Kuppam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100014,0001,Andhra Pradesh,2,Chittoor,0005,Kuppam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100015,0001,Andhra Pradesh,2,Chittoor,0006,Tirupati,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100016,0001,Andhra Pradesh,2,Chittoor,0006,Tirupati,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100017,0001,Andhra Pradesh,2,Chittoor,0006,Tirupati,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100018,0001,Andhra Pradesh,3,Cuddapah,0009,Cuddapah,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100019,0001,Andhra Pradesh,3,Cuddapah,0009,Cuddapah,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100020,0001,Andhra Pradesh,3,Cuddapah,0009,Cuddapah,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100021,0001,Andhra Pradesh,3,Cuddapah,0010,Tirupati,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100022,0001,Andhra Pradesh,3,Cuddapah,0010,Tirupati,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100023,0001,Andhra Pradesh,3,Cuddapah,0010,Tirupati,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100024,0001,Andhra Pradesh,3,Cuddapah,0011,Rajampet,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100025,0001,Andhra Pradesh,3,Cuddapah,0011,Rajampet,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100026,0001,Andhra Pradesh,3,Cuddapah,0011,Rajampet,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100027,0001,Andhra Pradesh,4,East Godavari,0014,Rajamundry,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100028,0001,Andhra Pradesh,4,East Godavari,0014,Rajamundry,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100029,0001,Andhra Pradesh,4,East Godavari,0014,Rajamundry,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100030,0001,Andhra Pradesh,4,East Godavari,0015,Kakinada,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100031,0001,Andhra Pradesh,4,East Godavari,0015,Kakinada,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100032,0001,Andhra Pradesh,4,East Godavari,0015,Kakinada,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100033,0001,Andhra Pradesh,4,East Godavari,0016,Amalapuram,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100034,0001,Andhra Pradesh,4,East Godavari,0016,Amalapuram,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100035,0001,Andhra Pradesh,4,East Godavari,0016,Amalapuram,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100036,0001,Andhra Pradesh,5,Guntur,0019,Guntur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100037,0001,Andhra Pradesh,5,Guntur,0019,Guntur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100038,0001,Andhra Pradesh,5,Guntur,0019,Guntur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100039,0001,Andhra Pradesh,5,Guntur,0020,Tenali,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100040,0001,Andhra Pradesh,5,Guntur,0020,Tenali,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100041,0001,Andhra Pradesh,5,Guntur,0020,Tenali,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100042,0001,Andhra Pradesh,5,Guntur,0021,Narasaraopet,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100043,0001,Andhra Pradesh,5,Guntur,0021,Narasaraopet,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+100044,0001,Andhra Pradesh,5,Guntur,0021,Narasaraopet,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200000,0002,Arunachal Pradesh,1,Changlang,0001,Changlang,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200001,0002,Arunachal Pradesh,1,Changlang,0001,Changlang,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200002,0002,Arunachal Pradesh,1,Changlang,0001,Changlang,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200003,0002,Arunachal Pradesh,1,Changlang,0002,Namsai,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200004,0002,Arunachal Pradesh,1,Changlang,0002,Namsai,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200005,0002,Arunachal Pradesh,1,Changlang,0002,Namsai,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200006,0002,Arunachal Pradesh,2,Lohit,0003,Tezu,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200007,0002,Arunachal Pradesh,2,Lohit,0003,Tezu,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200008,0002,Arunachal Pradesh,2,Lohit,0003,Tezu,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200009,0002,Arunachal Pradesh,2,Lohit,0004,Roing,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200010,0002,Arunachal Pradesh,2,Lohit,0004,Roing,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200011,0002,Arunachal Pradesh,2,Lohit,0004,Roing,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200012,0002,Arunachal Pradesh,3,Papum Pare,0005,Itanagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200013,0002,Arunachal Pradesh,3,Papum Pare,0005,Itanagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200014,0002,Arunachal Pradesh,3,Papum Pare,0005,Itanagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200015,0002,Arunachal Pradesh,3,Papum Pare,0006,Naharlagun,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200016,0002,Arunachal Pradesh,3,Papum Pare,0006,Naharlagun,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+200017,0002,Arunachal Pradesh,3,Papum Pare,0006,Naharlagun,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300000,0003,Assam,1,Barpeta,0001,Barpeta,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300001,0003,Assam,1,Barpeta,0001,Barpeta,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300002,0003,Assam,1,Barpeta,0001,Barpeta,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300003,0003,Assam,1,Barpeta,0002,Kaliabor,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300004,0003,Assam,1,Barpeta,0002,Kaliabor,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300005,0003,Assam,1,Barpeta,0002,Kaliabor,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300006,0003,Assam,2,Brahmaputra,0003,Guwahati,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300007,0003,Assam,2,Brahmaputra,0003,Guwahati,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300008,0003,Assam,2,Brahmaputra,0003,Guwahati,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300009,0003,Assam,2,Brahmaputra,0004,Dibrugarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300010,0003,Assam,2,Brahmaputra,0004,Dibrugarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300011,0003,Assam,2,Brahmaputra,0004,Dibrugarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300012,0003,Assam,3,Kamrup,0005,Rangiya,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300013,0003,Assam,3,Kamrup,0005,Rangiya,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300014,0003,Assam,3,Kamrup,0005,Rangiya,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300015,0003,Assam,3,Kamrup,0006,Nalbari,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300016,0003,Assam,3,Kamrup,0006,Nalbari,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+300017,0003,Assam,3,Kamrup,0006,Nalbari,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+400000,0004,Bihar,1,Araria,0001,Araria,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+400011,0004,Bihar,2,Arwal,0004,Kurtha,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+400012,0004,Bihar,3,Aurangabad,0005,Aurangabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+400013,0004,Bihar,3,Aurangabad,0005,Aurangabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+400014,0004,Bihar,3,Aurangabad,0005,Aurangabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+400015,0004,Bihar,3,Aurangabad,0006,Daudnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+400016,0004,Bihar,3,Aurangabad,0006,Daudnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+400017,0004,Bihar,3,Aurangabad,0006,Daudnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500000,0005,Chhattisgarh,1,Balod,0001,Balod,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500001,0005,Chhattisgarh,1,Balod,0001,Balod,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500002,0005,Chhattisgarh,1,Balod,0001,Balod,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500003,0005,Chhattisgarh,1,Balod,0002,Manpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500004,0005,Chhattisgarh,1,Balod,0002,Manpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500005,0005,Chhattisgarh,1,Balod,0002,Manpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500006,0005,Chhattisgarh,2,Balodabazar,0003,Balodabazar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500007,0005,Chhattisgarh,2,Balodabazar,0003,Balodabazar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500008,0005,Chhattisgarh,2,Balodabazar,0003,Balodabazar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500009,0005,Chhattisgarh,2,Balodabazar,0004,Dongargarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500010,0005,Chhattisgarh,2,Balodabazar,0004,Dongargarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500011,0005,Chhattisgarh,2,Balodabazar,0004,Dongargarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500012,0005,Chhattisgarh,3,Bilaspur,0005,Bilaspur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500013,0005,Chhattisgarh,3,Bilaspur,0005,Bilaspur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500014,0005,Chhattisgarh,3,Bilaspur,0005,Bilaspur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500015,0005,Chhattisgarh,3,Bilaspur,0006,Gaurela,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500016,0005,Chhattisgarh,3,Bilaspur,0006,Gaurela,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+500017,0005,Chhattisgarh,3,Bilaspur,0006,Gaurela,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+600000,0006,Dadra and Nagar Haveli,1,Dadra,0001,Silvassa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+600001,0006,Dadra and Nagar Haveli,1,Dadra,0001,Silvassa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+600002,0006,Dadra and Nagar Haveli,1,Dadra,0001,Silvassa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+600003,0006,Dadra and Nagar Haveli,1,Dadra,0002,Khanvel,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+600004,0006,Dadra and Nagar Haveli,1,Dadra,0002,Khanvel,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+600005,0006,Dadra and Nagar Haveli,1,Dadra,0002,Khanvel,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700000,0007,Delhi,1,Central Delhi,0001,New Delhi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700001,0007,Delhi,1,Central Delhi,0001,New Delhi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700002,0007,Delhi,1,Central Delhi,0001,New Delhi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700003,0007,Delhi,1,Central Delhi,0002,Connaught Place,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700004,0007,Delhi,1,Central Delhi,0002,Connaught Place,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700005,0007,Delhi,1,Central Delhi,0002,Connaught Place,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700006,0007,Delhi,1,Central Delhi,0003,Chandni Chowk,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700007,0007,Delhi,1,Central Delhi,0003,Chandni Chowk,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700008,0007,Delhi,1,Central Delhi,0003,Chandni Chowk,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700009,0007,Delhi,2,North Delhi,0004,Rohini,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700010,0007,Delhi,2,North Delhi,0004,Rohini,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700011,0007,Delhi,2,North Delhi,0004,Rohini,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700012,0007,Delhi,2,North Delhi,0005,Seelampur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700013,0007,Delhi,2,North Delhi,0005,Seelampur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700014,0007,Delhi,2,North Delhi,0005,Seelampur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700015,0007,Delhi,2,North Delhi,0006,Alipur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700016,0007,Delhi,2,North Delhi,0006,Alipur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700017,0007,Delhi,2,North Delhi,0006,Alipur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700018,0007,Delhi,3,South Delhi,0007,Dwarka,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700019,0007,Delhi,3,South Delhi,0007,Dwarka,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700020,0007,Delhi,3,South Delhi,0007,Dwarka,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700021,0007,Delhi,3,South Delhi,0008,Vasant Kunj,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700022,0007,Delhi,3,South Delhi,0008,Vasant Kunj,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700023,0007,Delhi,3,South Delhi,0008,Vasant Kunj,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700024,0007,Delhi,3,South Delhi,0009,Mehrauli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700025,0007,Delhi,3,South Delhi,0009,Mehrauli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700026,0007,Delhi,3,South Delhi,0009,Mehrauli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700027,0007,Delhi,4,East Delhi,0010,Shahdara,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700028,0007,Delhi,4,East Delhi,0010,Shahdara,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700029,0007,Delhi,4,East Delhi,0010,Shahdara,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700030,0007,Delhi,4,East Delhi,0011,Mayur Vihar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700031,0007,Delhi,4,East Delhi,0011,Mayur Vihar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700032,0007,Delhi,4,East Delhi,0011,Mayur Vihar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700033,0007,Delhi,4,East Delhi,0012,Patparganj,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700034,0007,Delhi,4,East Delhi,0012,Patparganj,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700035,0007,Delhi,4,East Delhi,0012,Patparganj,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700036,0007,Delhi,5,West Delhi,0013,Karol Bagh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700037,0007,Delhi,5,West Delhi,0013,Karol Bagh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700038,0007,Delhi,5,West Delhi,0013,Karol Bagh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700039,0007,Delhi,5,West Delhi,0014,Rajouri Garden,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700040,0007,Delhi,5,West Delhi,0014,Rajouri Garden,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700041,0007,Delhi,5,West Delhi,0014,Rajouri Garden,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700042,0007,Delhi,5,West Delhi,0015,Prem Nagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700043,0007,Delhi,5,West Delhi,0015,Prem Nagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+700044,0007,Delhi,5,West Delhi,0015,Prem Nagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800000,0008,Goa,1,North Goa,0001,Panaji,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800001,0008,Goa,1,North Goa,0001,Panaji,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800002,0008,Goa,1,North Goa,0001,Panaji,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800003,0008,Goa,1,North Goa,0002,Mapusa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800004,0008,Goa,1,North Goa,0002,Mapusa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800005,0008,Goa,1,North Goa,0002,Mapusa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800006,0008,Goa,1,North Goa,0003,Vasco,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800007,0008,Goa,1,North Goa,0003,Vasco,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800008,0008,Goa,1,North Goa,0003,Vasco,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800009,0008,Goa,2,South Goa,0004,Margao,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800010,0008,Goa,2,South Goa,0004,Margao,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800011,0008,Goa,2,South Goa,0004,Margao,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800012,0008,Goa,2,South Goa,0005,Quepem,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800013,0008,Goa,2,South Goa,0005,Quepem,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+800014,0008,Goa,2,South Goa,0005,Quepem,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900000,0009,Gujarat,1,Ahmedabad,0001,Ahmedabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900001,0009,Gujarat,1,Ahmedabad,0001,Ahmedabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900002,0009,Gujarat,1,Ahmedabad,0001,Ahmedabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900003,0009,Gujarat,1,Ahmedabad,0002,Mehsana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900004,0009,Gujarat,1,Ahmedabad,0002,Mehsana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900005,0009,Gujarat,1,Ahmedabad,0002,Mehsana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900006,0009,Gujarat,1,Ahmedabad,0003,Visnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900007,0009,Gujarat,1,Ahmedabad,0003,Visnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900008,0009,Gujarat,1,Ahmedabad,0003,Visnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900009,0009,Gujarat,2,Anand,0004,Anand,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900010,0009,Gujarat,2,Anand,0004,Anand,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900011,0009,Gujarat,2,Anand,0004,Anand,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900012,0009,Gujarat,2,Anand,0005,Khambhat,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900013,0009,Gujarat,2,Anand,0005,Khambhat,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900014,0009,Gujarat,2,Anand,0005,Khambhat,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900015,0009,Gujarat,3,Aravalli,0006,Modasa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900016,0009,Gujarat,3,Aravalli,0006,Modasa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900017,0009,Gujarat,3,Aravalli,0006,Modasa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900018,0009,Gujarat,3,Aravalli,0007,Bhiloda,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900019,0009,Gujarat,3,Aravalli,0007,Bhiloda,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+900020,0009,Gujarat,3,Aravalli,0007,Bhiloda,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000000,0010,Haryana,1,Ambala,0001,Ambala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000001,0010,Haryana,1,Ambala,0001,Ambala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000002,0010,Haryana,1,Ambala,0001,Ambala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000003,0010,Haryana,1,Ambala,0002,Naraingarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000004,0010,Haryana,1,Ambala,0002,Naraingarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000005,0010,Haryana,1,Ambala,0002,Naraingarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000006,0010,Haryana,2,Bhiwani,0003,Bhiwani,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000007,0010,Haryana,2,Bhiwani,0003,Bhiwani,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000008,0010,Haryana,2,Bhiwani,0003,Bhiwani,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000009,0010,Haryana,2,Bhiwani,0004,Charkhi Dadri,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000010,0010,Haryana,2,Bhiwani,0004,Charkhi Dadri,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000011,0010,Haryana,2,Bhiwani,0004,Charkhi Dadri,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000012,0010,Haryana,3,Faridabad,0005,Faridabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000013,0010,Haryana,3,Faridabad,0005,Faridabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000014,0010,Haryana,3,Faridabad,0005,Faridabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000015,0010,Haryana,3,Faridabad,0006,Ballabgarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000016,0010,Haryana,3,Faridabad,0006,Ballabgarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1000017,0010,Haryana,3,Faridabad,0006,Ballabgarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100000,0011,Himachal Pradesh,1,Bilaspur,0001,Bilaspur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100001,0011,Himachal Pradesh,1,Bilaspur,0001,Bilaspur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100002,0011,Himachal Pradesh,1,Bilaspur,0001,Bilaspur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100003,0011,Himachal Pradesh,1,Bilaspur,0002,Jhanduta,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100004,0011,Himachal Pradesh,1,Bilaspur,0002,Jhanduta,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100005,0011,Himachal Pradesh,1,Bilaspur,0002,Jhanduta,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100006,0011,Himachal Pradesh,2,Chamba,0003,Chamba,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100007,0011,Himachal Pradesh,2,Chamba,0003,Chamba,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100008,0011,Himachal Pradesh,2,Chamba,0003,Chamba,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100009,0011,Himachal Pradesh,2,Chamba,0004,Dalhousie,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100010,0011,Himachal Pradesh,2,Chamba,0004,Dalhousie,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100011,0011,Himachal Pradesh,2,Chamba,0004,Dalhousie,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100012,0011,Himachal Pradesh,3,Kangra,0005,Kangra,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100013,0011,Himachal Pradesh,3,Kangra,0005,Kangra,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100014,0011,Himachal Pradesh,3,Kangra,0005,Kangra,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100015,0011,Himachal Pradesh,3,Kangra,0006,Mcleodganj,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100016,0011,Himachal Pradesh,3,Kangra,0006,Mcleodganj,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1100017,0011,Himachal Pradesh,3,Kangra,0006,Mcleodganj,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200000,0012,Jharkhand,1,Bokaro,0001,Bokaro,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200001,0012,Jharkhand,1,Bokaro,0001,Bokaro,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200002,0012,Jharkhand,1,Bokaro,0001,Bokaro,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200003,0012,Jharkhand,1,Bokaro,0002,Chas,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200004,0012,Jharkhand,1,Bokaro,0002,Chas,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200005,0012,Jharkhand,1,Bokaro,0002,Chas,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200006,0012,Jharkhand,2,Chatra,0003,Chatra,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200007,0012,Jharkhand,2,Chatra,0003,Chatra,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200008,0012,Jharkhand,2,Chatra,0003,Chatra,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200009,0012,Jharkhand,2,Chatra,0004,Kunti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200010,0012,Jharkhand,2,Chatra,0004,Kunti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200011,0012,Jharkhand,2,Chatra,0004,Kunti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200012,0012,Jharkhand,3,Dhanbad,0005,Dhanbad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200013,0012,Jharkhand,3,Dhanbad,0005,Dhanbad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200014,0012,Jharkhand,3,Dhanbad,0005,Dhanbad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200015,0012,Jharkhand,3,Dhanbad,0006,Tundi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200016,0012,Jharkhand,3,Dhanbad,0006,Tundi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1200017,0012,Jharkhand,3,Dhanbad,0006,Tundi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300000,0013,Karnataka,1,Bengaluru,0001,Bengaluru,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300001,0013,Karnataka,1,Bengaluru,0001,Bengaluru,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300002,0013,Karnataka,1,Bengaluru,0001,Bengaluru,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300003,0013,Karnataka,1,Bengaluru,0002,Whitefield,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300004,0013,Karnataka,1,Bengaluru,0002,Whitefield,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300005,0013,Karnataka,1,Bengaluru,0002,Whitefield,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300006,0013,Karnataka,1,Bengaluru,0003,Koramangala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300007,0013,Karnataka,1,Bengaluru,0003,Koramangala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300008,0013,Karnataka,1,Bengaluru,0003,Koramangala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300009,0013,Karnataka,2,Belgaum,0004,Belgaum,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300010,0013,Karnataka,2,Belgaum,0004,Belgaum,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300011,0013,Karnataka,2,Belgaum,0004,Belgaum,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300012,0013,Karnataka,2,Belgaum,0005,Soundatti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300013,0013,Karnataka,2,Belgaum,0005,Soundatti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300014,0013,Karnataka,2,Belgaum,0005,Soundatti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300015,0013,Karnataka,3,Hubli,0006,Hubli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300016,0013,Karnataka,3,Hubli,0006,Hubli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300017,0013,Karnataka,3,Hubli,0006,Hubli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300018,0013,Karnataka,3,Hubli,0007,Dharwad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300019,0013,Karnataka,3,Hubli,0007,Dharwad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300020,0013,Karnataka,3,Hubli,0007,Dharwad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300021,0013,Karnataka,4,Kolar,0008,Kolar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300022,0013,Karnataka,4,Kolar,0008,Kolar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300023,0013,Karnataka,4,Kolar,0008,Kolar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300024,0013,Karnataka,4,Kolar,0009,Kolar Gold Fields,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300025,0013,Karnataka,4,Kolar,0009,Kolar Gold Fields,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300026,0013,Karnataka,4,Kolar,0009,Kolar Gold Fields,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300027,0013,Karnataka,5,Gulbarga,0010,Gulbarga,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300028,0013,Karnataka,5,Gulbarga,0010,Gulbarga,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300029,0013,Karnataka,5,Gulbarga,0010,Gulbarga,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300030,0013,Karnataka,5,Gulbarga,0011,Sedam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300031,0013,Karnataka,5,Gulbarga,0011,Sedam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1300032,0013,Karnataka,5,Gulbarga,0011,Sedam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400000,0014,Kerala,1,Alappuzha,0001,Alappuzha,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400001,0014,Kerala,1,Alappuzha,0001,Alappuzha,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400002,0014,Kerala,1,Alappuzha,0001,Alappuzha,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400003,0014,Kerala,1,Alappuzha,0002,Cherthala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400004,0014,Kerala,1,Alappuzha,0002,Cherthala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400005,0014,Kerala,1,Alappuzha,0002,Cherthala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400006,0014,Kerala,2,Ernakulam,0003,Kochi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400007,0014,Kerala,2,Ernakulam,0003,Kochi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400008,0014,Kerala,2,Ernakulam,0003,Kochi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400009,0014,Kerala,2,Ernakulam,0004,Angamaly,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400010,0014,Kerala,2,Ernakulam,0004,Angamaly,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400011,0014,Kerala,2,Ernakulam,0004,Angamaly,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400012,0014,Kerala,3,Idukki,0005,Kattapana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400013,0014,Kerala,3,Idukki,0005,Kattapana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400014,0014,Kerala,3,Idukki,0005,Kattapana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400015,0014,Kerala,3,Idukki,0006,Adimali,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400016,0014,Kerala,3,Idukki,0006,Adimali,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1400017,0014,Kerala,3,Idukki,0006,Adimali,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500000,0015,Madhya Pradesh,1,Agar Malwa,0001,Agar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500001,0015,Madhya Pradesh,1,Agar Malwa,0001,Agar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500002,0015,Madhya Pradesh,1,Agar Malwa,0001,Agar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500003,0015,Madhya Pradesh,1,Agar Malwa,0002,Malwa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500004,0015,Madhya Pradesh,1,Agar Malwa,0002,Malwa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500005,0015,Madhya Pradesh,1,Agar Malwa,0002,Malwa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500006,0015,Madhya Pradesh,2,Alirajpur,0003,Alirajpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500007,0015,Madhya Pradesh,2,Alirajpur,0003,Alirajpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500008,0015,Madhya Pradesh,2,Alirajpur,0003,Alirajpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500009,0015,Madhya Pradesh,2,Alirajpur,0004,Seoni Malwa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500010,0015,Madhya Pradesh,2,Alirajpur,0004,Seoni Malwa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500011,0015,Madhya Pradesh,2,Alirajpur,0004,Seoni Malwa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500012,0015,Madhya Pradesh,3,Anuppur,0005,Anuppur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500013,0015,Madhya Pradesh,3,Anuppur,0005,Anuppur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500014,0015,Madhya Pradesh,3,Anuppur,0005,Anuppur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500015,0015,Madhya Pradesh,3,Anuppur,0006,Jaithari,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500016,0015,Madhya Pradesh,3,Anuppur,0006,Jaithari,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1500017,0015,Madhya Pradesh,3,Anuppur,0006,Jaithari,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600000,0016,Maharashtra,1,Ahmednagar,0001,Ahmednagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600001,0016,Maharashtra,1,Ahmednagar,0001,Ahmednagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600002,0016,Maharashtra,1,Ahmednagar,0001,Ahmednagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600003,0016,Maharashtra,1,Ahmednagar,0002,Shrirampur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600004,0016,Maharashtra,1,Ahmednagar,0002,Shrirampur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600005,0016,Maharashtra,1,Ahmednagar,0002,Shrirampur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600006,0016,Maharashtra,1,Ahmednagar,0003,Nevasa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600007,0016,Maharashtra,1,Ahmednagar,0003,Nevasa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600008,0016,Maharashtra,1,Ahmednagar,0003,Nevasa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600009,0016,Maharashtra,2,Aurangabad,0004,Aurangabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600010,0016,Maharashtra,2,Aurangabad,0004,Aurangabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600011,0016,Maharashtra,2,Aurangabad,0004,Aurangabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600012,0016,Maharashtra,2,Aurangabad,0005,Paithan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600013,0016,Maharashtra,2,Aurangabad,0005,Paithan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600014,0016,Maharashtra,2,Aurangabad,0005,Paithan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600015,0016,Maharashtra,2,Aurangabad,0006,Sillod,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600016,0016,Maharashtra,2,Aurangabad,0006,Sillod,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600017,0016,Maharashtra,2,Aurangabad,0006,Sillod,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600018,0016,Maharashtra,3,Beed,0007,Beed,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600019,0016,Maharashtra,3,Beed,0007,Beed,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600020,0016,Maharashtra,3,Beed,0007,Beed,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600021,0016,Maharashtra,3,Beed,0008,Parli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600022,0016,Maharashtra,3,Beed,0008,Parli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600023,0016,Maharashtra,3,Beed,0008,Parli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600024,0016,Maharashtra,3,Beed,0009,Ashti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600025,0016,Maharashtra,3,Beed,0009,Ashti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600026,0016,Maharashtra,3,Beed,0009,Ashti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600027,0016,Maharashtra,4,Buldhana,0010,Buldhana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600028,0016,Maharashtra,4,Buldhana,0010,Buldhana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600029,0016,Maharashtra,4,Buldhana,0010,Buldhana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600030,0016,Maharashtra,4,Buldhana,0011,Khamgaon,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600031,0016,Maharashtra,4,Buldhana,0011,Khamgaon,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600032,0016,Maharashtra,4,Buldhana,0011,Khamgaon,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600033,0016,Maharashtra,5,Chandrapur,0012,Chandrapur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600034,0016,Maharashtra,5,Chandrapur,0012,Chandrapur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600035,0016,Maharashtra,5,Chandrapur,0012,Chandrapur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600036,0016,Maharashtra,5,Chandrapur,0013,Ballarpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600037,0016,Maharashtra,5,Chandrapur,0013,Ballarpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1600038,0016,Maharashtra,5,Chandrapur,0013,Ballarpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700000,0017,Manipur,1,Bishnupur,0001,Bishnupur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700001,0017,Manipur,1,Bishnupur,0001,Bishnupur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700002,0017,Manipur,1,Bishnupur,0001,Bishnupur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700003,0017,Manipur,1,Bishnupur,0002,Kakching,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700004,0017,Manipur,1,Bishnupur,0002,Kakching,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700005,0017,Manipur,1,Bishnupur,0002,Kakching,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700006,0017,Manipur,2,Chandel,0003,Chandel,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700007,0017,Manipur,2,Chandel,0003,Chandel,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700008,0017,Manipur,2,Chandel,0003,Chandel,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700009,0017,Manipur,2,Chandel,0004,Moreh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700010,0017,Manipur,2,Chandel,0004,Moreh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700011,0017,Manipur,2,Chandel,0004,Moreh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700012,0017,Manipur,3,Imphal East,0005,Imphal,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700013,0017,Manipur,3,Imphal East,0005,Imphal,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700014,0017,Manipur,3,Imphal East,0005,Imphal,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700015,0017,Manipur,3,Imphal East,0006,Lilong,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700016,0017,Manipur,3,Imphal East,0006,Lilong,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1700017,0017,Manipur,3,Imphal East,0006,Lilong,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800000,0018,Meghalaya,1,East Khasi Hills,0001,Shillong,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800001,0018,Meghalaya,1,East Khasi Hills,0001,Shillong,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800002,0018,Meghalaya,1,East Khasi Hills,0001,Shillong,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800003,0018,Meghalaya,1,East Khasi Hills,0002,Jaintia Hills,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800004,0018,Meghalaya,1,East Khasi Hills,0002,Jaintia Hills,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800005,0018,Meghalaya,1,East Khasi Hills,0002,Jaintia Hills,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800006,0018,Meghalaya,2,West Khasi Hills,0003,Nongstoin,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800007,0018,Meghalaya,2,West Khasi Hills,0003,Nongstoin,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800008,0018,Meghalaya,2,West Khasi Hills,0003,Nongstoin,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800009,0018,Meghalaya,2,West Khasi Hills,0004,Mairang,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800010,0018,Meghalaya,2,West Khasi Hills,0004,Mairang,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800011,0018,Meghalaya,2,West Khasi Hills,0004,Mairang,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800012,0018,Meghalaya,3,Garo Hills,0005,Tura,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800013,0018,Meghalaya,3,Garo Hills,0005,Tura,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800014,0018,Meghalaya,3,Garo Hills,0005,Tura,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800015,0018,Meghalaya,3,Garo Hills,0006,Williamnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800016,0018,Meghalaya,3,Garo Hills,0006,Williamnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1800017,0018,Meghalaya,3,Garo Hills,0006,Williamnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900000,0019,Mizoram,1,Aizawl,0001,Aizawl,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900001,0019,Mizoram,1,Aizawl,0001,Aizawl,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900002,0019,Mizoram,1,Aizawl,0001,Aizawl,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900003,0019,Mizoram,1,Aizawl,0002,Durtlang,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900004,0019,Mizoram,1,Aizawl,0002,Durtlang,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900005,0019,Mizoram,1,Aizawl,0002,Durtlang,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900006,0019,Mizoram,2,Lunglei,0003,Lunglei,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900007,0019,Mizoram,2,Lunglei,0003,Lunglei,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900008,0019,Mizoram,2,Lunglei,0003,Lunglei,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900009,0019,Mizoram,2,Lunglei,0004,Hnahthial,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900010,0019,Mizoram,2,Lunglei,0004,Hnahthial,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900011,0019,Mizoram,2,Lunglei,0004,Hnahthial,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900012,0019,Mizoram,3,Kolasib,0005,Kolasib,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900013,0019,Mizoram,3,Kolasib,0005,Kolasib,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900014,0019,Mizoram,3,Kolasib,0005,Kolasib,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900015,0019,Mizoram,3,Kolasib,0006,Sakhan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900016,0019,Mizoram,3,Kolasib,0006,Sakhan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+1900017,0019,Mizoram,3,Kolasib,0006,Sakhan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000000,0020,Nagaland,1,Dimapur,0001,Dimapur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000001,0020,Nagaland,1,Dimapur,0001,Dimapur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000002,0020,Nagaland,1,Dimapur,0001,Dimapur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000003,0020,Nagaland,1,Dimapur,0002,Chumoukedima,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000004,0020,Nagaland,1,Dimapur,0002,Chumoukedima,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000005,0020,Nagaland,1,Dimapur,0002,Chumoukedima,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000006,0020,Nagaland,2,Kohima,0003,Kohima,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000007,0020,Nagaland,2,Kohima,0003,Kohima,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000008,0020,Nagaland,2,Kohima,0003,Kohima,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000009,0020,Nagaland,2,Kohima,0004,Medziphema,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000010,0020,Nagaland,2,Kohima,0004,Medziphema,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000011,0020,Nagaland,2,Kohima,0004,Medziphema,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000012,0020,Nagaland,3,Mokokchung,0005,Mokokchung,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000013,0020,Nagaland,3,Mokokchung,0005,Mokokchung,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000014,0020,Nagaland,3,Mokokchung,0005,Mokokchung,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000015,0020,Nagaland,3,Mokokchung,0006,Konia,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000016,0020,Nagaland,3,Mokokchung,0006,Konia,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2000017,0020,Nagaland,3,Mokokchung,0006,Konia,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100000,0021,Odisha,1,Angul,0001,Angul,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100001,0021,Odisha,1,Angul,0001,Angul,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100002,0021,Odisha,1,Angul,0001,Angul,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100003,0021,Odisha,1,Angul,0002,Talcher,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100004,0021,Odisha,1,Angul,0002,Talcher,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100005,0021,Odisha,1,Angul,0002,Talcher,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100006,0021,Odisha,2,Balarngir,0003,Balangir,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100007,0021,Odisha,2,Balarngir,0003,Balangir,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100008,0021,Odisha,2,Balarngir,0003,Balangir,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100009,0021,Odisha,2,Balarngir,0004,Titilagarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100010,0021,Odisha,2,Balarngir,0004,Titilagarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100011,0021,Odisha,2,Balarngir,0004,Titilagarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100012,0021,Odisha,3,Bargarh,0005,Bargarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100013,0021,Odisha,3,Bargarh,0005,Bargarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100014,0021,Odisha,3,Bargarh,0005,Bargarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100015,0021,Odisha,3,Bargarh,0006,Attabira,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100016,0021,Odisha,3,Bargarh,0006,Attabira,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2100017,0021,Odisha,3,Bargarh,0006,Attabira,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200000,0022,Punjab,1,Amritsar,0001,Amritsar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200001,0022,Punjab,1,Amritsar,0001,Amritsar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200002,0022,Punjab,1,Amritsar,0001,Amritsar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200003,0022,Punjab,1,Amritsar,0002,Harike,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200004,0022,Punjab,1,Amritsar,0002,Harike,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200005,0022,Punjab,1,Amritsar,0002,Harike,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200006,0022,Punjab,2,Bathinda,0003,Bathinda,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200007,0022,Punjab,2,Bathinda,0003,Bathinda,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200008,0022,Punjab,2,Bathinda,0003,Bathinda,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200009,0022,Punjab,2,Bathinda,0004,Talwandi Sabo,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200010,0022,Punjab,2,Bathinda,0004,Talwandi Sabo,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200011,0022,Punjab,2,Bathinda,0004,Talwandi Sabo,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200012,0022,Punjab,3,Firozpur,0005,Firozpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200013,0022,Punjab,3,Firozpur,0005,Firozpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200014,0022,Punjab,3,Firozpur,0005,Firozpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200015,0022,Punjab,3,Firozpur,0006,Abohar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200016,0022,Punjab,3,Firozpur,0006,Abohar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2200017,0022,Punjab,3,Firozpur,0006,Abohar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300000,0023,Puducherry,1,Puducherry,0001,Puducherry,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300001,0023,Puducherry,1,Puducherry,0001,Puducherry,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300002,0023,Puducherry,1,Puducherry,0001,Puducherry,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300003,0023,Puducherry,1,Puducherry,0002,Yanam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300004,0023,Puducherry,1,Puducherry,0002,Yanam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300005,0023,Puducherry,1,Puducherry,0002,Yanam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300006,0023,Puducherry,2,Karaikal,0003,Karaikal,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300007,0023,Puducherry,2,Karaikal,0003,Karaikal,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300008,0023,Puducherry,2,Karaikal,0003,Karaikal,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300009,0023,Puducherry,2,Karaikal,0004,Mahe,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300010,0023,Puducherry,2,Karaikal,0004,Mahe,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2300011,0023,Puducherry,2,Karaikal,0004,Mahe,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400000,0024,Rajasthan,1,Ajmer,0001,Ajmer,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400001,0024,Rajasthan,1,Ajmer,0001,Ajmer,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400002,0024,Rajasthan,1,Ajmer,0001,Ajmer,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400003,0024,Rajasthan,1,Ajmer,0002,Kishangarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400004,0024,Rajasthan,1,Ajmer,0002,Kishangarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400005,0024,Rajasthan,1,Ajmer,0002,Kishangarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400006,0024,Rajasthan,2,Alwar,0003,Alwar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400007,0024,Rajasthan,2,Alwar,0003,Alwar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400008,0024,Rajasthan,2,Alwar,0003,Alwar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400009,0024,Rajasthan,2,Alwar,0004,Malpura,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400010,0024,Rajasthan,2,Alwar,0004,Malpura,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400011,0024,Rajasthan,2,Alwar,0004,Malpura,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400012,0024,Rajasthan,3,Banswara,0005,Banswara,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400013,0024,Rajasthan,3,Banswara,0005,Banswara,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400014,0024,Rajasthan,3,Banswara,0005,Banswara,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400015,0024,Rajasthan,3,Banswara,0006,Dungarpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400016,0024,Rajasthan,3,Banswara,0006,Dungarpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2400017,0024,Rajasthan,3,Banswara,0006,Dungarpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500000,0025,Sikkim,1,East Sikkim,0001,Gangtok,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500001,0025,Sikkim,1,East Sikkim,0001,Gangtok,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500002,0025,Sikkim,1,East Sikkim,0001,Gangtok,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500003,0025,Sikkim,1,East Sikkim,0002,Tsomgo,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500004,0025,Sikkim,1,East Sikkim,0002,Tsomgo,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500005,0025,Sikkim,1,East Sikkim,0002,Tsomgo,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500006,0025,Sikkim,2,North Sikkim,0003,Mangan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500007,0025,Sikkim,2,North Sikkim,0003,Mangan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500008,0025,Sikkim,2,North Sikkim,0003,Mangan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500009,0025,Sikkim,2,North Sikkim,0004,Lachen,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500010,0025,Sikkim,2,North Sikkim,0004,Lachen,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500011,0025,Sikkim,2,North Sikkim,0004,Lachen,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500012,0025,Sikkim,3,South Sikkim,0005,Namchi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500013,0025,Sikkim,3,South Sikkim,0005,Namchi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500014,0025,Sikkim,3,South Sikkim,0005,Namchi,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500015,0025,Sikkim,3,South Sikkim,0006,Ravangla,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500016,0025,Sikkim,3,South Sikkim,0006,Ravangla,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2500017,0025,Sikkim,3,South Sikkim,0006,Ravangla,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600000,0026,Tamil Nadu,1,Ariyalur,0001,Ariyalur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600001,0026,Tamil Nadu,1,Ariyalur,0001,Ariyalur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600002,0026,Tamil Nadu,1,Ariyalur,0001,Ariyalur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600003,0026,Tamil Nadu,1,Ariyalur,0002,Andimadom,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600004,0026,Tamil Nadu,1,Ariyalur,0002,Andimadom,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600005,0026,Tamil Nadu,1,Ariyalur,0002,Andimadom,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600006,0026,Tamil Nadu,2,Chengalpattu,0003,Chengalpattu,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600007,0026,Tamil Nadu,2,Chengalpattu,0003,Chengalpattu,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600008,0026,Tamil Nadu,2,Chengalpattu,0003,Chengalpattu,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600009,0026,Tamil Nadu,2,Chengalpattu,0004,Mahabalipuram,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600010,0026,Tamil Nadu,2,Chengalpattu,0004,Mahabalipuram,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600011,0026,Tamil Nadu,2,Chengalpattu,0004,Mahabalipuram,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600012,0026,Tamil Nadu,3,Cuddalore,0005,Cuddalore,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600013,0026,Tamil Nadu,3,Cuddalore,0005,Cuddalore,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600014,0026,Tamil Nadu,3,Cuddalore,0005,Cuddalore,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600015,0026,Tamil Nadu,3,Cuddalore,0006,Chidambaram,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600016,0026,Tamil Nadu,3,Cuddalore,0006,Chidambaram,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2600017,0026,Tamil Nadu,3,Cuddalore,0006,Chidambaram,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700000,0027,Maharashtra,1,Ahmednagar,0001,Ahmednagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700001,0027,Maharashtra,1,Ahmednagar,0001,Ahmednagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700002,0027,Maharashtra,1,Ahmednagar,0001,Ahmednagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700003,0027,Maharashtra,1,Ahmednagar,0002,Shrirampur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700004,0027,Maharashtra,1,Ahmednagar,0002,Shrirampur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700005,0027,Maharashtra,1,Ahmednagar,0002,Shrirampur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700006,0027,Maharashtra,1,Ahmednagar,0003,Nevasa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700007,0027,Maharashtra,1,Ahmednagar,0003,Nevasa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700008,0027,Maharashtra,1,Ahmednagar,0003,Nevasa,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700009,0027,Maharashtra,2,Aurangabad,0004,Aurangabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700010,0027,Maharashtra,2,Aurangabad,0004,Aurangabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700011,0027,Maharashtra,2,Aurangabad,0004,Aurangabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700012,0027,Maharashtra,2,Aurangabad,0005,Paithan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700013,0027,Maharashtra,2,Aurangabad,0005,Paithan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700014,0027,Maharashtra,2,Aurangabad,0005,Paithan,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700015,0027,Maharashtra,2,Aurangabad,0006,Sillod,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700016,0027,Maharashtra,2,Aurangabad,0006,Sillod,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700017,0027,Maharashtra,2,Aurangabad,0006,Sillod,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700018,0027,Maharashtra,3,Beed,0007,Beed,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700019,0027,Maharashtra,3,Beed,0007,Beed,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700020,0027,Maharashtra,3,Beed,0007,Beed,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700021,0027,Maharashtra,3,Beed,0008,Parli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700022,0027,Maharashtra,3,Beed,0008,Parli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700023,0027,Maharashtra,3,Beed,0008,Parli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700024,0027,Maharashtra,3,Beed,0009,Ashti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700025,0027,Maharashtra,3,Beed,0009,Ashti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700026,0027,Maharashtra,3,Beed,0009,Ashti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700027,0027,Maharashtra,4,Buldhana,0010,Buldhana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700028,0027,Maharashtra,4,Buldhana,0010,Buldhana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700029,0027,Maharashtra,4,Buldhana,0010,Buldhana,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700030,0027,Maharashtra,4,Buldhana,0011,Khamgaon,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700031,0027,Maharashtra,4,Buldhana,0011,Khamgaon,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700032,0027,Maharashtra,4,Buldhana,0011,Khamgaon,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700033,0027,Maharashtra,5,Chandrapur,0012,Chandrapur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700034,0027,Maharashtra,5,Chandrapur,0012,Chandrapur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700035,0027,Maharashtra,5,Chandrapur,0012,Chandrapur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700036,0027,Maharashtra,5,Chandrapur,0013,Ballarpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700037,0027,Maharashtra,5,Chandrapur,0013,Ballarpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2700038,0027,Maharashtra,5,Chandrapur,0013,Ballarpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800000,0028,Telangana,1,Adilabad,0001,Adilabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800001,0028,Telangana,1,Adilabad,0001,Adilabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800002,0028,Telangana,1,Adilabad,0001,Adilabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800003,0028,Telangana,1,Adilabad,0002,Asifabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800004,0028,Telangana,1,Adilabad,0002,Asifabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800005,0028,Telangana,1,Adilabad,0002,Asifabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800006,0028,Telangana,2,Hyderabad,0003,Hyderabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800007,0028,Telangana,2,Hyderabad,0003,Hyderabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800008,0028,Telangana,2,Hyderabad,0003,Hyderabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800009,0028,Telangana,2,Hyderabad,0004,Secunderabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800010,0028,Telangana,2,Hyderabad,0004,Secunderabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800011,0028,Telangana,2,Hyderabad,0004,Secunderabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800012,0028,Telangana,3,Karimnagar,0005,Karimnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800013,0028,Telangana,3,Karimnagar,0005,Karimnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800014,0028,Telangana,3,Karimnagar,0005,Karimnagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800015,0028,Telangana,3,Karimnagar,0006,Jagtial,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800016,0028,Telangana,3,Karimnagar,0006,Jagtial,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2800017,0028,Telangana,3,Karimnagar,0006,Jagtial,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900000,0029,Karnataka,1,Bengaluru,0001,Bengaluru,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900001,0029,Karnataka,1,Bengaluru,0001,Bengaluru,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900002,0029,Karnataka,1,Bengaluru,0001,Bengaluru,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900003,0029,Karnataka,1,Bengaluru,0002,Whitefield,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900004,0029,Karnataka,1,Bengaluru,0002,Whitefield,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900005,0029,Karnataka,1,Bengaluru,0002,Whitefield,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900006,0029,Karnataka,1,Bengaluru,0003,Koramangala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900007,0029,Karnataka,1,Bengaluru,0003,Koramangala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900008,0029,Karnataka,1,Bengaluru,0003,Koramangala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900009,0029,Karnataka,2,Belgaum,0004,Belgaum,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900010,0029,Karnataka,2,Belgaum,0004,Belgaum,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900011,0029,Karnataka,2,Belgaum,0004,Belgaum,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900012,0029,Karnataka,2,Belgaum,0005,Soundatti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900013,0029,Karnataka,2,Belgaum,0005,Soundatti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900014,0029,Karnataka,2,Belgaum,0005,Soundatti,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900015,0029,Karnataka,3,Hubli,0006,Hubli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900016,0029,Karnataka,3,Hubli,0006,Hubli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900017,0029,Karnataka,3,Hubli,0006,Hubli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900018,0029,Karnataka,3,Hubli,0007,Dharwad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900019,0029,Karnataka,3,Hubli,0007,Dharwad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900020,0029,Karnataka,3,Hubli,0007,Dharwad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900021,0029,Karnataka,4,Kolar,0008,Kolar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900022,0029,Karnataka,4,Kolar,0008,Kolar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900023,0029,Karnataka,4,Kolar,0008,Kolar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900024,0029,Karnataka,4,Kolar,0009,Kolar Gold Fields,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900025,0029,Karnataka,4,Kolar,0009,Kolar Gold Fields,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900026,0029,Karnataka,4,Kolar,0009,Kolar Gold Fields,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900027,0029,Karnataka,5,Gulbarga,0010,Gulbarga,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900028,0029,Karnataka,5,Gulbarga,0010,Gulbarga,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900029,0029,Karnataka,5,Gulbarga,0010,Gulbarga,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900030,0029,Karnataka,5,Gulbarga,0011,Sedam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900031,0029,Karnataka,5,Gulbarga,0011,Sedam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+2900032,0029,Karnataka,5,Gulbarga,0011,Sedam,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000000,0030,Tripura,1,Dhalai,0001,Dhalai,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000001,0030,Tripura,1,Dhalai,0001,Dhalai,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000002,0030,Tripura,1,Dhalai,0001,Dhalai,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000003,0030,Tripura,1,Dhalai,0002,Kakaban,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000004,0030,Tripura,1,Dhalai,0002,Kakaban,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000005,0030,Tripura,1,Dhalai,0002,Kakaban,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000006,0030,Tripura,2,Gomti,0003,Agartala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000007,0030,Tripura,2,Gomti,0003,Agartala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000008,0030,Tripura,2,Gomti,0003,Agartala,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000009,0030,Tripura,2,Gomti,0004,Mohanpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000010,0030,Tripura,2,Gomti,0004,Mohanpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000011,0030,Tripura,2,Gomti,0004,Mohanpur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000012,0030,Tripura,3,North Tripura,0005,Kailashahar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000013,0030,Tripura,3,North Tripura,0005,Kailashahar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000014,0030,Tripura,3,North Tripura,0005,Kailashahar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000015,0030,Tripura,3,North Tripura,0006,Dharmanagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000016,0030,Tripura,3,North Tripura,0006,Dharmanagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3000017,0030,Tripura,3,North Tripura,0006,Dharmanagar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100000,0031,Uttar Pradesh,1,Agra,0001,Agra,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100001,0031,Uttar Pradesh,1,Agra,0001,Agra,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100002,0031,Uttar Pradesh,1,Agra,0001,Agra,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100003,0031,Uttar Pradesh,1,Agra,0002,Fatehpur Sikri,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100004,0031,Uttar Pradesh,1,Agra,0002,Fatehpur Sikri,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100005,0031,Uttar Pradesh,1,Agra,0002,Fatehpur Sikri,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100006,0031,Uttar Pradesh,2,Aligarh,0003,Aligarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100007,0031,Uttar Pradesh,2,Aligarh,0003,Aligarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100008,0031,Uttar Pradesh,2,Aligarh,0003,Aligarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100009,0031,Uttar Pradesh,2,Aligarh,0004,Hathras,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100010,0031,Uttar Pradesh,2,Aligarh,0004,Hathras,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100011,0031,Uttar Pradesh,2,Aligarh,0004,Hathras,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100012,0031,Uttar Pradesh,3,Allahabad,0005,Allahabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100013,0031,Uttar Pradesh,3,Allahabad,0005,Allahabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100014,0031,Uttar Pradesh,3,Allahabad,0005,Allahabad,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100015,0031,Uttar Pradesh,3,Allahabad,0006,Kheragarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100016,0031,Uttar Pradesh,3,Allahabad,0006,Kheragarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3100017,0031,Uttar Pradesh,3,Allahabad,0006,Kheragarh,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200000,0032,Uttarakhand,1,Almora,0001,Almora,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200001,0032,Uttarakhand,1,Almora,0001,Almora,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200002,0032,Uttarakhand,1,Almora,0001,Almora,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200003,0032,Uttarakhand,1,Almora,0002,Ranikhet,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200004,0032,Uttarakhand,1,Almora,0002,Ranikhet,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200005,0032,Uttarakhand,1,Almora,0002,Ranikhet,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200006,0032,Uttarakhand,2,Bageshwar,0003,Bageshwar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200007,0032,Uttarakhand,2,Bageshwar,0003,Bageshwar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200008,0032,Uttarakhand,2,Bageshwar,0003,Bageshwar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200009,0032,Uttarakhand,2,Bageshwar,0004,Kapkot,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200010,0032,Uttarakhand,2,Bageshwar,0004,Kapkot,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200011,0032,Uttarakhand,2,Bageshwar,0004,Kapkot,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200012,0032,Uttarakhand,3,Chamoli,0005,Ghat,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200013,0032,Uttarakhand,3,Chamoli,0005,Ghat,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200014,0032,Uttarakhand,3,Chamoli,0005,Ghat,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200015,0032,Uttarakhand,3,Chamoli,0006,Auli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200016,0032,Uttarakhand,3,Chamoli,0006,Auli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3200017,0032,Uttarakhand,3,Chamoli,0006,Auli,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300000,0033,West Bengal,1,Alipurduar,0001,Alipurduar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300001,0033,West Bengal,1,Alipurduar,0001,Alipurduar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300002,0033,West Bengal,1,Alipurduar,0001,Alipurduar,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300003,0033,West Bengal,1,Alipurduar,0002,Madarihat,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300004,0033,West Bengal,1,Alipurduar,0002,Madarihat,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300005,0033,West Bengal,1,Alipurduar,0002,Madarihat,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300006,0033,West Bengal,2,Bankura,0003,Bankura,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300007,0033,West Bengal,2,Bankura,0003,Bankura,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300008,0033,West Bengal,2,Bankura,0003,Bankura,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300009,0033,West Bengal,2,Bankura,0004,Bishnupur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300010,0033,West Bengal,2,Bankura,0004,Bishnupur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300011,0033,West Bengal,2,Bankura,0004,Bishnupur,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300012,0033,West Bengal,3,Birbhum,0005,Suri,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300013,0033,West Bengal,3,Birbhum,0005,Suri,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300014,0033,West Bengal,3,Birbhum,0005,Suri,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300015,0033,West Bengal,3,Birbhum,0006,Deucha,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300016,0033,West Bengal,3,Birbhum,0006,Deucha,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26
+3300017,0033,West Bengal,3,Birbhum,0006,Deucha,India,Active,2026-03-03 06:46:26,2026-03-03 06:46:26

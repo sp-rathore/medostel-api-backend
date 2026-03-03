@@ -1,11 +1,13 @@
 # Medostel Database Development Agent
 
-**Version:** 2.0 (Updated: March 4, 2026)
+**Version:** 3.0 (Updated: March 4, 2026)
 **Last Updated:** March 4, 2026
 **Database:** PostgreSQL 18.2
 **Host:** 35.244.27.232:5432
-**Status:** Production Ready ✅
+**Port:** 5432
+**Status:** ✅ Production Ready
 **Changes**: Step 1.1 (Geographic Hierarchy) ✅ COMPLETE, Step 1.2 (User Geographic Integration) ✅ COMPLETE
+**Data Status**: 9,805 records loaded (36 states, 98 districts)
 
 ---
 
@@ -33,8 +35,14 @@
 Database Name:      medostel
 Host:              35.244.27.232
 Port:              5432
-Engine:            PostgreSQL 18.2
+Engine:            PostgreSQL 18 (18.2)
 Instance:          medostel-ai-assistant-pgdev-instance (Google Cloud SQL)
+Project ID:        gen-lang-client-0064186167
+Region:            asia-south1 (Mumbai)
+Zone:              asia-south1-c
+Machine Type:      db-custom-1-3840 (1 vCPU, 3.84 GB RAM)
+Storage:           10 GB PD-SSD (auto-resize enabled)
+Status:            🟢 RUNNABLE
 ```
 
 ### Connection Pool
@@ -46,19 +54,43 @@ Timeout:           30 seconds
 Pool Recycle:      3600 seconds
 ```
 
-### Database Users
+### Database Roles & Users
+
+**ROLE 1: medostel_admin**
 ```
-Admin User:        medostel_admin_user
-API User:          medostel_api_user (Used by application)
-Test User:         test_user (For testing)
+Role Name:         medostel_admin
+Role Type:         SUPERUSER
+User Account:      medostel_admin_user
+Password:          Iag2bMi@0@6aA
+Privileges:        CREATEDB, CREATEROLE, SUPERUSER
+Capabilities:      Full administrative access, all schema operations
 ```
 
-### Statistics
-- **Total Tables:** 6
+**ROLE 2: medostel_api**
+```
+Role Name:         medostel_api
+Role Type:         Standard Role
+User Account:      medostel_api_user
+Password:          Iag2bMi@0@6aD
+Privileges:        CONNECT, SELECT, INSERT, UPDATE, DELETE
+Capabilities:      Application API access with limited permissions
+```
+
+### Database Statistics
+- **Total Tables:** 7 (6 application + 1 backup)
+  - user_role_master
+  - state_city_pincode_master
+  - state_city_pincode_master_backup_step1_1
+  - user_master
+  - user_login
+  - new_user_request
+  - report_history
 - **Total Indexes:** 35+
 - **Total Views:** 0 (Future use)
 - **Total Stored Procedures:** 0 (Using ORM)
-- **Foreign Keys:** Multiple relationships
+- **Total Records:** 9,805 (state_city_pincode_master)
+- **Database Size:** 304 kB
+- **Foreign Keys:** Multiple relationships with referential integrity
 
 ---
 
@@ -152,20 +184,26 @@ INSERT INTO user_role_master (roleId, roleName, status, comments) VALUES
 ### Purpose
 Stores geographic location information including states, cities, and postal codes. Supports location-based filtering and distribution of services.
 
-### Table Structure
+### Purpose
+Stores geographic location information including states, districts, cities, and postal codes with hierarchical structure. Supports location-based filtering and geographic hierarchy queries.
+
+### Table Structure (ENHANCED - Step 1.1 Complete)
+**Schema Version:** 2.0 | **Data Records:** 9,805 | **Status:** Production Ready ✅
+
 ```sql
 CREATE TABLE IF NOT EXISTS state_city_pincode_master (
     id SERIAL PRIMARY KEY,
-    stateId VARCHAR(10) NOT NULL,
+    stateId INTEGER NOT NULL,
     stateName VARCHAR(100) NOT NULL,
-    cityId VARCHAR(50) NOT NULL,
+    districtId INTEGER NOT NULL,
+    districtName VARCHAR(100) NOT NULL,
+    cityId INTEGER NOT NULL,
     cityName VARCHAR(100) NOT NULL,
-    pinCode VARCHAR(10) NOT NULL,
+    pinCode INTEGER PRIMARY KEY,
     countryName VARCHAR(100) DEFAULT 'India',
     status VARCHAR(50) DEFAULT 'Active',
     createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(stateId, cityId, pinCode)
+    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
@@ -174,32 +212,49 @@ CREATE TABLE IF NOT EXISTS state_city_pincode_master (
 | Column | Type | Constraints | Purpose |
 |--------|------|-------------|---------|
 | **id** | SERIAL | PK, AUTO-INCREMENT | Unique location identifier |
-| **stateId** | VARCHAR(10) | NOT NULL | State code (e.g., MH, KA, DL) |
+| **stateId** | INTEGER | NOT NULL | State identifier (numeric) |
 | **stateName** | VARCHAR(100) | NOT NULL | State name (e.g., Maharashtra, Karnataka) |
-| **cityId** | VARCHAR(50) | NOT NULL | City code |
+| **districtId** | INTEGER | NOT NULL | District identifier (0001-N per state) |
+| **districtName** | VARCHAR(100) | NOT NULL | District name |
+| **cityId** | INTEGER | NOT NULL | City identifier (numeric) |
 | **cityName** | VARCHAR(100) | NOT NULL | City name (e.g., Mumbai, Bangalore) |
-| **pinCode** | VARCHAR(10) | NOT NULL | Postal code / ZIP code |
+| **pinCode** | INTEGER | PRIMARY KEY | Postal code / ZIP code (6 digits) |
 | **countryName** | VARCHAR(100) | DEFAULT 'India' | Country name |
 | **status** | VARCHAR(50) | DEFAULT 'Active' | Location status: Active, Inactive |
 | **createdDate** | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 | **updatedDate** | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Last update timestamp |
 
-### Indexes
+### Geographic Hierarchy
+```
+State (stateId, stateName)
+   ├── District (districtId, districtName)
+   │    ├── City (cityId, cityName)
+   │    │    └── PinCode (pinCode)
+```
+
+### Indexes (11 Total - Step 1.1 Enhanced)
 ```sql
 -- Primary Key Index
 CREATE UNIQUE INDEX pk_location_master ON state_city_pincode_master(id);
 
--- Composite Unique Index
-CREATE UNIQUE INDEX uk_location_composite ON state_city_pincode_master(stateId, cityId, pinCode);
+-- Individual Field Indexes
+CREATE INDEX idx_state_name ON state_city_pincode_master(stateId);
+CREATE INDEX idx_district_id ON state_city_pincode_master(districtId);
+CREATE INDEX idx_district_name ON state_city_pincode_master(districtName);
+CREATE INDEX idx_city_name ON state_city_pincode_master(cityId);
+CREATE INDEX idx_pincode ON state_city_pincode_master(pinCode);
 
--- Search Indexes
-CREATE INDEX idx_location_state ON state_city_pincode_master(stateId);
-CREATE INDEX idx_location_city ON state_city_pincode_master(cityId);
-CREATE INDEX idx_location_pincode ON state_city_pincode_master(pinCode);
-CREATE INDEX idx_location_country ON state_city_pincode_master(countryName);
-CREATE INDEX idx_location_status ON state_city_pincode_master(status);
-CREATE INDEX idx_location_updated ON state_city_pincode_master(updatedDate);
+-- Composite Hierarchical Indexes
+CREATE INDEX idx_state_district ON state_city_pincode_master(stateId, districtId);
+CREATE INDEX idx_district_city ON state_city_pincode_master(districtId, cityId);
+CREATE INDEX idx_state_district_city ON state_city_pincode_master(stateId, districtId, cityId);
+CREATE INDEX idx_district_status ON state_city_pincode_master(districtId, status);
+
+-- Status Index
+CREATE INDEX idx_status ON state_city_pincode_master(status);
 ```
+
+**Index Usage**: Optimized for hierarchical queries (state → district → city → pincode)
 
 ### Sample Data
 ```sql
@@ -218,14 +273,16 @@ INSERT INTO state_city_pincode_master (stateId, stateName, cityId, cityName, pin
 - **API 4:** DELETE `/api/v1/locations/{location_id}` - Delete location
 
 ### Data Validation Rules
-- stateId: Required, 2-10 chars
+- stateId: Required, INTEGER (0001-0036 for 36 states/UTs)
 - stateName: Required, max 100 chars
-- cityId: Required, max 50 chars
+- districtId: Required, INTEGER (0001-N per state, hierarchical)
+- districtName: Required, max 100 chars
+- cityId: Required, INTEGER (0001-N per district, hierarchical)
 - cityName: Required, max 100 chars
-- pinCode: Required, max 10 chars (numeric)
+- pinCode: Required, INTEGER (PRIMARY KEY, 100000-999999, 6 digits)
 - countryName: Optional, default 'India'
 - status: Must be Active or Inactive
-- Composite unique constraint: (stateId, cityId, pinCode)
+- **Geographic Hierarchy Validation**: districtId must exist for given stateId
 
 ### Relationships
 - **Referenced by:** User_Master (implicit through user address)
@@ -238,24 +295,41 @@ INSERT INTO state_city_pincode_master (stateId, stateName, cityId, cityName, pin
 ### Purpose
 Stores user profile information for all system users (patients, doctors, staff, etc.).
 
+### Purpose
+Stores user profile information for all system users (patients, doctors, staff, etc.) with geographic location hierarchy integration.
+
 ### Table Structure
 
-**Updated March 1, 2026** ✅ - Enhanced schema with numeric userId, email validation, and 10-digit mobile validation
+**ENHANCED - March 4, 2026** ✅
+- **Schema Version**: 3.0
+- **Changes**: Added geographic FK columns (stateId, districtId, cityId), changed pinCode to INTEGER
+- **Migration Script**: migration_step1_2.sql
 
 ```sql
 CREATE TABLE IF NOT EXISTS user_master (
-    userId BIGINT PRIMARY KEY,
-    firstName VARCHAR(100) NOT NULL,
-    lastName VARCHAR(100) NOT NULL,
+    userId VARCHAR(100) PRIMARY KEY,
+    firstName VARCHAR(50) NOT NULL,
+    lastName VARCHAR(50) NOT NULL,
     currentRole VARCHAR(50) NOT NULL,
     emailId VARCHAR(255) NOT NULL UNIQUE CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
     mobileNumber NUMERIC(10) NOT NULL UNIQUE CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999),
     organisation VARCHAR(255),
-    address TEXT,
+    address1 VARCHAR(255),
+    address2 VARCHAR(255),
+    stateId INTEGER,
+    stateName VARCHAR(100),
+    districtId INTEGER,
+    cityId INTEGER,
+    cityName VARCHAR(100),
+    pinCode INTEGER,
     status VARCHAR(50) DEFAULT 'Active',
     createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (currentRole) REFERENCES user_role_master(roleId)
+    FOREIGN KEY (currentRole) REFERENCES user_role_master(roleId),
+    FOREIGN KEY (stateId) REFERENCES state_city_pincode_master(stateId),
+    FOREIGN KEY (districtId) REFERENCES state_city_pincode_master(districtId),
+    FOREIGN KEY (cityId) REFERENCES state_city_pincode_master(cityId),
+    FOREIGN KEY (pinCode) REFERENCES state_city_pincode_master(pinCode)
 );
 ```
 
@@ -263,19 +337,32 @@ CREATE TABLE IF NOT EXISTS user_master (
 
 | Column | Type | Constraints | Purpose |
 |--------|------|-------------|---------|
-| **userId** | BIGINT | PK | Unique numeric user identifier (1-1,000,000,000) |
-| **firstName** | VARCHAR(100) | NOT NULL | User's first name |
-| **lastName** | VARCHAR(100) | NOT NULL | User's last name |
+| **userId** | VARCHAR(100) | PK | Email address (unique user identifier) |
+| **firstName** | VARCHAR(50) | NOT NULL | User's first name |
+| **lastName** | VARCHAR(50) | NOT NULL | User's last name |
 | **currentRole** | VARCHAR(50) | NOT NULL, FK | User's current role (references user_role_master) |
-| **emailId** | VARCHAR(255) | UNIQUE, NOT NULL, CHECK | User's email address (validated against RFC 5322 regex pattern) |
-| **mobileNumber** | NUMERIC(10) | NOT NULL, UNIQUE, CHECK | User's phone number (exactly 10 digits, 1000000000-9999999999) |
+| **emailId** | VARCHAR(255) | UNIQUE, NOT NULL, CHECK | User's email address (RFC 5322 validated) |
+| **mobileNumber** | NUMERIC(10) | NOT NULL, UNIQUE, CHECK | Phone number (exactly 10 digits) |
 | **organisation** | VARCHAR(255) | NULLABLE | Hospital/clinic/organization name |
-| **address** | TEXT | NULLABLE | Full address of user |
+| **address1** | VARCHAR(255) | NULLABLE | Address line 1 |
+| **address2** | VARCHAR(255) | NULLABLE | Address line 2 |
+| **stateId** | INTEGER | FK | State identifier (references state_city_pincode_master) |
+| **stateName** | VARCHAR(100) | NULLABLE | State name (for display) |
+| **districtId** | INTEGER | FK | District identifier (references state_city_pincode_master) |
+| **cityId** | INTEGER | FK | City identifier (references state_city_pincode_master) |
+| **cityName** | VARCHAR(100) | NULLABLE | City name (for display) |
+| **pinCode** | INTEGER | FK, IMMUTABLE | Postal code (references state_city_pincode_master, cannot be updated) |
 | **status** | VARCHAR(50) | DEFAULT 'Active' | User status: Active, Inactive, Suspended |
 | **createdDate** | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Account creation date |
 | **updatedDate** | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Last profile update |
 
-### Indexes
+### Geographic Hierarchy Integration
+- Users are now linked to State_City_PinCode_Master through 4 FK columns
+- Enables precise location tracking at state → district → city → pincode levels
+- All geographic field values must exist in State_City_PinCode_Master table
+- ON DELETE RESTRICT prevents deletion of geographic references while users exist
+
+### Indexes (10 Total - Step 1.2 Enhanced)
 ```sql
 -- Primary Key Index
 CREATE UNIQUE INDEX pk_user_master ON user_master(userId);
@@ -286,8 +373,19 @@ CREATE INDEX idx_user_mobile ON user_master(mobileNumber);
 CREATE INDEX idx_user_role ON user_master(currentRole);
 CREATE INDEX idx_user_status ON user_master(status);
 CREATE INDEX idx_user_name ON user_master(firstName, lastName);
-CREATE INDEX idx_user_updated ON user_master(updatedDate);
+
+-- Geographic FK Indexes (Step 1.2)
+CREATE INDEX idx_user_state_id ON user_master(stateId);
+CREATE INDEX idx_user_district_id ON user_master(districtId);
+CREATE INDEX idx_user_city_id ON user_master(cityId);
+CREATE INDEX idx_user_pincode ON user_master(pinCode);
+
+-- Composite Geographic Indexes
+CREATE INDEX idx_user_state_district ON user_master(stateId, districtId);
+CREATE INDEX idx_user_district_city ON user_master(districtId, cityId);
 ```
+
+**Index Usage**: Optimized for geographic location filtering and hierarchical queries
 
 ### Sample Data
 ```sql
@@ -305,25 +403,31 @@ INSERT INTO user_master (userId, firstName, lastName, currentRole, emailId, mobi
 - **API 6:** PUT `/api/v1/users/{userId}` - Update user
 - **API 6:** DELETE `/api/v1/users/{userId}` - Delete user
 
-### Data Validation Rules (Updated March 1, 2026)
+### Data Validation Rules (Updated March 4, 2026 - Step 1.2)
 
 | Field | Constraint | Details |
 |-------|-----------|---------|
-| **userId** | BIGINT PK | Numeric (1-1,000,000,000), must be unique |
-| **firstName** | VARCHAR(100) | Required, max 100 characters |
-| **lastName** | VARCHAR(100) | Required, max 100 characters |
+| **userId** | VARCHAR(100) PK | Email address (unique user identifier) |
+| **firstName** | VARCHAR(50) | Required, max 50 characters |
+| **lastName** | VARCHAR(50) | Required, max 50 characters |
 | **currentRole** | VARCHAR(50) | Required, must exist in user_role_master |
 | **emailId** | VARCHAR(255) | Required, unique, validated email format (RFC 5322 regex) |
 | **mobileNumber** | NUMERIC(10) | Required, unique, exactly 10 digits (1000000000-9999999999) |
 | **organisation** | VARCHAR(255) | Optional, max 255 characters |
-| **address** | TEXT | Optional |
+| **address1** | VARCHAR(255) | Optional, address line 1 |
+| **address2** | VARCHAR(255) | Optional, address line 2 |
+| **stateId** | INTEGER FK | Optional, must exist in state_city_pincode_master |
+| **districtId** | INTEGER FK | Optional, must exist in state_city_pincode_master |
+| **cityId** | INTEGER FK | Optional, must exist in state_city_pincode_master |
+| **pinCode** | INTEGER FK | Optional, must exist in state_city_pincode_master (IMMUTABLE - cannot update) |
 | **status** | VARCHAR(50) | Must be one of: Active, Inactive, Suspended |
 
 **Enhanced Validation Features**:
 - ✅ Email validation using PostgreSQL CHECK constraint with regex pattern
 - ✅ Mobile number validation: CHECK constraint ensures exactly 10 digits
-- ✅ Numeric userId: BIGINT supports up to 1 billion+ users
+- ✅ Geographic FK validation: All location references must exist in State_City_PinCode_Master
 - ✅ UNIQUE constraints on emailId and mobileNumber
+- ✅ PinCode immutability: Set on creation, cannot be updated after
 
 ### Relationships
 - **Foreign Key:** currentRole → user_role_master(roleId)
@@ -1084,7 +1188,39 @@ State_City_PinCode_Master (Step 1.1 Enhanced)
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** March 1, 2026
-**Status:** Production Ready ✅
+## 🔄 Backup & Recovery Configuration
+
+### Backup Settings
+| Property | Value |
+|----------|-------|
+| **Automated Backups** | ✅ Enabled |
+| **Backup Tier** | STANDARD |
+| **Retained Backups** | 7 |
+| **Backup Start Time** | 03:00 UTC |
+| **Last Backup Status** | ✅ SUCCESSFUL |
+
+### Point-in-Time Recovery
+| Property | Value |
+|----------|-------|
+| **PITR Enabled** | ✅ Yes |
+| **Transaction Log Archiving** | ✅ Enabled |
+| **Log Retention Period** | 7 days |
+| **Replication Type** | SYNCHRONOUS |
+
+---
+
+## 📝 Document Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2026-03-01 | Initial: All 6 tables documented |
+| 2.0 | 2026-03-03 | Step 1.1: State_City_PinCode_Master enhanced with district hierarchy |
+| 3.0 | 2026-03-04 | Step 1.2: User_Master enhanced with geographic FK columns; 9,805 records loaded |
+
+---
+
+**Document Version:** 3.0
+**Last Updated:** March 4, 2026
+**Status:** ✅ Production Ready
 **Maintained By:** Data Engineering Team
+**Synced From:** DevOps Development/DBA/DBA.md
