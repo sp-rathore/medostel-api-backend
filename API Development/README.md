@@ -10,13 +10,30 @@ This is the backend API service for the Medostel Healthcare AI Assistant platfor
 - Geographic data management
 - Role-based access control
 
+## 🆕 Recent Enhancements
+
+### Step 1.2: User_Master Geographic Hierarchy Integration (March 4, 2026)
+- **User APIs (5 & 6)** now support geographic hierarchy with foreign key references
+- Added geographic FK columns to User_Master: stateId, districtId, cityId, pinCode (INTEGER)
+- Geographic references validated against State_City_PinCode_Master table
+- pinCode is immutable after creation (set during user registration only)
+- Enables precise user location tracking at state → district → city → pincode levels
+- See `API Development/API Development agent.md` for updated API specifications
+
+### Step 1.1: Location APIs District Hierarchy (March 3, 2026)
+- **Location APIs (3 & 4)** enhanced with district-level geographic hierarchy
+- Added districtId and districtName columns to State_City_PinCode_Master
+- 4 new hierarchical query endpoints for state/district/city/pincode navigation
+- pinCode changed to PRIMARY KEY (numeric, 5-6 digits)
+
 ## Technology Stack
 
 - **Framework**: FastAPI (Python 3.11+)
-- **Database**: PostgreSQL 18
+- **Database**: PostgreSQL 18 with geographic hierarchy
 - **Authentication**: JWT / OAuth2
 - **Deployment**: Google Cloud Run / Kubernetes (GKE)
 - **API Documentation**: Swagger/OpenAPI 3.0
+- **Data Validation**: Pydantic with custom validators
 
 ## Project Structure
 

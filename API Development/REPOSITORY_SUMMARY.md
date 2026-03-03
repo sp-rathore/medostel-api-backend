@@ -192,13 +192,33 @@ tests/
   - DELETE removed, manage via status field (Active/Inactive)
   - 6 total endpoints (3 SELECT + 1 pinCode SELECT + 2 new SELECT for hierarchy)
 
-#### APIs 5-6: User_Master (User Management)
+#### APIs 5-6: User_Master (User Management) ⭐ Enhanced Mar 4, 2026
 - **File**: `routes/v1/users.py` + `services/user_service.py`
-- **API 5 (SELECT)**: `GET /api/v1/users/all` - Retrieve all users
+- **Schema**: `schemas/user.py` (UserCreate, UserUpdate, UserResponse)
+- **API 5 (SELECT)**: `GET /api/v1/users/all` - Retrieve all users with geographic hierarchy
+  - Query filters: status, current_role, limit (1-1000), offset
+  - Returns: userId, firstName, lastName, currentRole, emailId, mobileNumber, organisation
+  - **Geographic fields**: stateId, stateName, districtId, cityId, cityName, pinCode (integer)
+  - **Address fields**: address1, address2
+  - **Audit fields**: createdDate, updatedDate
 - **API 6 (CRUD)**:
-  - `POST /api/v1/users` - Create user
-  - `PUT /api/v1/users/{userId}` - Update user
+  - `POST /api/v1/users` - Create user with geographic references
+    - Request includes: userId, firstName, lastName, currentRole, emailId, mobileNumber
+    - **Geographic fields** (optional): stateId, districtId, cityId, pinCode
+    - pinCode is numeric (5-6 digits), FK to State_City_PinCode_Master
+    - All geographic references validated before insert
+  - `PUT /api/v1/users/{userId}` - Update user (pinCode is immutable)
+    - Updatable: firstName, lastName, organisation, status, address1, address2
+    - Updatable geographic: stateId, districtId, cityId (not pinCode)
+    - Geographic references validated before update
   - `DELETE /api/v1/users/{userId}` - Delete user
+- **Changes** (Step 1.2):
+  - Added geographic FK columns: stateId, districtId, cityId (INTEGER)
+  - Changed pinCode from VARCHAR(10) to INTEGER
+  - All geographic fields reference State_City_PinCode_Master
+  - pinCode is immutable after creation (enforced in API)
+  - Hierarchical structure: State→District→City→PinCode
+  - 4 total endpoints (1 SELECT + 3 CRUD with geographic validation)
 
 #### APIs 7-8: User_Login (Authentication)
 - **File**: `routes/v1/auth.py` + `services/auth_service.py`

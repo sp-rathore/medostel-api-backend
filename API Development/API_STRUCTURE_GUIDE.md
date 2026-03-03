@@ -134,10 +134,10 @@ medostel-api-backend/
 │   │                        │                  │      locations/{pin}    │
 ├───┼────────────────────────┼──────────────────┼────────────────────────┤
 │ 5 │ User_Master            │ routes/v1/users. │ GET  /api/v1/users/all │
-│ 6 │                        │                  │ POST /api/v1/users     │
-│   │                        │                  │ PUT  /api/v1/           │
-│   │                        │                  │      users/{userId}    │
-│   │                        │                  │ DEL  /api/v1/           │
+│ 6 │ (Updated Mar 4, 2026)  │ py (4 endpoints) │ POST /api/v1/users     │
+│   │ + Geographic FK cols   │ + geographic     │ PUT  /api/v1/           │
+│   │ + pinCode as INTEGER   │   hierarchy      │      users/{userId}    │
+│   │ (Step 1.2)             │   validation     │ DEL  /api/v1/           │
 │   │                        │                  │      users/{userId}    │
 ├───┼────────────────────────┼──────────────────┼────────────────────────┤
 │ 7 │ User_Login             │ routes/v1/auth.  │ GET  /api/v1/auth/users│

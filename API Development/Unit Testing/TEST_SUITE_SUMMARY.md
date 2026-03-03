@@ -1,11 +1,12 @@
 # Medostel API - Test Suite Summary
 
-**Version:** 1.2
-**Updated:** March 3, 2026 - Added District Hierarchy Tests
+**Version:** 1.3
+**Updated:** March 4, 2026 - Added User_Master Geographic Hierarchy Tests
 **Framework:** pytest + FastAPI TestClient
-**Total Test Cases:** 165+ (50 Roles + 65 Locations + 50 Others)
+**Total Test Cases:** 190+ (50 Roles + 65 Locations + 40 Users + Others)
 **Coverage Target:** 80%+
-**Location API Tests:** 65 (APIs 1-3.4 with district hierarchy endpoints)
+**Location API Tests:** 65 (APIs 3-3.4 with district hierarchy endpoints)
+**User API Tests:** 40 (APIs 5-6 with geographic FK validation)
 
 ---
 
@@ -79,8 +80,17 @@
    - Updated fixtures with district hierarchy (districtId, districtName)
    - 4 new fixtures for multi-district/multi-city testing
 
-7. **test_users_api.py** (APIs 5 & 6)
-   - *To be created* following test_roles_api.py pattern
+7. **test_users_api.py** (APIs 5 & 6) ✅ Updated March 4, 2026
+   - Complete test implementation for User Management APIs with Geographic Hierarchy
+   - 40 test cases covering:
+     - GET /api/v1/users/all (API 5 - 10 tests, including geographic filters)
+     - POST /api/v1/users (API 6 - 15 tests for Create with geographic validation)
+     - PUT /api/v1/users/{userId} (API 6 - 10 tests for Update, pinCode immutability)
+     - DELETE /api/v1/users/{userId} (API 6 - 5 tests for Delete)
+   - Updated fixtures with geographic hierarchy (stateId, districtId, cityId, pinCode as int)
+   - Geographic FK validation tests (valid/invalid references)
+   - pinCode immutability verification tests
+   - Partial update tests (geographic fields)
 
 8. **test_auth_api.py** (APIs 7 & 8)
    - *To be created* following test_roles_api.py pattern

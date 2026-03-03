@@ -44,9 +44,64 @@ GET /api/v1/locations/pincodes?city_name=Mumbai
 
 ---
 
-### Phase 2: Earlier Enhancements (March 1, 2026)
+### Phase 2: User_Master Geographic Hierarchy Integration (March 4, 2026) 🆕
 
-### Dual API Enhancement: User_Role_Master (API 1 & 2) + User_Master (API 5 & 6)
+**User_Master (API 5 & 6) - Geographic FK Columns & pinCode as INTEGER**
+
+Major enhancement to link users to geographic locations with foreign key constraints:
+
+#### **Changes Made**:
+✅ **New Foreign Key Columns**:
+- stateId: INTEGER (FK to State_City_PinCode_Master.stateId)
+- districtId: INTEGER (FK to State_City_PinCode_Master.districtId)
+- cityId: INTEGER (FK to State_City_PinCode_Master.cityId)
+
+✅ **Data Type Change**:
+- pinCode: VARCHAR(10) → INTEGER (5-6 digit postal codes)
+- pinCode becomes FK to State_City_PinCode_Master.pinCode
+
+✅ **Referential Integrity**:
+- All geographic FKs use ON DELETE RESTRICT
+- Prevents deletion of geographic master records while users reference them
+- Database-level validation of geographic references
+
+✅ **API Field Changes**:
+- **POST /api/v1/users**: Accept optional geographic fields (stateId, districtId, cityId, pinCode)
+- **PUT /api/v1/users/{userId}**: Update geographic fields EXCEPT pinCode (immutable)
+- **GET /api/v1/users/all**: Return all geographic fields in response
+
+✅ **Validation**:
+- Pre-insert validation: All geographic references verified to exist in master table
+- Pre-update validation: Geographic references validated before update
+- pinCode validation: Must be 5-6 digit valid postal code
+- Geographic field validation: stateId, districtId, cityId must be positive integers
+
+#### **Data Model Hierarchy**:
+```
+User → State_City_PinCode_Master
+  ├── stateId (0001-0035)
+  ├── districtId (0001-N per state)
+  ├── cityId (0001-N per district)
+  └── pinCode (5-6 digit unique)
+```
+
+#### **Migration Details**:
+- Database: See `DevOps Development/DBA/migration_step1_2.sql` for schema migration
+- Backup: Automatic backup table created (User_Master_Backup_Step1_2)
+- Rollback: Complete rollback instructions included in migration script
+- Compatibility: Existing users can have NULL geographic fields initially
+
+#### **API Schema Changes**:
+See `app/schemas/user.py` for updated request/response models:
+- UserCreate: Accepts optional geographic FK fields
+- UserUpdate: Accepts geographic fields (except pinCode)
+- UserResponse: Returns all geographic fields
+
+---
+
+### Phase 3: Earlier Enhancements (March 1, 2026)
+
+### Dual API Enhancement: User_Role_Master (API 1 & 2) + User_Master Base Schema (API 5 & 6)
 
 Two major API implementations with comprehensive implementation code, schemas, and services.
 

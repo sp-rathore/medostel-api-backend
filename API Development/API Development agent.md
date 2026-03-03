@@ -1093,10 +1093,10 @@ curl -X GET "http://localhost:8000/api/v1/locations/by-district/10" \
 
 ---
 
-### API 5: User_Master - SELECT Operations
+### API 5: User_Master - SELECT Operations ⭐ Enhanced Mar 4, 2026
 
 **Endpoint**: `GET /api/v1/users/all`
-**Purpose**: Retrieve all user profiles (read-only)
+**Purpose**: Retrieve all user profiles with geographic hierarchy data (read-only)
 **Authentication**: Required (Admin/Doctor)
 **Rate Limit**: 100 requests/minute
 
@@ -1111,9 +1111,8 @@ curl -X GET "http://localhost:8000/api/v1/users/all?status=Active&limit=10" \
 |-----------|------|----------|-------------|
 | `status` | string | No | Filter by status: Active, Inactive |
 | `currentRole` | string | No | Filter by role |
-| `limit` | integer | No | Limit results (default: 100) |
-| `offset` | integer | No | Pagination offset |
-| `sort` | string | No | Sort field: firstName, createdDate |
+| `limit` | integer | No | Limit results (1-1000, default: 100) |
+| `offset` | integer | No | Pagination offset (default: 0) |
 
 #### Response (200 - Success)
 ```json
@@ -1122,7 +1121,6 @@ curl -X GET "http://localhost:8000/api/v1/users/all?status=Active&limit=10" \
   "code": 200,
   "message": "Users retrieved successfully",
   "data": {
-    "total": 45,
     "count": 10,
     "users": [
       {
@@ -1132,24 +1130,37 @@ curl -X GET "http://localhost:8000/api/v1/users/all?status=Active&limit=10" \
         "currentRole": "Doctor",
         "organisation": "City Hospital",
         "emailId": "john.doe@medostel.com",
-        "mobileNumber": "+919876543210",
+        "mobileNumber": "9876543210",
+        "address1": "123 Medical Street",
+        "address2": "Suite 101",
+        "stateId": 1,
         "stateName": "Maharashtra",
+        "districtId": 1,
+        "cityId": 1,
         "cityName": "Mumbai",
-        "pinCode": "400001",
+        "pinCode": 400001,
         "status": "Active",
-        "createdDate": "2026-02-28T10:00:00Z"
+        "createdDate": "2026-02-28T10:00:00Z",
+        "updatedDate": "2026-03-04T14:30:00Z"
       }
     ]
   },
-  "timestamp": "2026-02-28T16:00:00Z"
+  "timestamp": "2026-03-04T16:00:00Z"
 }
 ```
 
+**Response Fields**:
+- **Geographic References**: stateId, districtId, cityId (integer FK fields)
+- **Geographic Display**: stateName, cityName (for UI display)
+- **Address Fields**: address1, address2
+- **pinCode**: Now integer (5-6 digits), FK to State_City_PinCode_Master
+- **Audit Fields**: createdDate, updatedDate (ISO 8601 format)
+
 ---
 
-### API 6: User_Master - CRUD Operations
+### API 6: User_Master - CRUD Operations ⭐ Enhanced Mar 4, 2026
 
-**Purpose**: Create, Update, Delete user profiles
+**Purpose**: Create, Update, Delete user profiles with geographic hierarchy validation
 
 #### A. Create User Profile
 **Endpoint**: `POST /api/v1/users`
@@ -1164,43 +1175,112 @@ curl -X GET "http://localhost:8000/api/v1/users/all?status=Active&limit=10" \
   "currentRole": "Patient",
   "organisation": "Self",
   "emailId": "jane.smith@medostel.com",
-  "mobileNumber": "+919876543211",
+  "mobileNumber": "9876543211",
   "address1": "123 Health Street",
   "address2": "Apt 4",
+  "stateId": 1,
   "stateName": "Maharashtra",
+  "districtId": 1,
+  "cityId": 1,
   "cityName": "Mumbai",
-  "pinCode": "400001",
+  "pinCode": 400001,
   "status": "Active"
 }
 ```
+
+**Request Notes**:
+- All geographic FK fields (stateId, districtId, cityId, pinCode) are **OPTIONAL**
+- If provided, geographic references are **VALIDATED** against State_City_PinCode_Master
+- pinCode must be 5-6 digit integer (100000-999999)
+- stateId, districtId, cityId must be positive integers
 
 ##### Response (201 - Created)
 ```json
 {
   "status": "success",
   "code": 201,
-  "message": "User profile created successfully",
+  "message": "User created successfully",
   "data": {
-    "userId": "jane.smith@medostel.com",
-    "firstName": "Jane",
-    "lastName": "Smith",
-    "currentRole": "Patient",
-    "createdDate": "2026-02-28T16:00:00Z"
+    "user": {
+      "userId": "jane.smith@medostel.com",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "currentRole": "Patient",
+      "organisation": "Self",
+      "emailId": "jane.smith@medostel.com",
+      "mobileNumber": "9876543211",
+      "address1": "123 Health Street",
+      "address2": "Apt 4",
+      "stateId": 1,
+      "stateName": "Maharashtra",
+      "districtId": 1,
+      "cityId": 1,
+      "cityName": "Mumbai",
+      "pinCode": 400001,
+      "status": "Active",
+      "createdDate": "2026-03-04T16:00:00Z",
+      "updatedDate": "2026-03-04T16:00:00Z"
+    }
   },
-  "timestamp": "2026-02-28T16:00:00Z"
+  "timestamp": "2026-03-04T16:00:00Z"
 }
 ```
+
+**Error Responses**:
+- **409 Conflict**: User already exists
+- **400 Bad Request**: Invalid geographic reference or missing required fields
+- **422 Unprocessable Entity**: Validation error (email format, mobile length, etc.)
 
 #### B. Update User Profile
 **Endpoint**: `PUT /api/v1/users/{userId}`
 **Authentication**: Required (Admin or Self)
+**Note**: pinCode is **IMMUTABLE** and cannot be updated
 
 ##### Request Body
 ```json
 {
   "firstName": "Jane",
   "lastName": "Smith-Johnson",
-  "organisation": "City Medical Center"
+  "organisation": "City Medical Center",
+  "stateId": 2,
+  "stateName": "Karnataka",
+  "districtId": 2,
+  "cityId": 2,
+  "cityName": "Bangalore",
+  "address1": "456 Health Ave"
+}
+```
+
+**Update Notes**:
+- Only provided fields are updated; omitted fields retain current values
+- pinCode **CANNOT** be updated (immutable field, set during creation)
+- Geographic field updates are **VALIDATED** against master table
+- All geographic fields are optional during update
+
+##### Response (200 - Success)
+```json
+{
+  "status": "success",
+  "code": 200,
+  "message": "User updated successfully",
+  "data": {
+    "user": {
+      "userId": "jane.smith@medostel.com",
+      "firstName": "Jane",
+      "lastName": "Smith-Johnson",
+      "currentRole": "Patient",
+      "organisation": "City Medical Center",
+      "stateId": 2,
+      "stateName": "Karnataka",
+      "districtId": 2,
+      "cityId": 2,
+      "cityName": "Bangalore",
+      "address1": "456 Health Ave",
+      "pinCode": 400001,
+      "updatedDate": "2026-03-04T17:30:00Z"
+    }
+  },
+  "timestamp": "2026-03-04T17:30:00Z"
 }
 ```
 
