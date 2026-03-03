@@ -249,9 +249,11 @@ async def bangalore_location(client):
 
 
 # ===== User Fixtures =====
+# Note: Updated March 4, 2026 - Geographic hierarchy support added
+
 @pytest.fixture
 async def sample_user(client):
-    """Create and return a sample user"""
+    """Create and return a sample user with geographic hierarchy"""
     user_data = {
         "userId": f"user_{fake.numerify('####')}@example.com",
         "firstName": fake.first_name()[:50],
@@ -260,7 +262,14 @@ async def sample_user(client):
         "emailId": fake.email()[:100],
         "mobileNumber": fake.numerify("##########"),
         "organisation": fake.company()[:100],
-        "address": fake.address()[:200],
+        "address1": fake.address()[:255],
+        "address2": fake.building_number()[:255],
+        "stateId": fake.random_int(min=1, max=36),
+        "stateName": "Maharashtra",
+        "districtId": fake.random_int(min=1, max=10),
+        "cityId": fake.random_int(min=1, max=100),
+        "cityName": fake.city()[:100],
+        "pinCode": fake.random_int(min=100000, max=999999),
         "status": "Active"
     }
     response = await client.post("/api/v1/users", json=user_data)
@@ -277,7 +286,7 @@ async def sample_user_id(sample_user):
 
 @pytest.fixture
 async def doctor_user(client):
-    """Create a doctor user"""
+    """Create a doctor user with geographic hierarchy"""
     user_data = {
         "userId": f"doctor_{fake.numerify('####')}@example.com",
         "firstName": "Dr.",
@@ -286,7 +295,14 @@ async def doctor_user(client):
         "emailId": fake.email()[:100],
         "mobileNumber": fake.numerify("##########"),
         "organisation": "Medical Center",
-        "address": "Medical Center Building",
+        "address1": "Medical Center Building",
+        "address2": "Suite 101",
+        "stateId": 27,  # Maharashtra
+        "stateName": "Maharashtra",
+        "districtId": 1,
+        "cityId": 1,
+        "cityName": "Mumbai",
+        "pinCode": 400001,
         "status": "Active"
     }
     response = await client.post("/api/v1/users", json=user_data)
@@ -297,7 +313,7 @@ async def doctor_user(client):
 
 @pytest.fixture
 async def patient_user(client):
-    """Create a patient user"""
+    """Create a patient user with geographic hierarchy"""
     user_data = {
         "userId": f"patient_{fake.numerify('####')}@example.com",
         "firstName": fake.first_name()[:50],
@@ -306,7 +322,68 @@ async def patient_user(client):
         "emailId": fake.email()[:100],
         "mobileNumber": fake.numerify("##########"),
         "organisation": "Self",
-        "address": fake.address()[:200],
+        "address1": fake.address()[:255],
+        "address2": fake.building_number()[:255],
+        "stateId": 28,  # Karnataka
+        "stateName": "Karnataka",
+        "districtId": 1,
+        "cityId": 1,
+        "cityName": "Bangalore",
+        "pinCode": 560001,
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/users", json=user_data)
+    if response.status_code == 201:
+        return user_data
+    return None
+
+
+@pytest.fixture
+async def user_mumbai_geo(client):
+    """Create a user in Mumbai with geographic hierarchy"""
+    user_data = {
+        "userId": f"mumbai_user_{fake.numerify('####')}@example.com",
+        "firstName": fake.first_name()[:50],
+        "lastName": fake.last_name()[:50],
+        "currentRole": "Doctor",
+        "emailId": fake.email()[:100],
+        "mobileNumber": fake.numerify("##########"),
+        "organisation": "Mumbai Hospital",
+        "address1": "123 Marine Drive",
+        "address2": "Apt 5",
+        "stateId": 27,  # Maharashtra
+        "stateName": "Maharashtra",
+        "districtId": 1,  # Mumbai District
+        "cityId": 1,
+        "cityName": "Mumbai",
+        "pinCode": 400001,
+        "status": "Active"
+    }
+    response = await client.post("/api/v1/users", json=user_data)
+    if response.status_code == 201:
+        return user_data
+    return None
+
+
+@pytest.fixture
+async def user_pune_geo(client):
+    """Create a user in Pune with geographic hierarchy"""
+    user_data = {
+        "userId": f"pune_user_{fake.numerify('####')}@example.com",
+        "firstName": fake.first_name()[:50],
+        "lastName": fake.last_name()[:50],
+        "currentRole": "Patient",
+        "emailId": fake.email()[:100],
+        "mobileNumber": fake.numerify("##########"),
+        "organisation": "Pune Clinic",
+        "address1": "456 Pune Street",
+        "address2": "Suite 202",
+        "stateId": 27,  # Maharashtra
+        "stateName": "Maharashtra",
+        "districtId": 2,  # Pune District
+        "cityId": 103,
+        "cityName": "Pune",
+        "pinCode": 411001,
         "status": "Active"
     }
     response = await client.post("/api/v1/users", json=user_data)
