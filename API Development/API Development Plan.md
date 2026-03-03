@@ -19,6 +19,10 @@ As part of User Management we will have:
   - 6 location APIs implemented with district support
   - 65 comprehensive unit tests created
   - Complete Phase 6 execution infrastructure ready for user execution
+- ⏳ Step 1.2: User_Master Schema Enhancement with Geographic Hierarchy (EXECUTION PLAN - AWAITING APPROVAL)
+  - Add cityId, stateId, pinCode as foreign keys from State_City_PinCode_Master
+  - Enhance address fields with Address1 and Address2
+  - Update all dependent APIs and documentation
 - ⏳ Step 2: User_Management module implementation (Pending)
 
 ## Development Phases
@@ -53,12 +57,14 @@ As part of User Management we will have:
     - All relevant code changes are done in the medostel-api-backend/app and all code components are meeting requirement changes expectations
 
   - If the API change also need DB changes then ensure that relevant changes are done in
+    - Data Engineering/Database Development Agent.md
     - DevOps Development/DBA/DBA.md
     - DevOps Development/DBA/DEPLOYMENT_GUIDE.md
     - DevOps Development/DBA/Databasespecs.md
     - DevOps Development/DBA/create_tables.sql
+  - Ensure that every Database change dependency is clearly mentioned and updated in Database Development Agent.md and should have references to DBA.md, Deployment_Guide.md, Databasespecs.md and create_Tables.sql
   - Once the changes are done in respective md files and .sql files ensure that the documents are well indexed to ensure quick search capabilities for future changes.
-  - Provide a final code implementation and deployment file along with sequential steps both from database and API perspective which on approval can then be executed.
+  - Provide a final code implementation and deployment file along with sequential steps both from database and API perspective which on approval can then be executed. store these implementation files in medostel-api-backend/implementation guide folder. For every new distinct requirement create a new implementation plan_<phase>_<dt>.md file.
   - 
 - Ensure that for each step there is a log provided on whether the changes have been completed or not along with proper version control standards.
 
@@ -824,3 +830,240 @@ Follow: DevOps Development/DBA/PHASE_6_MANUAL_EXECUTION.md
 **Completion Verified by:** Implementation Team
 **Status:** STEP 1.1 READY FOR PHASE 6 USER EXECUTION
 **Next Phase:** Phase 7 - Final Version Control & Commit (in progress)
+
+---
+
+## ⏳ STEP 1.2: User_Master Schema Enhancement with Geographic Hierarchy
+
+**Status:** EXECUTION PLAN - AWAITING APPROVAL
+**Planned Date:** March 4-5, 2026
+**Impact Level:** Medium (affects 1 table, User Management APIs, schemas, tests, and documentation)
+
+### Overview
+
+Enhance the User_Master table to include geographic hierarchy integration by adding foreign key relationships to State_City_PinCode_Master table, allowing precise user location tracking at state, district, city, and pincode levels.
+
+### Current User_Master Schema
+
+**Existing Columns:**
+- userId (VARCHAR(100), PK)
+- firstName, lastName (VARCHAR)
+- currentRole (VARCHAR, FK to User_Role_Master)
+- organisation (VARCHAR)
+- emailId, mobileNumber (VARCHAR, UNIQUE)
+- address1, address2 (VARCHAR(255)) - Already present
+- stateName, cityName (VARCHAR) - Text values
+- pinCode (VARCHAR(10)) - Text value
+- status (VARCHAR)
+- createdDate, updatedDate (TIMESTAMP)
+
+### Required Schema Changes
+
+**Add 3 Foreign Key Columns:**
+
+| Column | Type | Source | Purpose |
+|--------|------|--------|---------|
+| stateId | INTEGER | FK: State_City_PinCode_Master.stateId | Link to specific state (0001-0035) |
+| districtId | INTEGER | FK: State_City_PinCode_Master.districtId | Link to specific district |
+| cityId | INTEGER | FK: State_City_PinCode_Master.cityId | Link to specific city |
+| pinCode | INTEGER | FK: State_City_PinCode_Master.pinCode | Change from VARCHAR(10) to INTEGER |
+
+**Impact Analysis:**
+- stateName, cityName, pinCode (VARCHAR) → Keep as text descriptors
+- Add stateId, districtId, cityId (INTEGER) → Enforce referential integrity
+- This allows users to be linked to exact geographic locations with IDs
+- Example: User must belong to a valid State+District+City combination from State_City_PinCode_Master
+
+### Objectives
+
+1. ✅ Add geographic hierarchy foreign keys (stateId, districtId, cityId)
+2. ✅ Change pinCode from VARCHAR(10) to INTEGER for consistency
+3. ✅ Maintain backward compatibility with existing text fields (stateName, cityName)
+4. ✅ Update all User Management APIs to handle new fields
+5. ✅ Add comprehensive validation for geographic hierarchy
+6. ✅ Update documentation and test suite
+7. ✅ Create migration script with backup and rollback procedures
+
+### Execution Plan (5 Phases)
+
+#### PHASE 1: Database Schema Enhancement
+
+**Files to Modify:**
+1. `DevOps Development/DBA/create_tables.sql`
+   - Add stateId (INTEGER, FK)
+   - Add districtId (INTEGER, FK)
+   - Add cityId (INTEGER, FK)
+   - Change pinCode from VARCHAR(10) to INTEGER
+   - Update indexes for new columns
+   - Add composite unique constraint: (stateId, districtId, cityId, pinCode) to prevent duplicate user locations
+
+2. `DevOps Development/DBA/Databasespecs.md`
+   - Update User_Master table documentation
+   - Document new foreign key relationships
+   - Update data type mappings
+   - Add hierarchy constraints notes
+
+3. `DevOps Development/DBA/DBA.md`
+   - Add entry for User_Master geographic enhancement
+
+**Files to Create:**
+1. `DevOps Development/DBA/migration_step1_2.sql` (NEW)
+   - Backup User_Master table (User_Master_Backup_Step1_2)
+   - Add new columns with NULL initial values
+   - Update pinCode data type conversion
+   - Create foreign key constraints
+   - Create indexes for geographic fields
+   - Verify data integrity
+   - Rollback instructions included
+
+#### PHASE 2: API Schema & Models Updates
+
+**Files to Modify:**
+1. `app/schemas/user.py`
+   - Add stateId: int with validation (gt=0)
+   - Add districtId: int with validation (gt=0)
+   - Add cityId: int with validation (gt=0)
+   - Update pinCode: int (change from str)
+   - Add field validators for geographic hierarchy consistency
+   - Keep stateName, cityName as text fields for display purposes
+
+2. `app/services/user_service.py`
+   - Update create_user() to include new geographic fields
+   - Update update_user() to validate geographic hierarchy
+   - Add new method: validate_geographic_hierarchy() - ensure stateId→districtId→cityId→pinCode are valid
+   - Add new method: get_user_by_location() - fetch users by state/district/city
+   - Update get_all_users() to support geographic filtering
+
+3. `app/routes/v1/users.py`
+   - Update POST /api/v1/users/register to accept geographic IDs
+   - Update PUT /api/v1/users/{userId} to update geographic fields
+   - Add validation error messages for invalid geographic combinations
+   - Update response schemas to include geographic IDs
+
+#### PHASE 3: Documentation Updates
+
+**Files to Modify (8 files):**
+1. `API Development/API development agent.md` - Update User Management API specs
+2. `API Development/API_STRUCTURE_GUIDE.md` - Update user API structure
+3. `API Development/APISETUP.md` - Add migration instructions
+4. `API Development/README.md` - Document geographic hierarchy
+5. `API Development/REPOSITORY_SUMMARY.md` - Update API descriptions
+6. `DevOps Development/DBA/DEPLOYMENT_GUIDE.md` - Add migration steps
+7. `API Development/Unit Testing/API Unit Testing Agent.md` - Add test specs
+8. `Database Development Agent.md` - Document User_Master changes (IF EXISTS)
+
+#### PHASE 4: Testing Framework Updates
+
+**Files to Create:**
+1. `API Development/Unit Testing/test_user_management_api.py` (NEW)
+   - Test user registration with geographic hierarchy
+   - Test validation of invalid geographic combinations
+   - Test geographic filtering queries
+   - Estimated: 30-40 test cases
+
+**Files to Modify:**
+1. `API Development/Unit Testing/conftest.py`
+   - Add user fixtures with geographic data
+   - Add fixtures for different geographic locations (cities, districts, states)
+   - Link to State_City_PinCode_Master test data
+
+2. `API Development/Unit Testing/TEST_SUITE_SUMMARY.md`
+   - Update test count with new user management tests
+
+#### PHASE 5: Version Control & Final Commits
+
+**Files to Update:**
+1. `API Development/API Development Plan.md`
+   - Add Step 1.2 completion log
+   - Document date completed
+   - Include statistics
+
+### Impact Analysis
+
+**Database Changes:**
+- 3 new foreign key columns added
+- 1 existing column type changed (pinCode VARCHAR→INTEGER)
+- 3 new indexes created
+- Composite unique constraint added
+- Table size increase: ~10 KB per user × total users
+
+**API Changes:**
+- 2 existing endpoints modified (POST register, PUT update)
+- All User Management endpoints updated
+- New geographic filtering capability added
+
+**Test Coverage Changes:**
+- 30-40 new test cases
+- New test fixtures with geographic data
+- Validation tests for geographic hierarchy
+
+**Documentation Changes:**
+- 8 files modified
+- New API specification section for geographic fields
+- Migration instructions provided
+
+### Data Mapping (Reference to State_City_PinCode_Master)
+
+```
+User_Master.stateId ──→ State_City_PinCode_Master.stateId (0001-0035)
+User_Master.districtId ──→ State_City_PinCode_Master.districtId (per state)
+User_Master.cityId ──→ State_City_PinCode_Master.cityId (per district)
+User_Master.pinCode ──→ State_City_PinCode_Master.pinCode (6-digit)
+```
+
+**Constraint:** Any user must have a valid combination of (stateId, districtId, cityId, pinCode) that exists in State_City_PinCode_Master
+
+### Success Criteria
+
+- ✅ User_Master table has 3 new FK columns + updated pinCode type
+- ✅ All foreign key constraints enforced
+- ✅ All User Management APIs updated with geographic fields
+- ✅ Backward compatibility maintained (text fields stateName, cityName still present)
+- ✅ 30-40 test cases passing for user geographic hierarchy
+- ✅ Migration script tested with backup/rollback
+- ✅ All documentation updated and cross-referenced
+- ✅ Version control commits made with detailed messages
+
+### Risk Mitigation
+
+| Risk | Mitigation |
+|------|-----------|
+| pinCode type change (VARCHAR→INTEGER) | Use migration script with data conversion, backup table |
+| FK constraint violation if invalid data exists | Run validation queries before migration, fix orphaned records |
+| Existing users without geographic data | Allow NULL initially, require values for new registrations |
+| Performance impact of new indexes | Monitor query plans, optimize if needed |
+| Breaking changes for client applications | Update API documentation, provide migration guide |
+
+### Files Summary
+
+**Total Files to Create:** 2 new
+**Total Files to Modify:** 13 existing
+**Total Files Affected:** 15 files
+
+### Timeline Estimate
+
+- Phase 1 (DB Schema): 30 minutes
+- Phase 2 (API Updates): 45 minutes
+- Phase 3 (Documentation): 30 minutes
+- Phase 4 (Testing): 1 hour
+- Phase 5 (Version Control): 15 minutes
+- **Total:** ~3 hours
+
+---
+
+## 🔷 STEP 1.2 EXECUTION PLAN STATUS
+
+**Current Status:** ⏳ AWAITING USER APPROVAL
+
+**Before Proceeding:**
+- [ ] User approves this execution plan
+- [ ] No conflicting changes in progress
+- [ ] Database backup verified
+
+**Upon Approval:**
+- Execute all 5 phases sequentially
+- Create 9 git commits documenting changes
+- Update Step 1.2 completion log
+- Proceed to Step 2 (User_Management module implementation)
+
+---

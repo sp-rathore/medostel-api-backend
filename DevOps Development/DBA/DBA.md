@@ -139,31 +139,46 @@
 ---
 
 ### TABLE 3: User_Master
-**Purpose**: Core user profile and demographic data (ENHANCED - March 1, 2026)
-**Primary Key**: `userId` (BIGINT - Numeric, supports up to 1 billion users)
-**Schema Version**: 2.0 (Updated with enhanced validation)
+**Purpose**: Core user profile and demographic data with geographic hierarchy integration (ENHANCED - March 4, 2026)
+**Primary Key**: `userId` (VARCHAR(100) - Email address)
+**Schema Version**: 3.0 (Added geographic FK columns: stateId, districtId, cityId; Changed pinCode from VARCHAR to INTEGER)
+**Foreign Keys**:
+- `currentRole` → User_Role_Master(roleName)
+- `stateId` → State_City_PinCode_Master(stateId)
+- `districtId` → State_City_PinCode_Master(districtId)
+- `cityId` → State_City_PinCode_Master(cityId)
+- `pinCode` → State_City_PinCode_Master(pinCode)
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `userId` | BIGINT | PK, Not Null | Numeric User ID (1-1000000000) |
-| `firstName` | VARCHAR(100) | Not Null | First name |
-| `lastName` | VARCHAR(100) | Not Null | Last name |
-| `currentRole` | VARCHAR(50) | FK, Not Null | References User_Role_Master(roleId) |
-| `emailId` | VARCHAR(255) | Not Null, Unique | RFC 5322 email format validation |
-| `mobileNumber` | NUMERIC(10) | Not Null, Unique | 10-digit mobile (1000000000-9999999999) |
-| `organisation` | VARCHAR(255) | | Organization name |
-| `address` | TEXT | | Full address |
-| `status` | VARCHAR(50) | Default 'Active' | Active/Inactive/Suspended |
+| `userId` | VARCHAR(100) | PK, Not Null | Email address (unique user identifier) |
+| `firstName` | VARCHAR(50) | Not Null | First name |
+| `lastName` | VARCHAR(50) | Not Null | Last name |
+| `currentRole` | VARCHAR(50) | FK, Not Null | References User_Role_Master(roleName) |
+| `organisation` | VARCHAR(100) | | Organization name |
+| `emailId` | VARCHAR(100) | Not Null, Unique | Email address (RFC 5322 validation) |
+| `mobileNumber` | VARCHAR(15) | Not Null, Unique | Mobile number |
+| `address1` | VARCHAR(255) | | Address line 1 |
+| `address2` | VARCHAR(255) | | Address line 2 |
+| `stateId` | INTEGER | FK | State ID (references State_City_PinCode_Master) |
+| `stateName` | VARCHAR(100) | | State name (for display) |
+| `districtId` | INTEGER | FK | District ID (references State_City_PinCode_Master) |
+| `cityId` | INTEGER | FK | City ID (references State_City_PinCode_Master) |
+| `cityName` | VARCHAR(100) | | City name (for display) |
+| `pinCode` | INTEGER | FK | Postal code (references State_City_PinCode_Master) |
+| `status` | VARCHAR(20) | Default 'Active' | Active/Inactive |
 | `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Creation timestamp |
 | `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Update timestamp |
 
-**Validation Constraints**:
-- `emailId`: CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
-- `mobileNumber`: CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999)
-- `status`: CHECK (status IN ('Active', 'Inactive', 'Suspended'))
+**Geographic Hierarchy Integration**:
+- Users now linked to State_City_PinCode_Master through 4 FK columns (stateId, districtId, cityId, pinCode)
+- Enables precise location tracking at state → district → city → pincode levels
+- All geographic field values must exist in State_City_PinCode_Master table
+- ON DELETE RESTRICT prevents deletion of geographic references while users exist
 
-**Indexes**: `idx_user_email`, `idx_user_mobile`, `idx_user_role`, `idx_user_status`, `idx_user_name`, `idx_user_updated`
-**Size**: ~80 kB | **Owner**: medostel_admin_user
+**Indexes**: `idx_user_email`, `idx_user_mobile`, `idx_user_role`, `idx_user_status`, `idx_user_state_id`, `idx_user_district_id`, `idx_user_city_id`, `idx_user_pincode`, `idx_user_state_district`, `idx_user_district_city`
+**Size**: ~120 kB | **Owner**: medostel_admin_user
+**Migration**: See migration_step1_2.sql for geographic hierarchy enhancement
 
 ---
 
@@ -371,7 +386,26 @@ Connection String: postgresql://medostel_admin_user:Iag2bMi@0@6aA@35.244.27.232:
 
 ---
 
-**Last Updated**: 2026-02-28
+**Last Updated**: 2026-03-04 (Step 1.2 Geographic Hierarchy Enhancement)
 **Instance**: medostel-ai-assistant-pgdev-instance
 **Status**: RUNNABLE ✅
 **Environment**: Development/Pre-Production
+
+---
+
+## 📝 Schema Update History
+
+### Step 1.1 (Completed - March 3, 2026)
+- **Table**: State_City_PinCode_Master
+- **Enhancement**: Added District-level geographic hierarchy (districtId, districtName)
+- **Indexes**: Created 6 new composite indexes for hierarchical queries
+- **Migration**: migration_step1_1.sql
+
+### Step 1.2 (Completed - March 4, 2026)
+- **Table**: User_Master
+- **Enhancement**: Added geographic FK columns (stateId, districtId, cityId, pinCode)
+- **Data Type Change**: pinCode from VARCHAR(10) to INTEGER
+- **Foreign Keys**: Added 4 FK constraints to State_City_PinCode_Master
+- **Indexes**: Created 6 new performance indexes
+- **Migration**: migration_step1_2.sql
+- **Backup**: User_Master_Backup_Step1_2 table created for rollback

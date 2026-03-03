@@ -111,49 +111,82 @@ CREATE INDEX idx_district_status ON State_City_PinCode_Master(districtId, status
 - See `Data Extraction/OGD_Data_Extraction_Process.md` for data population process
 
 #### 2.3 Table: `User_Master`
-*   **Description**: Core user profile data with enhanced numeric userId and validation.
-*   **Primary Key**: `userId` (BIGINT - supports up to 1 billion users)
-*   **Foreign Keys**: `currentRole` -> `User_Role_Master(roleId)`
-*   **Updated**: March 1, 2026 - BIGINT userId, email validation, 10-digit mobile validation
+*   **Description**: Core user profile data with geographic hierarchy integration
+*   **Primary Key**: `userId` (VARCHAR(100) - Email address)
+*   **Foreign Keys**:
+    - `currentRole` -> `User_Role_Master(roleName)`
+    - `stateId` -> `State_City_PinCode_Master(stateId)`
+    - `districtId` -> `State_City_PinCode_Master(districtId)`
+    - `cityId` -> `State_City_PinCode_Master(cityId)`
+    - `pinCode` -> `State_City_PinCode_Master(pinCode)`
+*   **Updated**: March 4, 2026 - Added geographic FK columns (stateId, districtId, cityId, pinCode)
 
 | Column Name | Data Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `userId` | BIGINT | PK, Not Null | Numeric User ID (1-1000000000) |
-| `firstName` | VARCHAR(100) | Not Null | First Name |
-| `lastName` | VARCHAR(100) | Not Null | Last Name |
-| `currentRole` | VARCHAR(50) | FK, Not Null | Role ID (references User_Role_Master.roleId) |
-| `emailId` | VARCHAR(255) | Unique, Not Null | Email with RFC 5322 validation |
-| `mobileNumber` | NUMERIC(10) | Unique, Not Null | 10-digit mobile (1000000000-9999999999) |
-| `organisation` | VARCHAR(255) | | Organization Name |
-| `address` | TEXT | | Address |
-| `status` | VARCHAR(50) | Not Null | 'Active', 'Inactive', 'Suspended' |
-| `createdDate` | TIMESTAMP | Not Null | Auto-populated at creation |
-| `updatedDate` | TIMESTAMP | Not Null | Auto-populated at update |
+| `userId` | VARCHAR(100) | PK, Not Null | User ID (Email) |
+| `firstName` | VARCHAR(50) | Not Null | First Name |
+| `lastName` | VARCHAR(50) | Not Null | Last Name |
+| `currentRole` | VARCHAR(50) | FK, Not Null | Role Name (references User_Role_Master.roleName) |
+| `organisation` | VARCHAR(100) | | Organization Name |
+| `emailId` | VARCHAR(100) | Unique, Not Null | Email Address |
+| `mobileNumber` | VARCHAR(15) | Unique, Not Null | Mobile Number |
+| `address1` | VARCHAR(255) | | Address Line 1 |
+| `address2` | VARCHAR(255) | | Address Line 2 |
+| `stateId` | INTEGER | FK | State ID (references State_City_PinCode_Master.stateId) |
+| `stateName` | VARCHAR(100) | | State Name (for display) |
+| `districtId` | INTEGER | FK | District ID (references State_City_PinCode_Master.districtId) |
+| `cityId` | INTEGER | FK | City ID (references State_City_PinCode_Master.cityId) |
+| `cityName` | VARCHAR(100) | | City Name (for display) |
+| `pinCode` | INTEGER | FK | Pin Code (references State_City_PinCode_Master.pinCode) |
+| `status` | VARCHAR(20) | Not Null | 'Active' or 'Inactive' |
+| `createdDate` | TIMESTAMP | | Auto-populated at creation |
+| `updatedDate` | TIMESTAMP | | Auto-populated at update |
 
 ```sql
 CREATE TABLE User_Master (
-    userId BIGINT PRIMARY KEY,
-    firstName VARCHAR(100) NOT NULL,
-    lastName VARCHAR(100) NOT NULL,
+    userId VARCHAR(100) PRIMARY KEY,
+    firstName VARCHAR(50) NOT NULL,
+    lastName VARCHAR(50) NOT NULL,
     currentRole VARCHAR(50) NOT NULL,
-    emailId VARCHAR(255) NOT NULL UNIQUE
-        CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
-    mobileNumber NUMERIC(10) NOT NULL UNIQUE
-        CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999),
-    organisation VARCHAR(255),
-    address TEXT,
-    status VARCHAR(50) DEFAULT 'Active' CHECK (status IN ('Active', 'Inactive', 'Suspended')),
+    organisation VARCHAR(100),
+    emailId VARCHAR(100) NOT NULL UNIQUE,
+    mobileNumber VARCHAR(15) NOT NULL UNIQUE,
+    address1 VARCHAR(255),
+    address2 VARCHAR(255),
+    stateId INTEGER,
+    stateName VARCHAR(100),
+    districtId INTEGER,
+    cityId INTEGER,
+    cityName VARCHAR(100),
+    pinCode INTEGER,
+    status VARCHAR(20) NOT NULL DEFAULT 'Active'
+        CHECK (status IN ('Active', 'Inactive')),
     createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (currentRole) REFERENCES User_Role_Master(roleId)
+    FOREIGN KEY (currentRole) REFERENCES User_Role_Master(roleName) ON DELETE RESTRICT,
+    FOREIGN KEY (stateId) REFERENCES State_City_PinCode_Master(stateId) ON DELETE RESTRICT,
+    FOREIGN KEY (districtId) REFERENCES State_City_PinCode_Master(districtId) ON DELETE RESTRICT,
+    FOREIGN KEY (cityId) REFERENCES State_City_PinCode_Master(cityId) ON DELETE RESTRICT,
+    FOREIGN KEY (pinCode) REFERENCES State_City_PinCode_Master(pinCode) ON DELETE RESTRICT
 );
 ```
 
+**Geographic Hierarchy Integration** (Step 1.2):
+- Users are now linked to specific geographic locations through State_City_PinCode_Master
+- `stateId`, `districtId`, `cityId`, `pinCode` are foreign keys for data integrity
+- Text fields (`stateName`, `cityName`) retained for display purposes
+- Allows users to be precisely located at state → district → city → pincode levels
+- All geographic field values must exist in State_City_PinCode_Master table
+
 **Validation Rules**:
-- `userId`: BIGINT supports 1 to 1,000,000,000 users
-- `emailId`: RFC 5322 regex pattern validation (standard email format)
-- `mobileNumber`: Exactly 10 digits in range 1000000000-9999999999
-- `status`: Only 'Active', 'Inactive', or 'Suspended'
+- `userId`: Email-based unique identifier
+- `emailId`: Unique email address
+- `mobileNumber`: Unique phone number
+- `stateId`: Must reference valid state in State_City_PinCode_Master
+- `districtId`: Must reference valid district in State_City_PinCode_Master
+- `cityId`: Must reference valid city in State_City_PinCode_Master
+- `pinCode`: Must reference valid pincode in State_City_PinCode_Master
+- `status`: Only 'Active' or 'Inactive'
 
 #### 2.4 Table: `User_Login`
 *   **Description**: Authentication details.

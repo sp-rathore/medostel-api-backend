@@ -69,8 +69,11 @@ CREATE INDEX IF NOT EXISTS idx_district_status ON State_City_PinCode_Master(dist
 
 -- ============================================================================
 -- TABLE 3: User_Master
--- Description: Core user profile data
+-- Description: Core user profile data with geographic hierarchy
 -- Primary Key: userId (Email)
+-- Updated: 2026-03-04 - Added geographic FK columns (stateId, districtId, cityId)
+--                       Changed pinCode from VARCHAR(10) to INTEGER
+-- Foreign Keys: References to State_City_PinCode_Master for geographic hierarchy
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS User_Master (
@@ -83,14 +86,21 @@ CREATE TABLE IF NOT EXISTS User_Master (
     mobileNumber VARCHAR(15) NOT NULL UNIQUE,
     address1 VARCHAR(255),
     address2 VARCHAR(255),
+    stateId INTEGER,
     stateName VARCHAR(100),
+    districtId INTEGER,
+    cityId INTEGER,
     cityName VARCHAR(100),
-    pinCode VARCHAR(10),
+    pinCode INTEGER,
     status VARCHAR(20) NOT NULL DEFAULT 'Active'
         CHECK (status IN ('Active', 'Inactive')),
     createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (currentRole) REFERENCES User_Role_Master(roleName) ON DELETE RESTRICT
+    FOREIGN KEY (currentRole) REFERENCES User_Role_Master(roleName) ON DELETE RESTRICT,
+    FOREIGN KEY (stateId) REFERENCES State_City_PinCode_Master(stateId) ON DELETE RESTRICT,
+    FOREIGN KEY (districtId) REFERENCES State_City_PinCode_Master(districtId) ON DELETE RESTRICT,
+    FOREIGN KEY (cityId) REFERENCES State_City_PinCode_Master(cityId) ON DELETE RESTRICT,
+    FOREIGN KEY (pinCode) REFERENCES State_City_PinCode_Master(pinCode) ON DELETE RESTRICT
 );
 
 -- Create indexes for User_Master
@@ -99,6 +109,16 @@ CREATE INDEX IF NOT EXISTS idx_user_mobile ON User_Master(mobileNumber);
 CREATE INDEX IF NOT EXISTS idx_user_role ON User_Master(currentRole);
 CREATE INDEX IF NOT EXISTS idx_user_status ON User_Master(status);
 CREATE INDEX IF NOT EXISTS idx_user_created_date ON User_Master(createdDate);
+
+-- Create indexes for geographic foreign keys (Step 1.2 enhancement)
+CREATE INDEX IF NOT EXISTS idx_user_state_id ON User_Master(stateId);
+CREATE INDEX IF NOT EXISTS idx_user_district_id ON User_Master(districtId);
+CREATE INDEX IF NOT EXISTS idx_user_city_id ON User_Master(cityId);
+CREATE INDEX IF NOT EXISTS idx_user_pincode ON User_Master(pinCode);
+
+-- Composite indexes for geographic queries
+CREATE INDEX IF NOT EXISTS idx_user_state_district ON User_Master(stateId, districtId);
+CREATE INDEX IF NOT EXISTS idx_user_district_city ON User_Master(districtId, cityId);
 
 -- ============================================================================
 -- TABLE 4: User_Login
