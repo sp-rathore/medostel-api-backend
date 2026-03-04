@@ -1,26 +1,30 @@
 # Medostel API - Unit Testing Agent
 
-**Version:** 2.0 (Comprehensive Edition)
-**Last Updated:** March 3, 2026
+**Version:** 3.0 (Updated for New_User_Request API)
+**Last Updated:** March 4, 2026
 **Status:** Production Ready ✅
 **Framework:** pytest + FastAPI TestClient
-**Total Test Cases:** 100+
+**Total Test Cases:** 228+ (123 User Master + 105 New User Request)
 **Target Coverage:** 80%+
-**Updated:** March 3, 2026 - roleId changed from VARCHAR(10) to SERIAL INTEGER (1-8)
+**Updated:** March 4, 2026 - Added comprehensive tests for New_User_Request API (APIs 6-8)
 **Location:** `/Users/shishupals/Documents/Claude/projects/Medostel/Development/API Development/Unit Testing/`
 
 ---
 
 ## 🎯 Agent Overview
 
-This comprehensive **Unit Testing Agent** provides complete guidance on designing, implementing, and executing unit tests for all 12 Medostel Healthcare APIs. It serves as the single source of truth for:
+This comprehensive **Unit Testing Agent** provides complete guidance on designing, implementing, and executing unit tests for all 13 Medostel Healthcare APIs. It serves as the single source of truth for:
 - Testing strategy and framework selection
 - Test design patterns and best practices
-- Complete test case specifications for all 12 APIs
+- Complete test case specifications for all 13 APIs
 - Test execution and maintenance procedures
 - CI/CD integration and automation
 
-**Status:** This agent is **production-ready** with 50+ tests fully implemented for APIs 1 & 2 (Roles), and complete specifications for APIs 3-12.
+**Status:** This agent is **production-ready** with:
+- 50+ tests for APIs 1 & 2 (Roles)
+- 123+ tests for APIs 3-5 (User Master)
+- 105+ tests for APIs 6-8 (New User Request) ✅ NEW
+- Complete specifications for APIs 9-13 (pending implementation)
 
 ---
 
@@ -1538,107 +1542,136 @@ async def test_delete_login_success(client, sample_user_id):
 
 ---
 
-### API 9 & 10: Registration Request Management
+### APIs 6-8: New User Request Management (105+ Tests) ✅ NEW
 
-#### API 9: GET `/api/v1/requests/all` - Select All Registration Requests
+**Test Files:**
+- `tests/test_user_request_schemas.py` - 35+ tests
+- `tests/test_user_request_db_utils.py` - 40+ tests
+- `tests/test_user_request_api.py` - 30+ tests
 
-**Test Case 9.1: Retrieve all registration requests**
+#### API 6: GET `/api/v1/user-request/search` - Search Requests by Status
+
+**Test Categories (5 tests):**
+- Search pending requests successfully
+- Search with no results
+- Missing status parameter (400 error)
+- Invalid status value (400 error)
+- Case-insensitive status handling
+
+**Example Test:**
 ```python
-async def test_get_all_requests_success(client):
-    """Should retrieve all registration requests with 200 status"""
-    response = await client.get("/api/v1/requests/all")
+def test_search_pending_requests_success():
+    """Should retrieve all pending requests with 200 status"""
+    response = client.get("/api/v1/user-request/search?status=pending")
     assert response.status_code == 200
-    assert response.json()["status"] == "success"
-    assert "requests" in response.json()["data"]
+    data = response.json()
+    assert "data" in data
+    assert "existsFlag" in data
+    assert isinstance(data["data"], list)
 ```
 
-**Test Case 9.2: Filter by request_status**
-```python
-async def test_get_requests_filter_by_status(client):
-    """Should filter requests by request_status"""
-    response = await client.get("/api/v1/requests/all?request_status=Pending")
-    assert response.status_code == 200
-    requests = response.json()["data"]["requests"]
-    for req in requests:
-        assert req["requestStatus"] == "Pending"
-```
+#### API 7: POST `/api/v1/user-request` - Create User Request
 
-**Test Case 9.3: Filter by current_role**
-```python
-async def test_get_requests_filter_by_role(client):
-    """Should filter requests by current_role"""
-    response = await client.get("/api/v1/requests/all?current_role=Doctor")
-    assert response.status_code == 200
-    requests = response.json()["data"]["requests"]
-    for req in requests:
-        assert req["currentRole"] == "Doctor"
-```
+**Test Categories (9 tests):**
+- Create with minimal fields (only required)
+- Create with full fields (all optional included)
+- Email uniqueness enforcement (409 Conflict)
+- Invalid email format (400 Bad Request)
+- Invalid mobile number (400 Bad Request)
+- Invalid role (400 Bad Request)
+- Missing required field (400 Bad Request)
+- Auto-generated requestId validation
+- Default status assignment (pending)
 
-#### API 10: CRUD Operations on Registration Requests
-
-**Test Case 10.1: Create registration request**
+**Example Test:**
 ```python
-async def test_create_registration_request_success(client):
-    """Should create registration request with 201 status"""
+def test_create_request_success_minimal():
+    """Should create request with auto-generated ID and default status"""
     request_data = {
-        "requestId": "REQ_001",
-        "userName": "newdoctor",
+        "userId": "john@example.com",
         "firstName": "John",
-        "lastName": "Smith",
-        "currentRole": "Doctor",
-        "emailId": "doctor@example.com",
-        "mobileNumber": "9876543210",
-        "address": "123 Medical Center",
-        "requestStatus": "Pending"
+        "lastName": "Doe",
+        "mobileNumber": 9876543210,
+        "currentRole": "DOCTOR"
     }
-    response = await client.post("/api/v1/requests", json=request_data)
+    response = client.post("/api/v1/user-request", json=request_data)
     assert response.status_code == 201
-    assert response.json()["data"]["request"]["requestId"] == "REQ_001"
+    data = response.json()["data"]
+    assert data["requestId"].startswith("REQ_")
+    assert data["status"] == "pending"
+    assert data["userId"] == "john@example.com"
 ```
 
-**Test Case 10.2: Create duplicate request**
-```python
-async def test_create_duplicate_request_conflict(client, sample_request):
-    """Should reject duplicate request with 409"""
-    response = await client.post("/api/v1/requests", json=sample_request)
-    assert response.status_code == 409
-```
+#### API 8: PUT `/api/v1/user-request/{requestId}` - Update Request Status
 
-**Test Case 10.3: Approve registration request**
+**Test Categories (8 tests):**
+- Update status to active (approval)
+- Update status to rejected (denial)
+- Update status to pending (revert)
+- Nonexistent request (404 Not Found)
+- Invalid status value (400 Bad Request)
+- Missing status field (400 Bad Request)
+- Case-insensitive status handling
+- Timestamp auto-update validation
+
+**Example Test:**
 ```python
-async def test_approve_registration_request(client, sample_request_id):
-    """Should approve request and change status"""
-    update_data = {
-        "requestStatus": "Approved",
-        "approvalDate": "2026-03-01T10:00:00",
-        "approvalComments": "Request approved"
-    }
-    response = await client.put(f"/api/v1/requests/{sample_request_id}", json=update_data)
+def test_update_status_to_active():
+    """Should update request status to active"""
+    update_data = {"status": "active"}
+    response = client.put("/api/v1/user-request/REQ_001", json=update_data)
     assert response.status_code == 200
-    assert response.json()["data"]["request"]["requestStatus"] == "Approved"
+    data = response.json()["data"]
+    assert data["status"] == "active"
+    # Verify updated_Date was updated
+    assert data["updated_Date"] > data["created_Date"]
 ```
 
-**Test Case 10.4: Reject registration request**
-```python
-async def test_reject_registration_request(client, sample_request_id):
-    """Should reject request and provide reason"""
-    update_data = {
-        "requestStatus": "Rejected",
-        "approvalDate": "2026-03-01T10:00:00",
-        "approvalComments": "Request rejected due to incomplete information"
-    }
-    response = await client.put(f"/api/v1/requests/{sample_request_id}", json=update_data)
-    assert response.status_code == 200
-    assert response.json()["data"]["request"]["requestStatus"] == "Rejected"
-```
+#### Schema Validation Tests (35+ tests)
 
-**Test Case 10.5: Delete registration request**
-```python
-async def test_delete_registration_request(client, sample_request_id):
-    """Should delete request with 204 status"""
-    response = await client.delete(f"/api/v1/requests/{sample_request_id}")
-    assert response.status_code == 204
-```
+**Coverage:**
+- Email validation: RFC 5322 format, case-insensitive, uniqueness
+- Mobile number validation: 10-digit range (1000000000-9999999999)
+- Status enum: pending, active, rejected
+- Role validation: 8 valid roles
+- Name validation: length constraints
+- Organization: optional field handling
+- Location fields: optional, reference validation
+
+#### Database Utility Tests (40+ tests)
+
+**Coverage:**
+- ID generation: REQ_001, REQ_002 auto-increment
+- CRUD operations: Create, Read (by ID and status), Update
+- Uniqueness checks: Email uniqueness in pending/active
+- Location validation: Against state_city_pincode_master
+- Role validation: Against user_role_master
+- Error handling: Database errors, validation errors
+
+#### Integration Workflow Tests (2 tests)
+
+**Coverage:**
+- Complete request lifecycle: Create → Search → Update
+- Multiple concurrent requests management
+- Status transitions: pending → active, pending → rejected, etc.
+
+### APIs 9 & 10: User Authentication (Pending Implementation)
+
+#### API 9: POST `/api/v1/auth/login` - User Login
+
+**Planned Test Cases:**
+- Valid credentials authentication
+- Invalid email/password
+- Missing required fields
+- JWT token generation
+- Token expiration handling
+
+#### API 10: POST `/api/v1/auth/logout` - User Logout
+
+**Planned Test Cases:**
+- Successful logout
+- Token invalidation
+- Session termination
 
 ---
 

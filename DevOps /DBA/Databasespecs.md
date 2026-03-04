@@ -233,49 +233,54 @@ CREATE TABLE User_Login (
 ```
 
 #### 2.5 Table: `New_User_Request`
-*   **Description**: Staging table for new user registrations with validation matching User_Master.
+*   **Description**: Staging table for new user registrations with validation matching User_Master and location hierarchy.
 *   **Primary Key**: `requestId`
-*   **Updated**: March 1, 2026 - Added email format validation and 10-digit mobile validation
+*   **Updated**: March 4, 2026 - Complete schema restructure with location fields and status workflow
 
 | Column Name | Data Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `requestId` | VARCHAR(100) | PK | Unique Request ID |
-| `userName` | VARCHAR(100) | Not Null | Requested Username |
+| `requestId` | VARCHAR(100) | PK | Unique Request ID (REQ_001 format) |
+| `userId` | VARCHAR(255) | Unique, Not Null | Email address (RFC 5322 validated) |
 | `firstName` | VARCHAR(100) | Not Null | First Name |
 | `lastName` | VARCHAR(100) | Not Null | Last Name |
-| `currentRole` | VARCHAR(50) | Not Null | Requested Role |
-| `emailId` | VARCHAR(255) | Unique, Not Null | Email with RFC 5322 validation |
 | `mobileNumber` | NUMERIC(10) | Not Null | 10-digit mobile (1000000000-9999999999) |
-| `address` | TEXT | | Address |
-| `requestStatus` | VARCHAR(50) | Default 'Pending' | 'Pending', 'Approved', 'Rejected' |
-| `approvalDate` | TIMESTAMP | | Approval timestamp |
-| `approvalComments` | TEXT | | Approval comments |
-| `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Creation timestamp |
-| `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Update timestamp |
+| `organization` | VARCHAR(255) | | Company/organization name |
+| `currentRole` | VARCHAR(50) | Not Null | Requested Role (references user_role_master) |
+| `status` | VARCHAR(50) | Default 'pending' | 'pending', 'active', 'rejected' |
+| `city_name` | VARCHAR(100) | | City name (validates against state_city_pincode_master) |
+| `district_name` | VARCHAR(100) | | District name (validates against state_city_pincode_master) |
+| `pincode` | VARCHAR(10) | | Pincode (validates against state_city_pincode_master) |
+| `state_name` | VARCHAR(100) | | State name (validates against state_city_pincode_master) |
+| `created_Date` | TIMESTAMP | Default CURRENT_TIMESTAMP | Immutable creation timestamp |
+| `updated_Date` | TIMESTAMP | Default CURRENT_TIMESTAMP | Auto-updated modification timestamp |
 
 ```sql
 CREATE TABLE New_User_Request (
     requestId VARCHAR(100) PRIMARY KEY,
-    userName VARCHAR(100) NOT NULL,
+    userId VARCHAR(255) NOT NULL UNIQUE
+        CHECK (userId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
     firstName VARCHAR(100) NOT NULL,
     lastName VARCHAR(100) NOT NULL,
-    currentRole VARCHAR(50) NOT NULL,
-    emailId VARCHAR(255) NOT NULL UNIQUE
-        CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
     mobileNumber NUMERIC(10) NOT NULL
         CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999),
-    address TEXT,
-    requestStatus VARCHAR(50) DEFAULT 'Pending' CHECK (requestStatus IN ('Pending', 'Approved', 'Rejected')),
-    approvalDate TIMESTAMP,
-    approvalComments TEXT,
-    createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    organization VARCHAR(255),
+    currentRole VARCHAR(50) NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'rejected')),
+    city_name VARCHAR(100),
+    district_name VARCHAR(100),
+    pincode VARCHAR(10),
+    state_name VARCHAR(100),
+    created_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
 **Validation Rules**:
-- `emailId`: RFC 5322 regex pattern (same as User_Master)
-- `mobileNumber`: NUMERIC(10) with exactly 10 digits (1000000000-9999999999)
+- `userId`: RFC 5322 regex pattern (email address, case-insensitive uniqueness)
+- `mobileNumber`: NUMERIC(10) with range validation (1000000000-9999999999)
+- `status`: CHECK constraint for enum values (pending, active, rejected)
+- `currentRole`: Validates against user_role_master.roleName
+- `city_name`, `district_name`, `pincode`, `state_name`: Validate against state_city_pincode_master
 
 #### 2.6 Table: `Report_History`
 *   **Description**: Stores metadata and links to generated medical reports.

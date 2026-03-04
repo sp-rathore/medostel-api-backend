@@ -1856,119 +1856,181 @@ curl -X GET "http://localhost:8000/api/v1/auth/users?isActive=true" \
 
 ---
 
-### API 9: New_User_Request - SELECT Operations
+### API 6: New_User_Request - Search Operations
 
-**Endpoint**: `GET /api/v1/requests/all`
-**Purpose**: Retrieve user registration requests (read-only)
-**Authentication**: Required (Admin/Doctor)
+**Endpoint**: `GET /api/v1/user-request/search`
+**Purpose**: Search user registration requests by status
+**Authentication**: Optional (public endpoint)
 **Rate Limit**: 100 requests/minute
+**Version**: 1.0 (Updated March 4, 2026)
 
 #### Request
 ```bash
-curl -X GET "http://localhost:8000/api/v1/requests/all?requestStatus=Pending" \
-  -H "Authorization: Bearer <jwt_token>"
+curl -X GET "http://localhost:8000/api/v1/user-request/search?status=pending"
 ```
 
 #### Query Parameters
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `requestStatus` | string | No | Filter: Pending, Approved, Rejected |
-| `currentRole` | string | No | Filter by requested role |
-| `limit` | integer | No | Limit results (default: 100) |
-| `offset` | integer | No | Pagination offset |
+| `status` | string | Yes | Filter by status: `pending`, `active`, `rejected` |
 
 #### Response (200 - Success)
 ```json
 {
-  "status": "success",
-  "code": 200,
-  "message": "Registration requests retrieved successfully",
-  "data": {
-    "total": 15,
-    "count": 10,
-    "requests": [
-      {
-        "requestId": "REQ20260228001",
-        "userName": "robert.kumar@medostel.com",
-        "firstName": "Robert",
-        "lastName": "Kumar",
-        "currentRole": "Patient",
-        "emailId": "robert.kumar@medostel.com",
-        "mobileNumber": "+919876543212",
-        "requestStatus": "Pending",
-        "createdDate": "2026-02-28T12:00:00Z",
-        "approvedBy": null,
-        "approvalRemarks": null
-      }
-    ]
-  },
-  "timestamp": "2026-02-28T16:00:00Z"
+  "data": [
+    {
+      "requestId": "REQ_001",
+      "userId": "john.doe@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "mobileNumber": 9876543210,
+      "organization": "Apollo Hospital",
+      "currentRole": "DOCTOR",
+      "status": "pending",
+      "city_name": "Mumbai",
+      "district_name": "Mumbai",
+      "pincode": "400001",
+      "state_name": "Maharashtra",
+      "created_Date": "2026-03-04T10:30:00Z",
+      "updated_Date": "2026-03-04T10:30:00Z"
+    }
+  ],
+  "existsFlag": true
+}
+```
+
+#### Response (200 - No Results)
+```json
+{
+  "data": [],
+  "existsFlag": false
 }
 ```
 
 ---
 
-### API 10: New_User_Request - CRUD Operations
+### API 7: New_User_Request - Create Request
 
-**Purpose**: Manage user registration requests
-
-#### A. Create Registration Request
-**Endpoint**: `POST /api/v1/requests`
+**Endpoint**: `POST /api/v1/user-request`
+**Purpose**: Submit new user registration request
 **Authentication**: Not required (Public)
+**Rate Limit**: 100 requests/minute
+**Version**: 1.0 (Updated March 4, 2026)
 
-##### Request Body
+#### Request Body
 ```json
 {
-  "requestId": "REQ20260228002",
-  "userName": "alice.green@medostel.com",
-  "firstName": "Alice",
-  "lastName": "Green",
-  "currentRole": "Doctor",
-  "organisation": "Metro Hospital",
-  "emailId": "alice.green@medostel.com",
-  "mobileNumber": "+919876543213",
-  "address1": "456 Medical Avenue",
-  "stateName": "Maharashtra",
-  "cityName": "Pune",
-  "pinCode": "411001",
-  "requestStatus": "Pending"
+  "userId": "jane.doe@example.com",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "mobileNumber": 9876543211,
+  "organization": "Max Hospital",
+  "currentRole": "NURSE",
+  "city_name": "Mumbai",
+  "district_name": "Mumbai",
+  "pincode": "400001",
+  "state_name": "Maharashtra"
 }
 ```
 
-##### Response (201 - Created)
+#### Request Validation Rules
+| Field | Validation | Required |
+|-------|-----------|----------|
+| `userId` | Valid email (RFC 5322), unique in pending/active | Yes |
+| `firstName` | String, max 100 chars | Yes |
+| `lastName` | String, max 100 chars | Yes |
+| `mobileNumber` | 10-digit integer (1000000000-9999999999) | Yes |
+| `currentRole` | One of 8 valid roles (ADMIN, DOCTOR, HOSPITAL, NURSE, PARTNER, PATIENT, RECEPTION, TECHNICIAN) | Yes |
+| `organization` | String, max 255 chars | No |
+| `city_name` | Valid city from state_city_pincode_master | No |
+| `district_name` | Valid district from state_city_pincode_master | No |
+| `pincode` | Valid pincode from state_city_pincode_master | No |
+| `state_name` | Valid state from state_city_pincode_master | No |
+
+#### Response (201 - Created)
 ```json
 {
-  "status": "success",
-  "code": 201,
-  "message": "Registration request submitted successfully",
+  "message": "User request created successfully",
   "data": {
-    "requestId": "REQ20260228002",
-    "userName": "alice.green@medostel.com",
-    "firstName": "Alice",
-    "lastName": "Green",
-    "requestStatus": "Pending",
-    "createdDate": "2026-02-28T16:00:00Z"
-  },
-  "timestamp": "2026-02-28T16:00:00Z"
+    "requestId": "REQ_001",
+    "userId": "jane.doe@example.com",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "mobileNumber": 9876543211,
+    "organization": "Max Hospital",
+    "currentRole": "NURSE",
+    "status": "pending",
+    "city_name": "Mumbai",
+    "district_name": "Mumbai",
+    "pincode": "400001",
+    "state_name": "Maharashtra",
+    "created_Date": "2026-03-04T10:35:00Z",
+    "updated_Date": "2026-03-04T10:35:00Z"
+  }
 }
 ```
 
-#### B. Update Registration Request
-**Endpoint**: `PUT /api/v1/requests/{requestId}`
-**Authentication**: Required (Admin only)
+#### Error Responses
+- **400 Bad Request**: Validation error (invalid email, mobile, role, etc.)
+- **409 Conflict**: Email already has pending/active request
+- **500 Internal Server Error**: Database error
 
-##### Request Body
+---
+
+### API 8: New_User_Request - Update Status
+
+**Endpoint**: `PUT /api/v1/user-request/{requestId}`
+**Purpose**: Update request status (approval workflow)
+**Authentication**: Optional (Admin recommended)
+**Rate Limit**: 100 requests/minute
+**Version**: 1.0 (Updated March 4, 2026)
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `requestId` | string | Yes | Request ID (e.g., REQ_001) |
+
+#### Request Body
 ```json
 {
-  "requestStatus": "Approved",
-  "approvedBy": "admin@medostel.com",
-  "approvalRemarks": "Verified doctor credentials"
+  "status": "active"
 }
 ```
 
-#### C. Delete Registration Request
-**Endpoint**: `DELETE /api/v1/requests/{requestId}`
-**Authentication**: Required (Admin only)
+#### Valid Status Transitions
+- `pending` → `active` (approval)
+- `pending` → `rejected` (denial)
+- `active` → `rejected` (revoke)
+- `rejected` → `pending` (re-request)
+- `active` → `pending` (revert)
+
+#### Response (200 - Success)
+```json
+{
+  "message": "User request updated successfully",
+  "data": {
+    "requestId": "REQ_001",
+    "userId": "jane.doe@example.com",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "mobileNumber": 9876543211,
+    "organization": "Max Hospital",
+    "currentRole": "NURSE",
+    "status": "active",
+    "city_name": "Mumbai",
+    "district_name": "Mumbai",
+    "pincode": "400001",
+    "state_name": "Maharashtra",
+    "created_Date": "2026-03-04T10:35:00Z",
+    "updated_Date": "2026-03-04T10:40:00Z"
+  }
+}
+```
+
+#### Error Responses
+- **400 Bad Request**: Invalid status value
+- **404 Not Found**: Request ID doesn't exist
+- **500 Internal Server Error**: Database error
 
 ---
 

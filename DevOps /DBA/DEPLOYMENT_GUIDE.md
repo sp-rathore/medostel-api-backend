@@ -155,6 +155,152 @@ SELECT * FROM information_schema.table_constraints WHERE table_name = 'user_mast
 
 ---
 
+## Step 2.6: New_User_Request Schema Migration (NEW - March 4, 2026)
+
+**⚠️ IMPORTANT**: This step is REQUIRED if you have an existing `new_user_request` table with the old schema. For fresh installations, the `create_Tables.sql` already contains the new schema. Execute ONLY if upgrading from previous versions.
+
+### Pre-Migration Checklist
+
+Before executing the migration:
+
+```bash
+# 1. Backup the database
+gcloud sql backups create medostel-backup-$(date +%Y%m%d-%H%M%S) \
+  --instance=medostel-ai-assistant-pgdev-instance \
+  --project=gen-lang-client-0064186167
+
+# 2. Verify backup completion
+gcloud sql backups list --instance=medostel-ai-assistant-pgdev-instance
+```
+
+### Migration Scripts Location
+
+The migration scripts are located in:
+```
+/Users/shishupals/Documents/Claude/projects/Medostel/repositories/medostel-api-backend/src/SQL\ files/
+├── 08_migrate_new_user_request_schema.sql (Schema migration)
+├── 09_validate_new_user_request_migration.sql (Validation)
+└── 10_rollback_new_user_request_migration.sql (Rollback - if needed)
+```
+
+### Schema Changes
+
+The migration restructures `new_user_request` table from:
+```
+OLD: requestId, userName, emailId, requestStatus, approvalDate, etc.
+NEW: requestId, userId, firstName, lastName, mobileNumber, organization,
+     currentRole, status, city_name, district_name, pincode, state_name,
+     created_Date, updated_Date
+```
+
+### Migration Steps
+
+**Step 1: Execute Migration Script**
+```bash
+cd /Users/shishupals/Documents/Claude/projects/Medostel/repositories/medostel-api-backend
+
+# Start Cloud SQL Proxy (if not already running)
+/opt/homebrew/share/google-cloud-sdk/bin/cloud-sql-proxy \
+  gen-lang-client-0064186167:asia-south1:medostel-ai-assistant-pgdev-instance &
+
+sleep 3
+
+# Execute migration
+PGPASSWORD='Iag2bMi@0@6aA' psql \
+  -h localhost \
+  -p 5432 \
+  -U medostel_admin_user \
+  -d medostel \
+  -f "src/SQL files/08_migrate_new_user_request_schema.sql"
+```
+
+Expected Output:
+```
+BEGIN
+ALTER TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+...
+INSERT 0 X  (X = number of rows migrated)
+COMMIT
+```
+
+**Step 2: Validate Migration**
+```bash
+# Execute validation script
+PGPASSWORD='Iag2bMi@0@6aA' psql \
+  -h localhost \
+  -p 5432 \
+  -U medostel_admin_user \
+  -d medostel \
+  -f "src/SQL files/09_validate_new_user_request_migration.sql"
+```
+
+Expected Output:
+```
+=== SCHEMA VALIDATION ===
+[14 columns with correct types verified]
+
+=== CONSTRAINT VALIDATION ===
+[7 indexes listed]
+
+=== DATA INTEGRITY CHECKS ===
+[All validation checks passed]
+
+=== MIGRATION SUMMARY ===
+[Row counts match, no data loss]
+```
+
+**Step 3: Verify Table Structure**
+```bash
+# Connect to database
+gcloud sql connect medostel-ai-assistant-pgdev-instance \
+  --user=medostel_admin_user \
+  --project=gen-lang-client-0064186167 \
+  --database=medostel
+
+# Run verification queries:
+\d new_user_request  -- Show all columns and constraints
+\di new_user_request*  -- List all indexes
+SELECT COUNT(*) FROM new_user_request;  -- Row count
+```
+
+### Rollback Procedure (If Migration Fails)
+
+If the migration encounters issues:
+
+```bash
+# Execute rollback script
+PGPASSWORD='Iag2bMi@0@6aA' psql \
+  -h localhost \
+  -p 5432 \
+  -U medostel_admin_user \
+  -d medostel \
+  -f "src/SQL files/10_rollback_new_user_request_migration.sql"
+```
+
+This will:
+- Drop the new `new_user_request` table
+- Restore the backup as `new_user_request`
+- Recreate original indexes
+
+### Migration Verification Checklist
+
+After successful migration, verify:
+
+```
+☐ Schema validation script passed all checks
+☐ All 14 columns present with correct data types
+☐ All 7 indexes created and functional
+☐ All 3 CHECK constraints active
+☐ No data loss during migration
+☐ Backup table cleaned up (optional: DROP TABLE IF EXISTS new_user_request_backup)
+☐ Application tests pass (105+ tests for new_user_request API)
+```
+
+---
+
 ## Step 3: Verify Tables Created
 
 Check that all tables were created:

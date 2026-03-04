@@ -208,31 +208,33 @@
 ---
 
 ### TABLE 5: New_User_Request
-**Purpose**: Staging table for new user registration requests (ENHANCED - March 1, 2026)
+**Purpose**: Staging table for new user registration requests with location hierarchy (RESTRUCTURED - March 4, 2026)
 **Primary Key**: `requestId`
-**Schema Version**: 2.0 (Added email & mobile validation matching User_Master)
+**Schema Version**: 2.1 (Complete schema restructure with location fields and status workflow)
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `requestId` | VARCHAR(100) | PK | Unique request ID |
-| `userName` | VARCHAR(100) | Not Null | Requested username |
+| `requestId` | VARCHAR(100) | PK | Unique request ID (REQ_001 format) |
+| `userId` | VARCHAR(255) | Not Null, Unique | Email address (RFC 5322 validated) |
 | `firstName` | VARCHAR(100) | Not Null | First name |
 | `lastName` | VARCHAR(100) | Not Null | Last name |
-| `currentRole` | VARCHAR(50) | Not Null | Requested role |
-| `emailId` | VARCHAR(255) | Not Null, Unique | RFC 5322 email format validation |
 | `mobileNumber` | NUMERIC(10) | Not Null | 10-digit mobile (1000000000-9999999999) |
-| `address` | TEXT | | Full address |
-| `requestStatus` | VARCHAR(50) | Default 'Pending' | Pending/Approved/Rejected |
-| `approvalDate` | TIMESTAMP | | Approval timestamp |
-| `approvalComments` | TEXT | | Approval comments |
-| `createdDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Creation timestamp |
-| `updatedDate` | TIMESTAMP | Default CURRENT_TIMESTAMP | Update timestamp |
+| `organization` | VARCHAR(255) | | Company/organization name |
+| `currentRole` | VARCHAR(50) | Not Null | Requested role (references user_role_master) |
+| `status` | VARCHAR(50) | Default 'pending' | Status: pending/active/rejected |
+| `city_name` | VARCHAR(100) | | City name (validates against state_city_pincode_master) |
+| `district_name` | VARCHAR(100) | | District name (validates against state_city_pincode_master) |
+| `pincode` | VARCHAR(10) | | Pincode (validates against state_city_pincode_master) |
+| `state_name` | VARCHAR(100) | | State name (validates against state_city_pincode_master) |
+| `created_Date` | TIMESTAMP | Default CURRENT_TIMESTAMP | Immutable creation timestamp |
+| `updated_Date` | TIMESTAMP | Default CURRENT_TIMESTAMP | Auto-updated modification timestamp |
 
 **Validation Constraints**:
-- `emailId`: CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
-- `mobileNumber`: CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999)
+- `userId`: CHECK (userId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$') - RFC 5322 email format
+- `mobileNumber`: CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999) - 10-digit validation
+- `status`: CHECK (status IN ('pending', 'active', 'rejected')) - Status workflow
 
-**Indexes**: `idx_request_email`, `idx_request_mobile`, `idx_request_status`, `idx_request_role`, `idx_request_created`, `idx_request_updated`
+**Indexes**: `idx_request_email` (userId), `idx_request_mobile`, `idx_request_status`, `idx_request_role`, `idx_request_created`, `idx_request_updated`, `pk_new_user_request` (requestId)
 **Size**: ~64 kB | **Owner**: medostel_admin_user
 
 ---
