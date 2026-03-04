@@ -58,10 +58,10 @@ INSERT INTO new_user_request (
 )
 SELECT
     requestId,
-    emailId,
+    LOWER(emailId), -- Normalize email to lowercase
     firstName,
     lastName,
-    mobileNumber,
+    CAST(mobileNumber AS NUMERIC), -- Cast VARCHAR to NUMERIC
     NULL, -- organization: no direct mapping from backup
     currentRole,
     CASE
