@@ -2,26 +2,32 @@
 
 **Date**: 2026-03-03
 
-1. Table name: User_Login. 
-    -   User_login table should contain below columns
-        - user_id - this should be the email id value. this value should match the email id column value in user_master table
-        - password should be hashed and fetching/inserting/updating should follow hash standards
-        - mobile number - should be integer 10 digits and should match the mobile number in user_master table against the email id row
-        - is_Active - if the status of user in user_master is 'active' then only this flag should be set to 'Y'. Otherwise this flag should be 'N'
-        - lAST_LOGIN - this is the system timestamp. for first time login this column will have the system timestamp. 
-        - created_date - this value should be system timestamp for the first time user login was created
-        - updated_Date - this value should be same as created date for first time. whenever password is changed then only this value should get updated
+1. Table name: new_User_request. 
+    -  this table should have following columns
+        - Request ID (PK) - numeric and starts from 1. Incremented for every new row added with max(requestid) + 1	
+        - User id - will be the email id and should be validated for email id  
+        - First Name	- character
+        - Last Name	    - character
+        - Current Role (FK)	- role name from user_role_master
+        - Status	- default status should be pending
+        - Organization	
+        - Mobile	- 10 digit numeric
+        - City_name (FK)	- should always be validated against the city name FROM STATE_CITY_PINCODE_MASTER
+        - district_name (FK) - should always be validated against the DISTRICT name FROM STATE_CITY_PINCODE_MASTER
+        - PINCODE (FK) - should always be validated against the PINCODE FROM STATE_CITY_PINCODE_MASTER
+        - State_name (FK) - should always be validated against the STATE name FROM STATE_CITY_PINCODE_MASTER
+        - created_Date - system timestamp
+        - updated_Date - system timestamp
 
     - APIs will be created for both Select and CRUD operation (no Delete operation required)
         - Select API should be able to fetch data based on following inputs
-           -   email id or mobile phone number. it should fetch the password, unhash it and provide as output. it should provide the value of is_Active flag in the output.
+           -   status as input and entire row all attributes should be fetched as output
         -   PUT and POST APIs should be able to
-            -   Insert a new user login row, email id should be validated against the email id in user_master, mobile number should be validated against the mobile number column of same row of email id provided. if password field is empty then default password 'Medostel@AI2026' should be hashed and inserted. last_login, created_date and updated_date should be the system timestamp values
+            -   Insert a new user request row, entire row should be added. Default status is pending when the row is inserted for first time
             -   Update API can be for a 
-                -   password change - in this case change the password, hash it and store. created_Date remains unchanged. last_login and updated_Date values are current system_Date
-                - last_login - whenever a select api is successful this update api should be triggered to update the row with last_login column update with current system timestamp. all other column values remain unchanged.
-                - is_Active flag status can be changed to 'Y' or 'N'. in this case only updated_Date should be changed along with is_Active flag value
-                
+                -   status change - valid status to update is 'active' ' rejected' or 'pending'.
+                - updated timestamp should be updated with system timestamp
+        
     - Create an overall plan and rewrite the Plan/API Development Plan.md that should comprise of updating
         - Agents/DB Dev Agent.md
         - Agents/API Dev Agent.md

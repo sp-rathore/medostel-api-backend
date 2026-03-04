@@ -33,6 +33,11 @@ try:
 except ImportError:
     reports_router = None
 
+try:
+    from src.routes.v1.user_request import router as user_request_router
+except ImportError:
+    user_request_router = None
+
 __all__ = [
     "roles_router",
     "locations_router",
@@ -40,4 +45,5 @@ __all__ = [
     "auth_router",
     "registrations_router",
     "reports_router",
+    "user_request_router",
 ]

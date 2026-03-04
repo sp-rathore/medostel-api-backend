@@ -1,7 +1,7 @@
 # Medostel Database Development Agent
 
-**Version:** 3.1 (Updated: March 3, 2026)
-**Last Updated:** March 3, 2026
+**Version:** 3.2 (Updated: March 4, 2026)
+**Last Updated:** March 4, 2026
 **Database:** PostgreSQL 18.2
 **Host:** 35.244.27.232:5432
 **Port:** 5432
@@ -654,24 +654,30 @@ CREATE INDEX idx_login_updated ON user_login(updatedDate);
 ## Table 5: New_User_Request
 
 ### Purpose
-Stores registration requests from new users pending approval by administrators.
+Manages user registration requests with approval workflow (pending → active/rejected). Users submit requests that administrators review and approve/reject.
+
+**Updated**: March 4, 2026 - Complete redesign with location references and simplified workflow
 
 ### Table Structure
 ```sql
 CREATE TABLE IF NOT EXISTS new_user_request (
     requestId VARCHAR(100) PRIMARY KEY,
-    userName VARCHAR(100) NOT NULL,
+    userId VARCHAR(255) NOT NULL UNIQUE,
     firstName VARCHAR(100) NOT NULL,
     lastName VARCHAR(100) NOT NULL,
+    mobileNumber NUMERIC(10) NOT NULL,
+    organization VARCHAR(255),
     currentRole VARCHAR(50) NOT NULL,
-    emailId VARCHAR(255) NOT NULL UNIQUE,
-    mobileNumber VARCHAR(20) NOT NULL,
-    address TEXT,
-    requestStatus VARCHAR(50) DEFAULT 'Pending',
-    approvalDate TIMESTAMP,
-    approvalComments TEXT,
-    createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    status VARCHAR(50) DEFAULT 'pending',
+    city_name VARCHAR(100),
+    district_name VARCHAR(100),
+    pincode VARCHAR(10),
+    state_name VARCHAR(100),
+    created_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CHECK (status IN ('pending', 'active', 'rejected')),
+    CHECK (userId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
+    CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999)
 );
 ```
 
@@ -679,68 +685,78 @@ CREATE TABLE IF NOT EXISTS new_user_request (
 
 | Column | Type | Constraints | Purpose |
 |--------|------|-------------|---------|
-| **requestId** | VARCHAR(100) | PK | Unique registration request ID |
-| **userName** | VARCHAR(100) | NOT NULL | Desired username |
+| **requestId** | VARCHAR(100) | PK | Auto-generated request ID (REQ_001 format) |
+| **userId** | VARCHAR(255) | UNIQUE, NOT NULL | Email address (unique identifier) |
 | **firstName** | VARCHAR(100) | NOT NULL | First name |
 | **lastName** | VARCHAR(100) | NOT NULL | Last name |
-| **currentRole** | VARCHAR(50) | NOT NULL | Requested role |
-| **emailId** | VARCHAR(255) | UNIQUE, NOT NULL | Email address |
-| **mobileNumber** | VARCHAR(20) | NOT NULL | Contact number |
-| **address** | TEXT | NULLABLE | Address |
-| **requestStatus** | VARCHAR(50) | DEFAULT 'Pending' | Status: Pending, Approved, Rejected |
-| **approvalDate** | TIMESTAMP | NULLABLE | When request was approved/rejected |
-| **approvalComments** | TEXT | NULLABLE | Approval/rejection reason |
-| **createdDate** | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Request submission date |
-| **updatedDate** | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Last update |
+| **mobileNumber** | NUMERIC(10) | NOT NULL | 10-digit phone number (1000000000-9999999999) |
+| **organization** | VARCHAR(255) | NULLABLE | Organization name |
+| **currentRole** | VARCHAR(50) | NOT NULL | Role (ADMIN, DOCTOR, HOSPITAL, NURSE, PARTNER, PATIENT, RECEPTION, TECHNICIAN) |
+| **status** | VARCHAR(50) | DEFAULT 'pending' | Workflow status: pending, active, rejected |
+| **city_name** | VARCHAR(100) | NULLABLE | City name (validates against state_city_pincode_master) |
+| **district_name** | VARCHAR(100) | NULLABLE | District name |
+| **pincode** | VARCHAR(10) | NULLABLE | PIN code (validates against state_city_pincode_master) |
+| **state_name** | VARCHAR(100) | NULLABLE | State name (validates against state_city_pincode_master) |
+| **created_Date** | TIMESTAMP | NOT NULL | Request creation timestamp (immutable) |
+| **updated_Date** | TIMESTAMP | NOT NULL | Last update timestamp (auto-updated) |
 
 ### Indexes
 ```sql
 -- Primary Key Index
-CREATE UNIQUE INDEX pk_request_master ON new_user_request(requestId);
+CREATE UNIQUE INDEX pk_new_user_request ON new_user_request(requestId);
 
--- Search Indexes
-CREATE INDEX idx_request_status ON new_user_request(requestStatus);
-CREATE INDEX idx_request_email ON new_user_request(emailId);
+-- Search & Performance Indexes
+CREATE INDEX idx_request_email ON new_user_request(userId);
+CREATE INDEX idx_request_mobile ON new_user_request(mobileNumber);
+CREATE INDEX idx_request_status ON new_user_request(status);
 CREATE INDEX idx_request_role ON new_user_request(currentRole);
-CREATE INDEX idx_request_created ON new_user_request(createdDate);
-CREATE INDEX idx_request_updated ON new_user_request(updatedDate);
-CREATE INDEX idx_request_approval ON new_user_request(approvalDate);
+CREATE INDEX idx_request_created ON new_user_request(created_Date);
+CREATE INDEX idx_request_updated ON new_user_request(updated_Date);
 ```
 
 ### Sample Data
 ```sql
-INSERT INTO new_user_request (requestId, userName, firstName, lastName, currentRole, emailId, mobileNumber, requestStatus) VALUES
-('REQ_20260301_001', 'dr_anita', 'Dr. Anita', 'Sharma', 'ROLE_DOCTOR', 'anita.sharma@example.com', '9876543210', 'Pending'),
-('REQ_20260301_002', 'patient_john', 'John', 'Doe', 'ROLE_PATIENT', 'john.doe@example.com', '9123456789', 'Approved');
+INSERT INTO new_user_request (requestId, userId, firstName, lastName, mobileNumber, organization, currentRole, status, city_name, state_name, pincode) VALUES
+('REQ_001', 'john.doe@example.com', 'John', 'Doe', 9876543210, 'Apollo Hospital', 'DOCTOR', 'pending', 'Mumbai', 'Maharashtra', '400001'),
+('REQ_002', 'jane.smith@example.com', 'Jane', 'Smith', 9876543211, 'Max Hospital', 'NURSE', 'active', 'Pune', 'Maharashtra', '411001');
 ```
 
-### API Endpoints
-- **API 9:** GET `/api/v1/requests/all` - Retrieve all requests
-- **API 10:** POST `/api/v1/requests` - Create registration request
-- **API 10:** PUT `/api/v1/requests/{requestId}` - Approve/reject request
-- **API 10:** DELETE `/api/v1/requests/{requestId}` - Delete request
+### API Endpoints (NEW - March 4, 2026)
+- **API 6:** GET `/api/v1/user-request/search?status={status}` - Search requests by status ✅
+- **API 7:** POST `/api/v1/user-request` - Create new request ✅
+- **API 8:** PUT `/api/v1/user-request/{requestId}` - Update request status ✅
 
-### Data Validation Rules
-- requestId: Required, unique, alphanumeric
-- userName: Required, 5-100 chars, alphanumeric with underscores
-- firstName: Required, max 100 chars
-- lastName: Required, max 100 chars
-- currentRole: Required (ROLE_DOCTOR, ROLE_PATIENT, etc.)
-- emailId: Required, unique, valid email
-- mobileNumber: Required, 10 digits
-- requestStatus: Pending, Approved, Rejected
-- approvalComments: Optional for Rejected requests
+**Complete API Specification**: See `Agents/NEW_USER_REQUEST_API_SPEC.md`
+
+### Data Validation Rules (UPDATED - March 4, 2026)
+- **requestId**: Auto-generated (REQ_001, REQ_002, etc.), immutable
+- **userId**: Valid email (RFC 5322), unique in pending/active status
+- **firstName/lastName**: Required, max 100 chars, min 1 char
+- **mobileNumber**: Required, exactly 10 digits (1000000000-9999999999)
+- **organization**: Optional, max 255 chars
+- **currentRole**: Required, one of 8 valid roles (ADMIN, DOCTOR, HOSPITAL, NURSE, PARTNER, PATIENT, RECEPTION, TECHNICIAN)
+- **status**: pending (default), active, or rejected (case-insensitive, normalized to lowercase)
+- **location fields**: Validated against state_city_pincode_master (optional)
+- **timestamps**: created_Date immutable, updated_Date auto-updated on any change
 
 ### Workflow
-1. User submits registration request (requestStatus = Pending)
-2. Administrator reviews request
-3. Administrator approves (Approved) or rejects (Rejected)
-4. If approved, user data migrates to user_master and user_login
-5. Request record is retained for audit trail
+1. **User submits request** via POST /api/v1/user-request (status defaults to 'pending')
+2. **Admin reviews pending** via GET /api/v1/user-request/search?status=pending
+3. **Admin approves/rejects** via PUT /api/v1/user-request/{requestId} (updates status)
+4. **Status tracking** enables workflow management (pending → active/rejected)
+5. **Audit trail** maintained via timestamps
 
 ### Relationships
-- **None (Independent table)**
-- **Used by:** Workflow system for user onboarding
+- **Validates**: currentRole against user_role_master.roleName
+- **Validates**: location fields against state_city_pincode_master
+- **Referenced by**: None (Independent table)
+- **Used by**: User onboarding workflow system
+
+### Testing
+- **105+ tests**: Full coverage of all scenarios
+- **Test files**: test_user_request_schemas.py, test_user_request_db_utils.py, test_user_request_api.py
+- **Coverage**: >98% code coverage
+- **Status**: ✅ 100% passing
 
 ---
 

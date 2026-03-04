@@ -132,35 +132,42 @@ CREATE INDEX idx_login_updated_date ON user_login(updated_date);
 -- ============================================================================
 -- Table 5: new_user_request
 -- ============================================================================
--- UPDATED (March 1, 2026):
--- - emailId validation added with RFC 5322 regex pattern
--- - mobileNumber validation: NUMERIC(10) with 10-digit CHECK constraint
+-- REDESIGNED (March 3, 2026):
+-- - requestId: VARCHAR(100), auto-generated as REQ_001, REQ_002, etc.
+-- - userId: VARCHAR(255), email address, unique, RFC 5322 validated
+-- - currentRole: VARCHAR(50), validates against user_role_master.roleName (no FK)
+-- - status: VARCHAR(50), default 'pending', check: pending|active|rejected
+-- - mobileNumber: NUMERIC(10), 10-digit validation
+-- - Location fields: city_name, district_name, pincode, state_name (validate against state_city_pincode_master)
+-- - Timestamps: created_Date (immutable), updated_Date (auto-updated)
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS new_user_request (
     requestId VARCHAR(100) PRIMARY KEY,
-    userName VARCHAR(100) NOT NULL,
+    userId VARCHAR(255) NOT NULL UNIQUE
+        CHECK (userId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
     firstName VARCHAR(100) NOT NULL,
     lastName VARCHAR(100) NOT NULL,
-    currentRole VARCHAR(50) NOT NULL,
-    emailId VARCHAR(255) NOT NULL UNIQUE
-        CHECK (emailId ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
     mobileNumber NUMERIC(10) NOT NULL
         CHECK (mobileNumber >= 1000000000 AND mobileNumber <= 9999999999),
-    address TEXT,
-    requestStatus VARCHAR(50) DEFAULT 'Pending' CHECK (requestStatus IN ('Pending', 'Approved', 'Rejected')),
-    approvalDate TIMESTAMP,
-    approvalComments TEXT,
-    createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    organization VARCHAR(255),
+    currentRole VARCHAR(50) NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending'
+        CHECK (status IN ('pending', 'active', 'rejected')),
+    city_name VARCHAR(100),
+    district_name VARCHAR(100),
+    pincode VARCHAR(10),
+    state_name VARCHAR(100),
+    created_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX pk_new_user_request ON new_user_request(requestId);
-CREATE INDEX idx_request_email ON new_user_request(emailId);
+CREATE INDEX idx_request_email ON new_user_request(userId);
 CREATE INDEX idx_request_mobile ON new_user_request(mobileNumber);
-CREATE INDEX idx_request_status ON new_user_request(requestStatus);
+CREATE INDEX idx_request_status ON new_user_request(status);
 CREATE INDEX idx_request_role ON new_user_request(currentRole);
-CREATE INDEX idx_request_created ON new_user_request(createdDate);
-CREATE INDEX idx_request_updated ON new_user_request(updatedDate);
+CREATE INDEX idx_request_created ON new_user_request(created_Date);
+CREATE INDEX idx_request_updated ON new_user_request(updated_Date);
 
 -- ============================================================================
 -- Table 6: report_history

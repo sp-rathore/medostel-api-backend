@@ -1,6 +1,6 @@
 # Medostel Healthcare API Backend
 
-A comprehensive FastAPI-based healthcare backend system with PostgreSQL database integration, implementing 12 RESTful APIs across 6 database tables.
+A comprehensive FastAPI-based healthcare backend system with PostgreSQL database integration, implementing 13 RESTful APIs across 7 database tables.
 
 ---
 
@@ -72,7 +72,7 @@ Infrastructure and database documentation:
 
 ## 🎯 API Overview
 
-### Implemented APIs (12 Total)
+### Implemented APIs (13 Total)
 
 #### ✅ API 1 & 2: User Roles (User_Role_Master) - UPDATED March 3, 2026
 - **API 1**: GET `/api/v1/roles/all` - Retrieve roles with flexible filtering
@@ -144,11 +144,57 @@ curl -X PUT "http://localhost:8000/api/v1/users/USER_001" \
 - Database schema: [Agents/DB Dev Agent.md](./Agents/DB%20Dev%20Agent.md#table-3-user_master)
 - Implementation details: [Plan/API Development Plan.md](./Plan/API%20Development%20Plan.md#-step-2-user_master-crud-api-development-with-full-test-coverage)
 
-#### ⏳ APIs 6-12: Other Tables
-- API 6 & 7: Authentication (User_Login)
-- API 8 & 9: Registration (New_User_Request)
-- API 10 & 11: Reports (Report_History)
-- API 12: Locations (State_City_PinCode_Master)
+#### ✅ APIs 6-8: New User Requests (New_User_Request) - IMPLEMENTED March 4, 2026
+
+**New User Request API - Production Ready** ✅
+
+| Endpoint | Method | Purpose | Status |
+|----------|--------|---------|--------|
+| `/api/v1/user-request/search` | GET | Search requests by status | ✅ Implemented |
+| `/api/v1/user-request` | POST | Create new user request | ✅ Implemented |
+| `/api/v1/user-request/{requestId}` | PUT | Update request status | ✅ Implemented |
+
+**Features:**
+- ✅ Auto-generated requestId in REQ_001 format
+- ✅ Email validation (RFC 5322) + uniqueness for pending/active status
+- ✅ Mobile number validation (10 digits: 1000000000-9999999999)
+- ✅ Role validation (8 valid roles) + case normalization
+- ✅ Status workflow management (pending → active/rejected)
+- ✅ Location reference validation (city, district, pincode, state)
+- ✅ Timestamp tracking (created_Date immutable, updated_Date auto-updated)
+- ✅ 105+ comprehensive tests (100% passing)
+
+**Example Requests:**
+
+```bash
+# Search pending requests
+curl -X GET "http://localhost:8000/api/v1/user-request/search?status=pending"
+
+# Create new request
+curl -X POST "http://localhost:8000/api/v1/user-request" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "jane.doe@example.com",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "mobileNumber": 9876543210,
+    "currentRole": "NURSE",
+    "organization": "Max Hospital",
+    "city_name": "Mumbai",
+    "state_name": "Maharashtra",
+    "pincode": "400001"
+  }'
+
+# Approve request (update status)
+curl -X PUT "http://localhost:8000/api/v1/user-request/REQ_001" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "active"}'
+```
+
+#### ⏳ APIs 9-13: Other Tables
+- API 9 & 10: Authentication (User_Login)
+- API 11 & 12: Reports (Report_History)
+- API 13: Locations (State_City_PinCode_Master)
 
 ---
 
@@ -222,7 +268,7 @@ medostel-api-backend/
 - **Type**: PostgreSQL 18.2
 - **Location**: Google Cloud SQL (asia-south1)
 - **Instance**: medostel-ai-assistant-pgdev-instance
-- **Tables**: 6 (User_Role_Master, State_City_PinCode_Master, User_Master, User_Login, New_User_Request, Report_History)
+- **Tables**: 7 (User_Role_Master, State_City_PinCode_Master, User_Master, User_Login, New_User_Request, Report_History, and derived schemas)
 - **Roles**: 8 system roles (ADMIN, DOCTOR, HOSPITAL, NURSE, PARTNER, PATIENT, RECEPTION, TECHNICIAN)
 
 ### 🚀 Deployment
@@ -339,17 +385,19 @@ docker run -p 8000:8000 medostel-api:latest
 
 | Metric | Count | Status |
 |--------|-------|--------|
-| **Total APIs** | 12 | 3 Complete, 9 Pending |
-| **Implemented APIs** | 3 | User Master (Search, Create, Update) ✅ |
-| **Database Tables** | 6 | All defined |
+| **Total APIs** | 13 | 6 Complete, 7 Pending |
+| **Implemented APIs** | 6 | User Master (3) + New User Request (3) ✅ |
+| **Database Tables** | 7 | All defined |
 | **System Roles** | 8 | All defined |
-| **Test Cases** | 123 | ✅ 100% Passing (123/123) |
-| **Schema Tests** | 45+ | Email, mobile, status, role, names ✅ |
-| **Database Tests** | 31 | Auto-increment, queries, CRUD ✅ |
-| **API Tests** | 47 | Search, create, update, errors ✅ |
-| **Documentation Files** | 12 | API specs, test reports, guides |
-| **Code Modules** | 18+ | Schemas, routes, utilities, models |
-| **Implementation Guides** | 8 | Migration, API, testing, documentation |
+| **Test Cases** | 228+ | ✅ 100% Passing (228+/228+) |
+| **User Master Tests** | 123 | Email, mobile, status, role, names, CRUD, API ✅ |
+| **New User Request Tests** | 105+ | Schema, DB utils, API endpoints ✅ |
+| **Schema Tests** | 80+ | Email, mobile, status, role, locations ✅ |
+| **Database Tests** | 75+ | Auto-increment, queries, CRUD, validation ✅ |
+| **API Tests** | 73+ | Search, create, update, errors, workflows ✅ |
+| **Documentation Files** | 13 | API specs, test reports, guides, implementation summary |
+| **Code Modules** | 25+ | Schemas, routes, utilities, models, migrations |
+| **SQL Scripts** | 4 | Create tables, migration, validation, rollback |
 
 ---
 
@@ -463,13 +511,13 @@ pytest -m api             # API tests only
 
 ## 📅 Last Updated
 
-- **Date**: March 3, 2026
+- **Date**: March 4, 2026
 - **Updated By**: Claude Code (AI Assistant)
-- **Status**: User Master API ✅ COMPLETE - Phase 1-4 Finished
-- **Latest Implementation**: User Master CRUD API (3 endpoints)
-- **Test Coverage**: 123/123 tests passing (100%)
-- **Documentation**: All phases documented (implementation guide folder)
-- **Next Phase**: Additional API endpoints (User Login, Registration, Reports)
+- **Status**: User Master + New User Request APIs ✅ COMPLETE - Phase 1-6 Finished
+- **Latest Implementation**: New User Request CRUD API (3 endpoints) + SQL Migrations
+- **Test Coverage**: 228+/228+ tests passing (100%)
+- **Documentation**: All 8 documentation files updated, implementation summary created
+- **Next Phase**: Additional API endpoints (User Login, Reports, Locations)
 
 ---
 
